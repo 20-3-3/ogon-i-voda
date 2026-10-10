@@ -123,7 +123,7 @@ h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin
   <section class="scr" id="scrTitle">
     <div class="box">
       <h1><span class="f">Огонь</span> <span class="and">и</span> <span class="w">Вода</span></h1>
-      <p class="sub">Храм на двоих. 10 уровней.</p>
+      <p class="sub">Храм на двоих. 20 уровней.</p>
       <button class="btn hot" id="btnNet">Играть вдвоём по сети<small>Два айфона, у каждого свой герой</small></button>
       <button class="btn" id="btnSolo">Вдвоём на одном телефоне<small>Слева огонь, справа вода</small></button>
       <div class="status" id="netStatus">Подключаюсь к сети…</div>
@@ -669,6 +669,74 @@ const LEVELS = [
       b.red(29, 10); b.blue(28, 10); b.red(13, 5); b.blue(19, 5);
     },
   },
+  {
+    name: 'Челнок', par: 150,
+    hint: 'Огонь дёргает рычаг над лавой, вода — над водой. Оба рычага открывают ворота к дверям.',
+    build(b) {
+      b.box(12, 17, 20, 17, 'G'); b.mover(12, 15, 4, 1, 5, 0, 3.4);
+      b.box(21, 16, 30, 16);
+      b.box(23, 16, 25, 16, 'L'); b.lever(24, 15, 0);
+      b.box(27, 16, 29, 16, 'W'); b.lever(28, 15, 1);
+      b.plat(6, 13, 1, 4, 0, -4, 0); b.plat(7, 13, 1, 4, 0, -4, 1);
+      b.fire(8, 16); b.water(9, 16);
+      b.doorF(2, 16); b.doorW(4, 16);
+      b.red(16, 12); b.red(24, 13); b.red(3, 15); b.red(30, 14);
+      b.blue(14, 12); b.blue(28, 13); b.blue(5, 15); b.blue(22, 14);
+    },
+  },
+  {
+    name: 'Шахты', par: 170,
+    hint: 'Вода держит кнопку внизу, пока огонь едет вверх. Потом огонь жмёт свою кнопку для лифта воды.',
+    build(b) {
+      b.box(1, 1, 30, 3); b.box(1, 8, 30, 8); b.clear(3, 8, 5, 8); b.clear(14, 8, 16, 8);
+      b.box(11, 9, 12, 16);
+      b.box(8, 17, 10, 17, 'L'); b.box(19, 17, 21, 17, 'W');
+      b.plat(3, 16, 3, 1, 0, -8, 0); b.button(24, 16, 0);
+      b.plat(14, 16, 3, 1, 0, -8, 1); b.button(8, 7, 1);
+      b.box(17, 8, 19, 8, 'L'); b.box(20, 8, 21, 8, 'W');
+      b.button(18, 7, 2); b.button(20, 7, 2);
+      b.plat(22, 4, 1, 4, 0, -4, 2, { and: true, latch: true });
+      b.fire(2, 16); b.water(28, 16);
+      b.doorF(26, 7); b.doorW(28, 7);
+      b.red(9, 15); b.red(4, 12); b.red(1, 6); b.red(13, 6); b.red(25, 6);
+      b.blue(20, 15); b.blue(15, 11); b.blue(9, 6); b.blue(12, 6); b.blue(29, 6);
+    },
+  },
+  {
+    name: 'Мельница', par: 190,
+    hint: 'Один держит кнопку внизу, пока второй едет вверх. Потом он держит кнопку наверху, а первый едет на втором лифте.',
+    build(b) {
+      b.box(1, 1, 30, 2);
+      b.box(1, 7, 10, 7); b.box(14, 7, 15, 7); b.box(19, 7, 30, 16);
+      b.box(5, 17, 6, 17, 'L'); b.box(8, 17, 9, 17, 'W'); b.box(16, 17, 18, 17, 'G');
+      b.plat(16, 16, 3, 1, 0, -9, 0); b.button(15, 16, 0);
+      b.plat(11, 16, 3, 1, 0, -9, 1); b.button(14, 6, 1);
+      b.plat(26, 3, 1, 4, 0, -4, 1);
+      b.button(27, 6, 1);
+      b.fire(2, 16); b.water(3, 16);
+      b.doorF(28, 6); b.doorW(29, 6);
+      b.red(5, 15); b.red(3, 5); b.red(16, 12); b.red(30, 6);
+      b.blue(8, 15); b.blue(4, 5); b.blue(18, 11); b.blue(30, 5);
+    },
+  },
+  {
+    name: 'Сердце храма', par: 240,
+    hint: 'Огонь держит кнопку внизу, пока вода идёт через паром, потом вода держит лифт. Наверху обе печати нажимаются вместе.',
+    build(b) {
+      b.box(1, 1, 30, 3); b.box(1, 10, 30, 10); b.clear(16, 10, 18, 10);
+      b.box(9, 17, 12, 17, 'L');
+      b.box(6, 10, 8, 10, 'L'); b.box(10, 10, 12, 10, 'W'); b.box(21, 10, 27, 10, 'G');
+      b.button(6, 16, 1); b.plat(20, 5, 1, 5, 0, -5, 1);
+      b.plat(16, 16, 3, 1, 0, -6, 0); b.button(14, 9, 0);
+      b.mover(21, 8, 3, 1, 4, 0, 3.0);
+      b.button(7, 9, 2); b.button(11, 9, 2);
+      b.plat(4, 5, 1, 5, 0, -5, 2, { and: true, latch: true });
+      b.fire(2, 16); b.water(29, 9);
+      b.doorF(1, 9); b.doorW(2, 9);
+      b.red(10, 15); b.red(25, 15); b.red(17, 12); b.red(7, 7); b.red(3, 8);
+      b.blue(11, 7); b.blue(24, 6); b.blue(29, 8); b.blue(5, 8); b.blue(19, 8);
+    },
+  },
 ];
 // module.exports = { LEVELS };
 
@@ -981,7 +1049,7 @@ const LEVELS = [
       const pr = pt.presence;
       // two players took the same hero: the one with the larger label steps aside
       if (S.role && pr.r === S.role && S.myPeer && pt.peer < S.myPeer) { S.role = null; pres({ r: null }); toast('Партнёр уже выбрал «' + ROLE_NAME[pr.r] + '»'); if (S.scr !== 'title') show('role'); }
-      if (typeof pr.un === 'number' && pr.un > S.unlocked) { S.unlocked = Math.min(10, pr.un); store.set('un', S.unlocked); }
+      if (typeof pr.un === 'number' && pr.un > S.unlocked) { S.unlocked = Math.min(LEVELS.length, pr.un); store.set('un', S.unlocked); }
     }
     syncSelection();
     if (S.scr !== 'play') refreshMenus();
@@ -1138,10 +1206,10 @@ const LEVELS = [
     const rank = rankOf(t, got, total, S.lv.par);
     const prev = S.best[i];
     if (!prev || 'ABC'.indexOf(rank) < 'ABC'.indexOf(prev.rank) || (rank === prev.rank && t < prev.t)) { S.best[i] = { t, rank, gems: got }; store.set('best', S.best); }
-    if (S.unlocked < Math.min(10, i + 2)) { S.unlocked = Math.min(10, i + 2); store.set('un', S.unlocked); pres({ un: S.unlocked }); }
+    if (S.unlocked < Math.min(LEVELS.length, i + 2)) { S.unlocked = Math.min(LEVELS.length, i + 2); store.set('un', S.unlocked); pres({ un: S.unlocked }); }
     const last = i >= LEVELS.length - 1;
     overlay('<div class="big" style="color:var(--gold)">' + (last ? 'Храм пройден!' : 'Уровень пройден!') + '</div><div class="rank">' + rank + '</div><div class="stats"><span>⏱ ' + fmtT(t) + '</span><span>◆ ' + got + '/' + total + '</span></div>' +
-      (last ? '<p class="sub">Все 10 уровней позади. Новые уровни скоро.</p>' : '<button class="btn hot" id="oNx">Следующий уровень</button>') +
+      (last ? '<p class="sub">Все уровни пройдены!</p>' : '<button class="btn hot" id="oNx">Следующий уровень</button>') +
       '<div class="row"><button class="btn ghost" id="oRe">Ещё раз</button><button class="btn ghost" id="oLv">К уровням</button></div>',
       { oNx: () => choose(i + 1), oRe: () => choose(i), oLv: () => choose(-1) });
     refreshMenus();
