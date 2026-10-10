@@ -993,6 +993,13 @@ const LEVELS = [
     parts: [], keys: new Set(), padKeys: new Set(), lastPresence: '',
     camX: 0, shake: 0, partnerSeen: false, partnerGoneAt: 0,
   };
+  // progress repair: older versions capped progress at 10 levels; every level with a record unlocks the next one
+  (function () {
+    let un = typeof S.unlocked === 'number' ? S.unlocked : 1;
+    for (const k in S.best) { const i = +k; if (Number.isInteger(i) && S.best[k]) un = Math.max(un, i + 2); }
+    S.unlocked = Math.max(1, Math.min(LEVELS.length, un));
+    store.set('un', S.unlocked);
+  })();
 
   // ---------- sound ----------
   let AC = null;
