@@ -81,6 +81,7 @@ canvas{touch-action:none;display:block}
 .fl{display:inline-flex;gap:1px}.fl i{width:8px;height:8px;background:#9fc3d1;border-radius:1px;display:block}.fl.x i{background:var(--red)}.fl i.h{background:var(--fire)}
 .btns{display:flex;gap:10px}.btns .btn{flex:1}
 #stat{font-family:var(--hf);font-size:15px;color:var(--paper);flex:1;line-height:1.15;text-align:center}
+.ping{font-family:system-ui,sans-serif;font-size:11px;letter-spacing:0;text-transform:none;color:var(--mute);opacity:.75;font-variant-numeric:tabular-nums}
 #stat.me{color:#ffe08a}
 @media (orientation:landscape) and (max-height:500px){
  #s-battle .body{flex-direction:row;align-items:flex-start;justify-content:center;gap:12px}
@@ -146,7 +147,7 @@ canvas{touch-action:none;display:block}
 <section id="s-place" class="scr">
  <div class="hdr"><button class="icn" id="pl-back" aria-label="Назад">‹</button><h2 id="pl-title">Расстановка<small id="pl-sub"></small></h2></div>
  <div class="stage"><canvas id="cPlace"></canvas></div>
- <div class="side2"><p id="pl-hint">Тяни корабль · тап по кораблю — повернуть</p>
+ <div class="side2"><div class="ping" id="ping-p" style="text-align:center"></div><p id="pl-hint">Тяни корабль · тап по кораблю — повернуть</p>
  <div class="pbtns"><button class="btn dark" id="pl-shuf">Перемешать</button><button class="btn" id="pl-ready">Готов!</button></div></div>
 </section>
 
@@ -154,7 +155,7 @@ canvas{touch-action:none;display:block}
  <div class="hdr"><button class="icn" id="bt-menu" aria-label="Меню">☰</button><div id="stat">…</div><button class="icn" id="b-mute3" aria-label="Звук">🔊</button></div>
  <div class="toast" id="toast"></div>
  <div class="body">
-  <div class="enemy"><div class="lbl"><span>Море противника</span><span id="en-fl"></span></div><canvas id="cEn"></canvas></div>
+  <div class="enemy"><div class="lbl"><span>Море противника</span><span id="en-fl"></span><span class="ping" id="ping-b"></span></div><canvas id="cEn"></canvas></div>
   <div class="side">
    <div class="mrow">
     <div class="mine"><div class="lbl"><span>Твой флот</span></div><canvas id="cMy"></canvas></div>
@@ -584,9 +585,9 @@ function announce(shooter, idx) {
   const mineShot = shooter === me(), cv = mineShot ? cEn : cMy, who = mineShot ? 'Ты' : (G.mode === 'ai' ? 'Враг' : G.mode === 'pass' ? 'Игрок ' + (shooter + 1) : 'Партнёр');
   if (mv.r) { addEff(cv, 'ping', mv.r[0], mv.r[1], 0); Snd.ping(); logMsg(`${who}: радар ${cname(mv.r[0], mv.r[1])} — кораблей рядом: ${an.n}`); return; }
   mv.c.forEach(([x, y], j) => {
-    const r = an.a[j], dl = j * 280; Snd.fire(dl);
+    const r = an.a[j], dl = j * 90; if (!(mineShot && G.mode === 'net')) Snd.fire(dl);
     const k = r === 0 ? 'splash' : r === 3 ? 'mine' : r === 2 ? 'sunk' : 'boom';
-    addEff(cv, k, x, y, dl + 120); Snd[k === 'splash' ? 'splash' : k](dl + 220);
+    addEff(cv, k, x, y, dl); Snd[k](dl + 30);
   });
   logMsg(`${who}: ${mv.c.map(c => cname(c[0], c[1])).join(', ')} — ${resText(an.a)}`);
 }
@@ -610,6 +611,7 @@ function afterChange() {
   updateBattleUI();
   if (G.mode === 'ai') aiLoop();
 }
+let flE = '', flM = '';
 function updateBattleUI() {
   if (!G || G.phase !== 'battle') return;
   const st = curStatus(), mine = canAct(), s = me();
@@ -632,14 +634,20 @@ function updateBattleUI() {
   }
   // флоты
   const ev = enemyView(), sunkSizes = ev.sunk.map(c => c.length), rest = sunkSizes.slice();
-  $('fl-en').innerHTML = L.fleet.map(len => { const i = rest.indexOf(len), dead = i >= 0; if (dead) rest.splice(i, 1); return `<span class="fl ${dead ? 'x' : ''}">${'<i></i>'.repeat(len)}</span>`; }).join('');
+  const fe = L.fleet.map(len => { const i = rest.indexOf(len), dead = i >= 0; if (dead) rest.splice(i, 1); return `<span class="fl ${dead ? 'x' : ''}">${'<i></i>'.repeat(len)}</span>`; }).join('');
+  if (fe !== flE) { flE = fe; $('fl-en').innerHTML = fe; }
   const bd = G.mode === 'pass' ? G.boards[G.view] : G.board;
-  $('fl-my').innerHTML = bd.ships.map(sh => `<span class="fl ${sh.hits >= sh.len ? 'x' : ''}">${Array.from({ length: sh.len }, (_, i) => `<i class="${i < sh.hits ? 'h' : ''}"></i>`).join('')}</span>`).join('');
+  const fm = bd.ships.map(sh => `<span class="fl ${sh.hits >= sh.len ? 'x' : ''}">${Array.from({ length: sh.len }, (_, i) => `<i class="${i < sh.hits ? 'h' : ''}"></i>`).join('')}</span>`).join('');
+  if (fm !== flM) { flM = fm; $('fl-my').innerHTML = fm; }
   $('en-fl').textContent = L.fog && fogRect(L, st.turn) ? '⛈ шторм' : '';
 }
 function submitMove(mv) {
   const s = me();
-  if (G.mode === 'net') { S[s].mv.push(mv); netSync(); persist(); }
+  if (G.mode === 'net') {
+    S[s].mv.push(mv); netSyncBurst(); persist();
+    // мгновенная реакция стреляющему: выстрел слышен и виден сразу, ответ придёт через RTT
+    if (mv.c) mv.c.forEach(([x, y], j) => { Snd.fire(j * 90); addEff(cEn, 'shell', x, y, j * 90); }); else Snd.click();
+  }
   else { S[s].mv.push(mv); const ans = resolveMove(G.boards[1 - s], mv); S[1 - s].an.push(ans); if (G.mode === 'ai' && s === 1 && mv.r) aiLearnRadar(L, G.ai, mv, ans); }
   sel = []; radarMode = false; scanAnnounce(); afterChange();
 }
@@ -685,7 +693,7 @@ function finish(st) {
   const first20 = Math.min(LEVELS.length, G.level + 1);
   if (G.mode === 'net' || G.mode === 'pass' || (G.mode === 'ai' && won)) prog.u = Math.max(prog.u, first20);
   if (G.mode !== 'pass' && won) { const sh = S[s].mv.reduce((a, m) => a + (m.c ? m.c.length : 0), 0); if (!prog.b[G.level] || sh < prog.b[G.level]) prog.b[G.level] = sh; }
-  saveProg(); if (G.mode === 'net') { netSync(); persist(); }
+  saveProg(); if (G.mode === 'net') { netSyncBurst(); persist(); }
   setTimeout(() => {
     if (!G || !G.over) return;
     const sh = S[s].mv.reduce((a, m) => a + (m.c ? m.c.length : 0), 0), hit = enemyView().grid.filter(v => v === 2 || v === 3).length;
@@ -695,7 +703,7 @@ function finish(st) {
     $('res-p').textContent = pass ? 'Бой ' + G.level + ' «' + L.name + '» окончен.' : `Бой ${G.level} «${L.name}». Выстрелов: ${sh}, попаданий: ${hit}.` + (won && G.level < LEVELS.length ? ' Открыт следующий бой!' : '') + (G.mode === 'net' && !won ? ' Бой всё равно засчитан — следующий открыт для вас обоих.' : '');
     $('res-next').style.display = (G.level < LEVELS.length && (G.level + 1 <= prog.u)) ? '' : 'none';
     ov('ov-result', 1); (pass || won ? Snd.win : Snd.lose).call(Snd);
-  }, 1500);
+  }, 800);
 }
 $('res-next').onclick = () => { ov('ov-result', 0); pickLevel(G.level + 1); };
 $('res-again').onclick = () => { ov('ov-result', 0); pickLevel(G.level); };
@@ -720,6 +728,12 @@ function netSync() {
   if (G && G.mode === 'net') { o.m = G.ep; o.rdy = G.rdy ? 1 : 0; o.mv = S[role].mv; o.an = S[role].an; o.rev = G.over ? G.ships : null; } else o.m = 0;
   Duo.set(o);
 }
+// ход/ответ — единичное изменение: шлём сразу и дублируем (состояние идемпотентно), чтобы потеря пакета стоила ~60 мс, а не 400 мс…1,5 с
+let burstT = [];
+function netSyncBurst() {
+  netSync(); burstT.forEach(clearTimeout);
+  burstT = [60, 150, 350].map(ms => setTimeout(netSync, ms));
+}
 function persist() {
   if (!G || G.mode !== 'net') return;
   LS.set('mb:net', { room: Duo.code(), role, ep: G.ep, level: G.level, ships: G.ships, mines: [...G.board.mines], shot: [...G.board.shot], mv: S[role].mv, an: S[role].an, rdy: G.rdy, phase: G.phase, over: G.over });
@@ -727,10 +741,13 @@ function persist() {
 function processIncoming() {
   const opp = 1 - role, pm = S[opp].mv; let ch = false;
   while (S[role].an.length < pm.length) { S[role].an.push(resolveMove(G.board, pm[S[role].an.length])); ch = true; }
-  if (ch) { netSync(); persist(); }
+  if (ch) { netSyncBurst(); persist(); }
 }
-function onPartner(p) {
+let pSig = '';
+function onPartner(p, force) {
   if (mode !== 'net' || !p) return; lastP = p;
+  const sig = [p.m, p.rdy, (p.mv || []).length, (p.an || []).length, p.rev ? 1 : 0, p.sel && p.sel.ep, JSON.stringify(p.prog), G && G.ep, G && G.rdy, G && G.phase, G && G.over, S[role].an.length, mySel.ep, handledEp, screen, lostFlag].join('|');
+  if (!force && sig === pSig) return; pSig = sig;
   const mp = mergeProg(prog, p.prog);
   if (JSON.stringify(mp) !== JSON.stringify(prog)) { prog = mp; saveProg(); netSync(); if (screen === 'levels') renderLevels(); }
   if (p.sel && p.sel.ep > mySel.ep) { mySel = { level: p.sel.level, ep: p.sel.ep }; saveSel(); }
@@ -743,7 +760,7 @@ function onPartner(p) {
   }
 }
 Duo.onState(onPartner);
-Duo.onLink(() => { lostFlag = false; ov('ov-lost', 0); onLinked(); netSync(); if (lastP === null && Duo.partner()) onPartner(Duo.partner()); updateBattleUI(); if (screen === 'levels') renderLevels(); });
+Duo.onLink(() => { lostFlag = false; ov('ov-lost', 0); onLinked(); netSync(); if (Duo.partner()) onPartner(Duo.partner(), true); updateBattleUI(); if (screen === 'levels') renderLevels(); });
 Duo.onLoss(() => { if (mode !== 'net') return; lostFlag = true; if (screen === 'battle' || screen === 'place') ov('ov-lost', 1); updateBattleUI(); if (screen === 'levels') renderLevels(); });
 function onLinked() {
   if (mode === 'net' && linkedOnce) return; linkedOnce = true;
@@ -882,9 +899,10 @@ function drawBoard(cv, o) {
   const ef = effs.get(cv) || [], now = performance.now(), keep = [];
   ef.forEach(e => {
     const a = (now - e.t0) / 1000; if (a < 0) { keep.push(e); return; }
-    const dur = e.k === 'sunk' || e.k === 'mine' ? 1.3 : e.k === 'ping' ? 1.2 : .8; if (a > dur) return; keep.push(e);
+    const dur = e.k === 'sunk' || e.k === 'mine' ? 1.3 : e.k === 'ping' ? 1.2 : e.k === 'shell' ? .4 : .8; if (a > dur) return; keep.push(e);
     const cx = ox + (e.x + .5) * cs, cy = ox + (e.y + .5) * cs, p = a / dur;
-    if (e.k === 'splash') { c.strokeStyle = `rgba(255,255,255,${1 - p})`; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, cs * (.2 + p * .9), 0, 7); c.stroke(); for (let i = 0; i < 6; i++) { const an = i * 1.047, r = cs * (.2 + p * .7); c.fillStyle = `rgba(255,255,255,${1 - p})`; c.beginPath(); c.arc(cx + Math.cos(an) * r, cy + Math.sin(an) * r - Math.sin(p * 3.14) * cs * .4, cs * .06, 0, 7); c.fill(); } }
+    if (e.k === 'shell') { const r = cs * (1.4 - p * 1.1); c.strokeStyle = `rgba(255,224,138,${.3 + p * .6})`; c.lineWidth = 2.5; c.beginPath(); c.arc(cx, cy, Math.max(cs * .2, r), 0, 7); c.stroke(); c.fillStyle = `rgba(255,240,200,${.5 * (1 - p)})`; c.fillRect(ox + e.x * cs, ox + e.y * cs, cs, cs); }
+    else if (e.k === 'splash') { c.strokeStyle = `rgba(255,255,255,${1 - p})`; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, cs * (.2 + p * .9), 0, 7); c.stroke(); for (let i = 0; i < 6; i++) { const an = i * 1.047, r = cs * (.2 + p * .7); c.fillStyle = `rgba(255,255,255,${1 - p})`; c.beginPath(); c.arc(cx + Math.cos(an) * r, cy + Math.sin(an) * r - Math.sin(p * 3.14) * cs * .4, cs * .06, 0, 7); c.fill(); } }
     else if (e.k === 'ping') { const r = cs * 1.5 * p; c.strokeStyle = `rgba(125,255,176,${1 - p})`; c.lineWidth = 3; c.beginPath(); c.arc(cx, cy, r + cs * .3, 0, 7); c.stroke(); }
     else { const big = e.k !== 'boom'; c.fillStyle = `rgba(255,${200 - p * 120 | 0},60,${(1 - p) * .9})`; c.beginPath(); c.arc(cx, cy, cs * (.3 + p * (big ? 1.5 : .9)), 0, 7); c.fill(); if (e.k === 'mine') { c.fillStyle = `rgba(255,255,255,${Math.max(0, .8 - p * 2)})`; c.fillRect(0, 0, S, S); }
       for (let i = 0; i < 9; i++) { const an = i * .7 + e.x, r = cs * p * (.8 + (i % 3) * .5) * (big ? 1.4 : 1); c.fillStyle = `rgba(255,${120 + i * 10},40,${1 - p})`; c.beginPath(); c.arc(cx + Math.cos(an) * r, cy + Math.sin(an) * r - p * cs * .3, cs * .08, 0, 7); c.fill(); } }
@@ -921,9 +939,16 @@ function frame() {
   } catch (e) { console.error(e); }
 }
 requestAnimationFrame(frame);
+// пинг связи: мелко, раз в секунду, только в сетевой игре
+function updPing() {
+  const on = mode === 'net' && G && G.mode === 'net' && (screen === 'battle' || screen === 'place'), p = on ? Duo.ping() : null;
+  const t = on ? (p ? p.ms + ' мс · ' + (p.via === 'напрямую' ? 'напрямую' : 'сервер') : '… связь') : '';
+  ['ping-b', 'ping-p'].forEach(id => { const e = $(id); if (e.textContent !== t) e.textContent = t; });
+}
+setInterval(updPing, 1000); Duo.onState(updPing);
 setMute(muted); renderTitle();
 // при возвращении на страницу — пересчитать
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { if (mode === 'net' && Duo.partner()) onPartner(Duo.partner()); layout(); } });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { if (mode === 'net' && Duo.partner()) onPartner(Duo.partner(), true); layout(); } });
 window.__mb = { get G() { return G; }, get S() { return S; }, get L() { return L; }, get mode() { return mode; }, get prog() { return prog; }, get role() { return role; }, status: () => curStatus(), cellAt, geo };
 
 </script>
