@@ -166,7 +166,7 @@
 .duo-st{text-align:center;font-size:14px;border-radius:12px;padding:8px 12px;background:rgba(255,255,255,.06)}
 .duo-err{color:#ffb4a0;border:1px solid rgba(255,120,80,.5)}
 .duo-diag{text-align:center;font-size:12px;color:#9a958a;margin:0}
-.duo-ov [hidden]{display:none!important}`);
+.duo-ov[hidden],.duo-ov [hidden]{display:none!important}`);
     document.head.appendChild(css);
     ov = el('div', 'duo-ov'); ov.hidden = true; ov.style.setProperty('--duo-accent', accent);
     ov.innerHTML = `<div class="duo-box">
