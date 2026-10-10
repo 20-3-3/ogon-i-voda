@@ -32,6 +32,7 @@ body { font-family: var(--font-ui); -webkit-user-select: none; user-select: none
 #hud { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 10px; padding: 6px max(12px, env(safe-area-inset-left, 0px)); font-weight: 800; font-size: 14px; pointer-events: none; }
 #hud .lvl { font-family: var(--font-display); font-size: 15px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
 #hud .chip { background: rgba(0,0,0,.45); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; display: flex; gap: 8px; align-items: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#hud .ping { font-size: 12px; color: var(--goo); } #hud .ping.slow { color: #ffb4a0; }
 #hud .gr { color: var(--fire-hi); } #hud .gb { color: var(--water-hi); }
 #hud .dot { width: 8px; height: 8px; border-radius: 50%; background: #777; }
 #hud .dot.on { background: var(--goo); box-shadow: 0 0 6px var(--goo); }
@@ -113,6 +114,7 @@ h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin
     <span class="lvl" id="hudLvl"></span>
     <span class="chip"><span class="gr" id="hudR">◆ 0/0</span><span class="gb" id="hudB">◆ 0/0</span></span>
     <span class="chip" id="hudT">0:00</span>
+    <span class="chip ping" id="hudPing" hidden></span>
     <button class="iconbtn" id="btnPause" aria-label="Пауза">II</button>
   </div>
   <div id="pad" hidden>
@@ -805,8 +807,28 @@ const LEVELS = [
   // ---------- messages ----------
   function packet(t) { return { t, id: myId, code: NET.code, s: ++seq, p: me.presence }; }
   function sendPresence() { if (!NET.code) return; const m = packet('p'); rtcSend(m); mqSend(m); }
+  // ping per transport: q = question, a = answer (echo of the sender's timestamp)
+  const rtt = { rtc: 0, mq: 0 }, lastVia = { rtc: 0, mq: 0 };
+  function sendPing() {
+    if (!NET.code) return;
+    const q = { t: 'q', id: myId, code: NET.code, ts: performance.now() };
+    rtcSend(q); if (mq && mq.connected) { try { mq.publish(TOPIC + NET.code, JSON.stringify(q), { qos: 0 }); } catch (e) {} }
+  }
+  setInterval(sendPing, 1000);
+  NET.ping = () => {
+    const now = Date.now(), r = now - lastVia.rtc < 2500 && rtt.rtc, m = now - lastVia.mq < 4000 && rtt.mq;
+    if (r) return { via: 'напрямую', ms: Math.round(r) };
+    if (m) return { via: 'через сервер', ms: Math.round(m) };
+    return null;
+  };
+  NET.direct = () => Date.now() - lastVia.rtc < 1500;
   function onMsg(d, via) {
     if (!d || typeof d !== 'object' || d.id === myId || d.code !== NET.code || typeof d.id !== 'string') return;
+    lastVia[via] = Date.now();
+    if (d.t === 'q') { const a = { t: 'a', id: myId, code: NET.code, ts: d.ts, to: d.id };
+      if (via === 'rtc') rtcSend(a); else if (mq && mq.connected) { try { mq.publish(TOPIC + NET.code, JSON.stringify(a), { qos: 0 }); } catch (e) {} }
+      return; }
+    if (d.t === 'a') { if (d.to === myId && typeof d.ts === 'number') { const v = performance.now() - d.ts; rtt[via] = rtt[via] ? rtt[via] * 0.7 + v * 0.3 : v; } return; }
     if (typeof d.s === 'number') { if (lastSeq[d.id] && d.s <= lastSeq[d.id] && via !== 'hello') return; lastSeq[d.id] = d.s; }
     partnerLast = Date.now();
     if (d.p && typeof d.p === 'object') partner = { peer: d.id, presence: d.p, updatedAt: Date.now() };
@@ -845,7 +867,7 @@ const LEVELS = [
       peer.on('connection', (c) => rtcAttach(c, ss));
     } else {
       peer = new window.Peer(undefined, ICE);
-      const tryConnect = () => { if (ss !== session || conns.length || !peer || peer.destroyed) return; rtcAttach(peer.connect(PREFIX + code, { reliable: true }), ss); };
+      const tryConnect = () => { if (ss !== session || conns.length || !peer || peer.destroyed) return; rtcAttach(peer.connect(PREFIX + code, { reliable: false, serialization: 'json' }), ss); };
       peer.on('open', () => { if (ss !== session) return; NET.diag.rtc = 'соединяюсь…'; ui(); tryConnect(); });
       const iv = setInterval(() => { if (ss !== session) { clearInterval(iv); return; } if (!conns.length) tryConnect(); }, 6000);
     }
@@ -863,7 +885,8 @@ const LEVELS = [
   function mqSend(m) {
     if (!mq || !mq.connected) return;
     mqPending = m;
-    const wait = Math.max(0, 60 - (Date.now() - mqLastSent));
+    const gap = NET.direct && NET.direct() ? 400 : 40;
+    const wait = Math.max(0, gap - (Date.now() - mqLastSent));
     if (!mqTimer) mqTimer = setTimeout(() => {
       mqTimer = 0; if (!mq || !mq.connected || !mqPending) return;
       try { mq.publish(TOPIC + mqPending.code, JSON.stringify(mqPending), { qos: 0 }); } catch (e) {}
@@ -1050,6 +1073,7 @@ const LEVELS = [
   function basePresence() { return { g: 'fw', r: S.solo ? null : S.role, sel: S.sel, un: S.unlocked, sc: S.scr }; }
 
   function onPartnerChange() {
+    recordSnap();
     const pt = partner();
     if (pt && !S.partnerSeen) { S.partnerSeen = true; toast('Партнёр в игре'); }
     if (!pt && S.partnerSeen) { S.partnerSeen = false; if (!S.solo && S.role) toast('Партнёр отключился'); }
@@ -1263,16 +1287,59 @@ const LEVELS = [
   }
 
   // ---------- game update ----------
+  // Partner movement: every state update is stored with its arrival time; the partner is drawn slightly
+  // in the past (a delay that adapts to how evenly updates arrive) and interpolated between updates,
+  // so uneven network delivery shows up as a tiny constant delay instead of jerks.
+  function recordSnap() {
+    const pt = partner(); if (!pt || S.solo) return;
+    const pr = pt.presence;
+    if (!pr || pr === S.lastPr || typeof pr.x !== 'number') return;
+    S.lastPr = pr;
+    const now = Date.now();
+    const snaps = S.snaps || (S.snaps = []);
+    if (snaps.length && snaps[snaps.length - 1].ce !== pr.ce) snaps.length = 0;
+    // place the update on our clock by its send time: offset = smallest observed (arrival - send) difference,
+    // which cancels the clock difference between the phones; "late" = how much later than the fastest update it came
+    const sent = typeof pr.ts === 'number' ? pr.ts : now;
+    const sample = now - sent;
+    const nowS = performance.now();
+    if (S.off == null || sample < S.off) S.off = sample;
+    else S.off += Math.min(sample - S.off, (nowS - (S.offT || nowS)) * 0.002); // slow upward drift in case clocks move
+    S.offT = nowS;
+    const late = sample - S.off;
+    S.late = Math.max(late, (S.late || 0) * 0.995);
+    const t = sent + S.off;
+    if (snaps.length && t <= snaps[snaps.length - 1].t) return; // older than what we have
+    snaps.push({ t, x: pr.x, y: pr.y, vx: pr.vx || 0, vy: pr.vy || 0, gr: !!pr.gr, ce: pr.ce });
+    if (snaps.length > 60) snaps.shift();
+  }
   function remoteBody() {
     if (S.solo) return null;
     const pt = partner(); if (!pt) return null;
     const pr = pt.presence;
     if (pr.ce !== S.cur.ep || typeof pr.x !== 'number') return null;
-    const lag = Math.min(0.12, Math.max(0, (Date.now() - (pr.ts || Date.now())) / 1000));
-    const tx = pr.x + (pr.vx || 0) * lag, ty = pr.y + (pr.gr ? 0 : (pr.vy || 0) * lag);
+    recordSnap();
+    const snaps = (S.snaps || []).filter(q => q.ce === S.cur.ep);
+    let tx = pr.x, ty = pr.y;
+    if (snaps.length) {
+      // draw the partner this far in the past: covers late updates plus the gap between two updates
+      const gap = snaps.length > 1 ? Math.min(120, (snaps[snaps.length - 1].t - snaps[0].t) / (snaps.length - 1)) : 16;
+      const delay = Math.max(8, Math.min(250, (S.late || 0) + gap + 4));
+      const rt = Date.now() - delay;
+      let i = snaps.length - 1;
+      while (i > 0 && snaps[i - 1].t > rt) i--;
+      const b = snaps[i], a = snaps[i - 1];
+      if (rt >= snaps[snaps.length - 1].t) {
+        const L = snaps[snaps.length - 1], dt = Math.min(0.1, (rt - L.t) / 1000);
+        tx = L.x + L.vx * dt; ty = L.gr ? L.y : L.y + L.vy * dt + 0.5 * PH.G * dt * dt;
+      } else if (a && rt > a.t) {
+        const k = (rt - a.t) / Math.max(1, b.t - a.t);
+        tx = a.x + (b.x - a.x) * k; ty = a.y + (b.y - a.y) * k;
+      } else { tx = b.x; ty = b.y; }
+    }
     if (!S.remote || S.remote.role !== pr.r || Math.hypot(S.remote.x - tx, S.remote.y - ty) > 3) S.remote = { role: pr.r, x: tx, y: ty, vx: 0, vy: 0, face: 1, gr: true };
     const R = S.remote;
-    R.x += (tx - R.x) * 0.35; R.y += (ty - R.y) * 0.35;
+    R.x = tx; R.y = ty;
     R.vx = pr.vx || 0; R.vy = pr.vy || 0; R.face = pr.f || 1; R.gr = !!pr.gr; R.dead = !!pr.d; R.door = !!pr.dr; R.role = pr.r;
     R.gm = Array.isArray(pr.gm) ? pr.gm : []; R.lv = pr.lv && typeof pr.lv === 'object' ? pr.lv : {};
     return R;
@@ -1359,6 +1426,9 @@ const LEVELS = [
     $('hudR').textContent = '◆ ' + rT.filter(g => got.has(g.id)).length + '/' + rT.length;
     $('hudB').textContent = '◆ ' + bT.filter(g => got.has(g.id)).length + '/' + bT.length;
     $('hudT').textContent = fmtT(S.tNow);
+    const pg = !S.solo && window.FWNET && window.FWNET.ping ? window.FWNET.ping() : null;
+    const pe = $('hudPing'); pe.hidden = !pg;
+    if (pg) { pe.textContent = pg.ms + ' мс · ' + (pg.via === 'напрямую' ? 'напрямую' : 'сервер'); pe.classList.toggle('slow', pg.ms > 80); }
     $('netDot').classList.toggle('on', S.solo || !!partner());
   }
 
