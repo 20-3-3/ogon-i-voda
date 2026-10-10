@@ -1306,8 +1306,10 @@ const LEVELS = [
     if (S.off == null || sample < S.off) S.off = sample;
     else S.off += Math.min(sample - S.off, (nowS - (S.offT || nowS)) * 0.002); // slow upward drift in case clocks move
     S.offT = nowS;
-    const late = sample - S.off;
-    S.late = Math.max(late, (S.late || 0) * 0.995);
+    const lt = S.lateS || (S.lateS = []);
+    lt.push([nowS, sample - S.off]); while (lt.length && nowS - lt[0][0] > 2000) lt.shift();
+    const v = lt.map(q => q[1]).sort((x, y) => x - y);
+    S.late = v[Math.min(v.length - 1, Math.floor(v.length * 0.9))]; // 90th percentile over the last 2 s
     const t = sent + S.off;
     if (snaps.length && t <= snaps[snaps.length - 1].t) return; // older than what we have
     snaps.push({ t, x: pr.x, y: pr.y, vx: pr.vx || 0, vy: pr.vy || 0, gr: !!pr.gr, ce: pr.ce });

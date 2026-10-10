@@ -52,6 +52,7 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:16px;padding:12px;font-si
 #hud{position:fixed;left:0;right:0;top:0;padding:calc(var(--sat) + 8px) calc(var(--sar) + 10px) 0 calc(var(--sal) + 10px);display:none;z-index:4;pointer-events:none;align-items:flex-start;justify-content:space-between;gap:8px}
 #hud.on{display:flex}
 #hud .sq{pointer-events:auto;width:46px;height:46px;font-size:20px;background:rgba(36,27,82,.7)}
+#ping{position:fixed;right:10px;bottom:calc(6px + env(safe-area-inset-bottom));z-index:6;font:11px/1 var(--txt);opacity:.55;pointer-events:none;color:#cfc8ff;display:none}
 #hmid{flex:1;text-align:center;font-family:var(--disp);min-width:0}
 #htime{font-size:26px;text-shadow:0 2px 0 #000a}
 #hname{font-size:11px;color:var(--mut);font-family:var(--txt);letter-spacing:.5px}
@@ -86,7 +87,7 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:16px;padding:12px;font-si
 
 <div id="hud">
   <button class="sq" id="bx" aria-label="Выход">✕</button>
-  <div id="hmid"><div id="htime">0.00</div><div id="hname"></div><div id="track"><i id="tp1"></i><i id="tp2"></i></div></div>
+  <div id="ping"></div><div id="hmid"><div id="htime">0.00</div><div id="hname"></div><div id="track"><i id="tp1"></i><i id="tp2"></i></div></div>
   <button class="sq" id="bm" aria-label="Звук">🔊</button>
 </div>
 <div id="ctl">
@@ -552,7 +553,7 @@ function curInput(){
 let screen='title',mode='',online=false;
 let lvl=0,L=null,me=null,gh=null,ghInp=null,rec=[],phase='',cdStart=0,hostRole=true;
 let sel={level:0,ep:0},handledEp=0,startedEp=0,myRd=0,myFin=0,raceId=0,paused=false,duelStep=0,duelP1=0,duelP2=0,lastGhostFrames=0;
-let pp={x:0,y:0,face:1,d:0,t:0,fin:0,tx:0,ty:0,on:0};
+let pp={x:0,y:0,face:1,d:0,t:0,fin:0,vx:0,vy:0,g:0,on:0};
 let particles=[],shake=0,camX=0,camY=0,camInit=false,animT=0;
 function show(s){screen=s;for(const id of ['title','lv','stage','res'])$('s-'+id).classList.toggle('on',id===s);
   const pl=(s==='race');$('hud').classList.toggle('on',pl);$('ctl').classList.toggle('on',pl);if(!pl){$('cd').classList.remove('on');$('hint').style.display='none'}}
@@ -567,7 +568,7 @@ function unrle(o){const a=[];for(let i=0;i<o.length;i+=2)for(let k=0;k<o[i+1];k+
 function netSet(extra){if(!online)return;Duo.set(Object.assign({sel:sel,rd:myRd,pg:progOut()},extra||{}))}
 function netPos(){
   if(!online||!me)return;
-  Duo.set({x:+me.x.toFixed(2),y:+me.y.toFixed(2),f:me.face,d:me.dead>0?1:0,t:me.t,fin:myFin,vx:+me.vx.toFixed(1),g:me.gr?1:0,rid:raceId,rd:myRd,sel:sel,pg:progOut()});
+  Duo.set({x:+me.x.toFixed(2),y:+me.y.toFixed(2),vx:+me.vx.toFixed(1),vy:+me.vy.toFixed(1),f:me.face,g:me.gr?1:0,d:me.dead>0?1:0,dn:me.deaths,t:me.t,fin:myFin,rid:raceId,ts:Date.now()});
 }
 function selectLevel(n){
   const pe=(Duo.partner()&&Duo.partner().sel&&Duo.partner().sel.ep)||0;
@@ -587,9 +588,45 @@ function onPartner(p){
   if(screen==='res'&&online)renderResult();
 }
 function partnerPos(p){
-  if(p.rid!==raceId||p.rd!==sel.ep){pp.on=0;return}
-  if(!pp.on){pp.x=p.x;pp.y=p.y}
-  pp.on=1;pp.tx=p.x;pp.ty=p.y;pp.face=p.f||1;pp.d=p.d;pp.t=p.t||0;pp.fin=p.fin||0;pp.vx=p.vx||0;pp.g=p.g;
+  gPush(p);
+  if(p.rid!==raceId||p.rd!==sel.ep){pp.t=0;pp.fin=0;return}
+  pp.t=p.t||0;pp.fin=p.fin||0;
+}
+// плавный призрак партнёра: свой буфер, интерполяция по времени отправки (ts), показ чуть в прошлом.
+// Задержка = «насколько пакеты запаздывают» (90-й перцентиль за 2 с, оконно — разовый затык не раздувает её) + интервал между пакетами.
+let snaps=[],arr=[],gOff=0,gLate=0,gGap=16,gDelay=40,gCalc=0,gLast=0;
+function gReset(){snaps=[];arr=[];gOff=0;gLate=0;gGap=16;gDelay=40;gCalc=0;gLast=0;pp.on=0}
+function gPush(p){
+  if(typeof p.ts!=='number'||typeof p.x!=='number'||p.rid!==raceId||p.rd!==sel.ep)return;
+  if(snaps.length&&p.ts<=snaps[snaps.length-1].ts)return;
+  const now=Date.now();arr.push([now,now-p.ts]);
+  snaps.push({ts:p.ts,x:p.x,y:p.y,vx:p.vx||0,vy:p.vy||0,f:p.f||1,g:p.g,d:p.d,dn:p.dn||0,t:0});
+  if(snaps.length>90)snaps.shift();
+}
+function gCalcDelay(now){
+  while(arr.length&&now-arr[0][0]>2500)arr.shift();
+  if(!arr.length)return;
+  let mn=1e12;for(const a of arr)if(a[1]<mn)mn=a[1];
+  const ls=arr.filter(a=>now-a[0]<2000).map(a=>a[1]-mn).sort((a,b)=>a-b);
+  gLate=ls.length?ls[Math.floor(ls.length*.9)]:0;gOff=mn;
+  if(snaps.length>3){const n=Math.min(30,snaps.length-1);gGap=Math.min(120,(snaps[snaps.length-1].ts-snaps[snaps.length-1-n].ts)/n)}
+}
+function ghostUpdate(dt){
+  const now=Date.now();
+  if(!snaps.length){pp.on=0;return false}
+  if(now-gCalc>200){gCalc=now;gCalcDelay(now)}
+  const target=Math.max(20,Math.min(220,gLate+gGap+6));
+  gDelay+=(target-gDelay)*Math.min(1,dt*3);
+  const rt=now-gDelay-gOff; // время на часах партнёра
+  let i=snaps.length-1;while(i>0&&snaps[i-1].ts>rt)i--;
+  const b=snaps[i],a=snaps[i-1],last=snaps[snaps.length-1];
+  let o;
+  if(rt>=last.ts){const e=Math.min(100,rt-last.ts)/1000;o={x:last.x+last.vx*e,y:last.y+last.vy*e,src:last}}
+  else if(!a||rt<=a.ts)o={x:b.x,y:b.y,src:b};
+  else if(Math.abs(b.x-a.x)>3||Math.abs(b.y-a.y)>3||a.dn!==b.dn)o={x:a.x,y:a.y,src:a}; // респавн: без «пролёта»
+  else{const k=(rt-a.ts)/Math.max(1,b.ts-a.ts);o={x:a.x+(b.x-a.x)*k,y:a.y+(b.y-a.y)*k,src:k<.5?a:b}}
+  const c=o.src;pp.on=1;pp.x=o.x;pp.y=o.y;pp.face=c.f;pp.d=c.d;pp.vx=c.vx;pp.vy=c.vy;pp.g=c.g;
+  return true;
 }
 function renderStage(){
   const p=Duo.partner(),r=myRole();
@@ -600,11 +637,14 @@ function renderStage(){
   $('g-go').style.display=myRd===sel.ep?'none':'';
   $('g-w').textContent=myRd===sel.ep?(pr?'Поехали!':'Ждём партнёра…'):'Нажмите «Готов» — когда готовы оба, начнётся отсчёт.';
 }
+let fromBtn=false;
 function checkStart(p){
   p=p||Duo.partner();
-  if(online&&myRd===sel.ep&&p&&p.rd===sel.ep&&startedEp!==sel.ep){startedEp=sel.ep;beginRace()}
+  if(online&&myRd===sel.ep&&p&&p.rd===sel.ep&&startedEp!==sel.ep){startedEp=sel.ep;
+    // партнёр нажал «Готов» раньше, чем дошёл пакет: сдвигаем отсчёт на половину пинга — старт у обоих совпадает
+    const pg=Duo.ping();beginRace(fromBtn?0:(pg?Math.min(400,pg.ms/2):0))}
 }
-$('g-go').onclick=()=>{SFX.click();myRd=sel.ep;netSet();renderStage();checkStart()};
+$('g-go').onclick=()=>{SFX.click();myRd=sel.ep;netSet();renderStage();fromBtn=true;checkStart();fromBtn=false};
 $('g-back').onclick=()=>{SFX.click();backToLevels()};
 function backToLevels(){
   if(online){sel={level:0,ep:Math.max(Date.now(),((Duo.partner()&&Duo.partner().sel&&Duo.partner().sel.ep)||0)+1,sel.ep+1)};handledEp=sel.ep;myRd=0;raceId=0;netSet({rid:0})}
@@ -643,6 +683,14 @@ $('t-on').onclick=async()=>{
 };
 $('t-tt').onclick=()=>{audio();online=false;mode='solo';openLevels()};
 $('t-du').onclick=()=>{audio();online=false;mode='duel';openLevels()};
+let pingEl=null;
+setInterval(()=>{
+  if(!pingEl)pingEl=$('ping');
+  if(!online||screen==='title'){pingEl.style.display='none';return}
+  const q=Duo.ping();pingEl.style.display='block';
+  pingEl.textContent=q?q.ms+' мс · '+(q.via==='напрямую'?'напрямую':'сервер'):'— мс';
+  pingEl.style.color=!q?'#cfc8ff':q.ms<30?'#7dff9b':q.ms<100?'#ffe27a':'#ff8a7a';
+},500);
 let hooked=false;
 function hookNet(){
   if(hooked)return;hooked=true;
@@ -652,21 +700,23 @@ function hookNet(){
 }
 
 // ---------- гонка ----------
-function beginRace(){
-  L=LEVELS[lvl-1];me=initState(L,true);rec=[];myFin=0;raceId=online?sel.ep:(Date.now()%1e9)|0;pp.on=0;phase='count';camInit=false;particles=[];
+function beginRace(comp){
+  L=LEVELS[lvl-1];me=initState(L,true);rec=[];myFin=0;raceId=online?sel.ep:(Date.now()%1e9)|0;gReset();phase='count';camInit=false;particles=[];
   gh=null;ghInp=null;
   if(!online){
     if(mode==='duel'&&duelStep===2&&duelP1Inp){ghInp=duelP1Inp}
     else if(SV.ghosts[lvl]){ghInp=unrle(SV.ghosts[lvl].r)}
     if(ghInp){gh=initState(L,false)}
   }
-  show('race');cdStart=performance.now()+300;lastCd=-1;
+  show('race');cdStart=performance.now()+300-(comp||0);lastCd=-1;
   $('hname').textContent=lvl+'. '+L.name+(online?'':mode==='duel'?' · игрок '+duelStep:'');
   $('tp1').style.background=PCOL[myRole()];$('tp2').style.background=online?PCOL[3-myRole()]:'#cfc8ff';$('tp2').style.display=(online||gh)?'':'none';
   if(online)netPos();
   const h=$('hint');if(!SV.hinted){h.style.display='block';h.innerHTML='◀ ▶ — бег · ПРЫГ — прыжок<br>у стены прыгайте ещё раз — отскок';}else h.style.display='none';
 }
-let duelP1Inp=null,lastCd=-1;
+let duelP1Inp=null,lastCd=-1,finAt=0;
+// после финиша повторяем позицию с финишем, пока не дойдёт (потерянный пакет не ждёт 1,5 с повтора)
+setInterval(()=>{if(online&&myFin&&finAt&&performance.now()-finAt<3000&&(screen==='res'||screen==='race'))netPos()},250);
 function finishRace(){
   phase='done';myFin=me.won;SFX.win();ghWasBetter=!!(gh&&gh.won&&gh.won<myFin);isRec=!SV.best[lvl]||myFin<SV.best[lvl];
   SV.hinted=1;
@@ -676,7 +726,8 @@ function finishRace(){
   if(!SV.ghosts[lvl]||myFin<SV.ghosts[lvl].f){SV.ghosts[lvl]={f:myFin,r:rle(rec)};lastGhostFrames=myFin}
   save();
   if(online){netPos();netSet()}
-  setTimeout(()=>{if(screen==='race'&&phase==='done')toResult()},online?900:1200);
+  finAt=performance.now();
+  if(online)toResult();else setTimeout(()=>{if(screen==='race'&&phase==='done')toResult()},1200);
 }
 function toResult(){show('res');phase='res';renderResult()}
 function renderResult(){
@@ -750,7 +801,7 @@ function tick(){
   if(gh&&!gh.won){const i=gh.t;step(L,gh,i<ghInp.length?ghInp[i]:0);
     if(gh.won&&phase==='run'&&!online&&!ghWinner){ghWinner=1}}
   if(gh&&gh.won&&phase==='done'&&0){}
-  if(++netCnt%3===0)netPos();
+  netPos();
   if(phase==='run'&&!online&&gh&&gh.won&&!me.won&&!ghAnn){ghAnn=1}
 }
 let ghWinner=0,ghAnn=0;
@@ -886,8 +937,8 @@ function render(dt){
   // призраки
   const r=myRole();
   if(online){
-    if(pp.on){pp.x+=(pp.tx-pp.x)*Math.min(1,dt*14);pp.y+=(pp.ty-pp.y)*Math.min(1,dt*14);
-      drawRunner(pp.x,pp.y,pp.face,pp.vx||0,0,pp.g,PCOL[3-r],.5,T,ox,oy,'ИГРОК '+(3-r),pp.d)}
+    if(ghostUpdate(dt)){
+      drawRunner(pp.x,pp.y,pp.face,pp.vx||0,pp.vy||0,pp.g,PCOL[3-r],.5,T,ox,oy,'ИГРОК '+(3-r),pp.d)}
   }else if(gh){drawRunner(gh.x,gh.y,gh.face,gh.vx,gh.vy,gh.gr,mode==='duel'?PCOL[1]:'#cfc8ff',.45,T,ox,oy,mode==='duel'?'ИГРОК 1':'ПРИЗРАК',gh.dead>0)}
   drawRunner(me.x,me.y,me.face,me.vx,me.vy,me.gr,PCOL[r],1,T,ox,oy,'',me.dead>0);
   if(me.dead>0&&me.dead>DEAD_F-3){}

@@ -50,12 +50,15 @@
   // Each update is placed on our clock by its send time (offset = smallest arrival-minus-send difference seen,
   // which cancels the clock difference between phones). Drawing happens slightly in the past so there are
   // always two updates to interpolate between: delay = how late updates come + gap between updates.
-  let snaps = [], off = null, offT = 0, late = 0;
+  let snaps = [], off = null, offT = 0, late = 0, lateS = [];
+  // 90th percentile of how late updates came in the last 2 s: rare spikes are covered by extrapolation instead
+  function p90(arr) { const v = arr.map(x => x[1]).sort((x, y) => x - y); return v.length ? v[Math.min(v.length - 1, Math.floor(v.length * 0.9))] : 0; }
   function recordSnap(d) {
     const now = Date.now(), sent = typeof d.w === 'number' ? d.w : now, sample = now - sent, nowS = performance.now();
     if (off == null || sample < off) off = sample; else off += Math.min(sample - off, (nowS - (offT || nowS)) * 0.002);
     offT = nowS;
-    late = Math.max(sample - off, late * 0.995);
+    lateS.push([nowS, sample - off]); while (lateS.length && nowS - lateS[0][0] > 2000) lateS.shift();
+    late = p90(lateS);
     const t = sent + off;
     if (snaps.length && t <= snaps[snaps.length - 1].t) return;
     snaps.push({ t, p: d.p }); if (snaps.length > 60) snaps.shift();
@@ -180,7 +183,7 @@
   function mqStop() { try { if (mq) mq.end(true); } catch (e) {} mq = null; mqPending = null; }
 
   // ---------- sessions ----------
-  function stopAll() { session++; rtcStop(); mqStop(); const was = linked; linked = false; partner = null; lastSeq = {}; snaps = []; off = null; late = 0; if (was) call(H.loss); }
+  function stopAll() { session++; rtcStop(); mqStop(); const was = linked; linked = false; partner = null; lastSeq = {}; snaps = []; off = null; late = 0; lateS = []; if (was) call(H.loss); }
   function begin() {
     const ss = session;
     rtcStart(ss); mqStart(ss);
