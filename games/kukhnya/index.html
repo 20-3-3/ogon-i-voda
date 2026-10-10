@@ -68,6 +68,8 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 /* ---- игра ---- */
 #game{padding:0;background:var(--cream2)}
 #hud{display:flex;align-items:center;gap:8px;padding:calc(var(--sat) + 4px) calc(var(--sar) + 8px) 4px calc(var(--sal) + 8px);background:var(--ink);color:var(--cream);height:calc(var(--sat) + 46px);flex:none}
+#hud{position:relative}
+#hPing{position:absolute;left:calc(var(--sal) + 8px);bottom:1px;font-size:9px;line-height:1;opacity:.65;pointer-events:none;white-space:nowrap;font-weight:700}
 #hud .time{font-family:var(--fd);font-size:26px;min-width:64px;color:var(--mustard)}
 #hud .time.low{color:#ff7a5c;animation:pulse .5s infinite alternate}
 @keyframes pulse{to{transform:scale(1.12)}}
@@ -234,7 +236,7 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 
  <section id="game" class="scr" hidden>
   <div id="hud">
-   <div class="time" id="hTime">1:30</div>
+   <div class="time" id="hTime">1:30</div><div id="hPing"></div>
    <div class="sc" id="hSc"><i></i><span>0 / 100</span></div>
    <button class="hb" data-mute>🔊</button>
    <button class="hb" id="bPause">⏸</button>
@@ -399,11 +401,28 @@ Cook.prototype.tap = function (id) {
   }
   if (id === 'trash') { if (h) { this.hand = null; this.ev.push('trash'); } }
 };
-Cook.prototype.step = function (dt, P, run) {
+Cook.prototype.step = function (dt, P, run, net) {
   if (run === false) dt = 0;
   if (P && P.ep === this.ep && typeof P.t === 'number') {
-    this.served = P.served || this.served; this.score = P.score || 0; this.fin = P.fin || null;
-    this.t += dt; const e = P.t - this.t; if (Math.abs(e) > 1) this.t = P.t; else this.t += e * 0.15;
+    this.served = P.served || this.served; this.score = P.score == null ? this.score : P.score; this.fin = P.fin || null;
+    this.t += dt;
+    if (dt > 0) {
+      // часы Сборщика главные. Каждый новый пакет даёт оценку смещения off = P.t + 0.2·rtt (самый быстрый пакет ≈ 0.4 средней задержки в одну сторону) − (мои «сырые» часы в момент приёма);
+      // берём максимум за последние 2 с (самый быстрый пакет = меньше всего задержки), между пакетами медленно спуская вниз.
+      // Свои часы подтягиваются к raw+off мягко и никогда не идут назад.
+      const pn = performance.now(); // «сырые» часы идут по реальному времени (зависшие кадры не теряют время)
+      this.raw = (this.raw || 0) + (this.pn ? Math.min(1, (pn - this.pn) / 1000) : dt); this.pn = pn;
+      if (net && net.at !== this.lastAt) {
+        this.lastAt = net.at;
+        if (P.t > 0) {
+          const o = P.t + (net.rtt || 0) * 0.2 - (this.raw - Math.min(0.1, Math.max(0, (performance.now() - net.at) / 1000)));
+          const w = this.win || (this.win = []); w.push([pn, o]); while (w[0][0] < pn - 2000) w.shift();
+          this.off = Math.max(...w.map(x => x[1]));
+        }
+      } else if (this.off != null) this.off -= dt * 0.01;
+      const e = this.off == null ? 0 : this.raw + this.off - this.t;
+      if (Math.abs(e) > 1) this.t += e; else this.t += Math.max(-dt * 0.8, e * Math.min(1, dt * 5));
+    } else this.pn = 0;
     if (P.ack && this.out.length) this.out = this.out.filter(o => P.ack.indexOf(o.i) < 0);
   } else this.t += dt;
   for (const s of this.st) {
@@ -589,10 +608,13 @@ const normP = (p) => {
   const b = Array(20).fill(0); if (p && Array.isArray(p.b)) for (let i = 0; i < 20; i++) b[i] = Math.max(0, Math.min(3, p.b[i] | 0));
   return {u: Math.max(1, Math.min(20, (p && p.u) | 0 || 1)), b};
 };
+const encP = (p) => p.u + ',' + p.b.join('');
+const decP = (s) => { const m = /^(\d+),(\d{20})$/.exec(s); return m ? {u: +m[1], b: m[2].split('').map(Number)} : null; };
 const mergeP = (a, b) => ({u: Math.max(a.u, b.u), b: a.b.map((x, i) => Math.max(x, b.b[i]))});
 let prog = (() => { try { return normP(JSON.parse(lsGet(SKEY))); } catch (e) { return normP(null); } })();
-const saveProg = () => { lsSet(SKEY, JSON.stringify(prog)); if (mode === 'net') Duo.set({prog}); };
+const saveProg = () => { lsSet(SKEY, JSON.stringify(prog)); if (mode === 'net') pubNet(); };
 function absorb(p) {
+  if (typeof p === 'string') p = decP(p);
   if (!p) return; const m = mergeP(prog, normP(p));
   if (JSON.stringify(m) !== JSON.stringify(prog)) { prog = m; saveProg(); if (screen === 'sel') renderSel(); }
 }
@@ -608,7 +630,7 @@ function effSel() { const p = partnerSel(); return p && (!mySel || p.ep > mySel.
 function setSel(level, go) {
   const p = partnerSel(), ep = Math.max(Date.now(), (p ? p.ep + 1 : 0), (mySel ? mySel.ep + 1 : 0));
   mySel = {level, ep, go: go ? 1 : 0};
-  if (mode === 'net') Duo.set({sel: mySel});
+  if (mode === 'net') pubNet();
   applySel();
 }
 function applySel() {
@@ -625,7 +647,7 @@ $('#bNet').onclick = async () => {
   try { await Duo.pair(); } catch (e) { return; }
   mode = 'net'; role = Duo.isHost() ? 'cook' : 'asm'; mySel = null;
   const s = partnerSel(); appliedEp = s ? s.ep : -1; selLevel = s ? s.level : Math.min(prog.u, 20);
-  Duo.set({prog, sel: null}); absorb(Duo.partner() && Duo.partner().prog);
+  Duo.set({prog: encP(prog), sel: null}); absorb(Duo.partner() && Duo.partner().prog);
   goSelect();
 };
 Duo.init({game: 'kukhnya', accent: '#e5432a'});
@@ -779,7 +801,7 @@ function startGame(level, ep) {
   setTab('cook');
   show('game'); $('#cd').hidden = false; $('#toast').classList.remove('on');
   $('#bPause').textContent = off ? '⏸' : '✕';
-  lastNetJson = ''; pubNet();
+  lastNetJson = ''; burst = []; pubNet();
 }
 function setTab(t) {
   G.tab = t; $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
@@ -802,7 +824,7 @@ $('#bLeave').onclick = () => { setSel(G ? G.lv.id : selLevel, 0); };
 const halvesBox = $('#halves');
 function doTap(id, side) {
   if (!G || G.cd > 0 || G.paused || G.done || (mode === 'net' && !Duo.linked())) return;
-  const o = G[side]; if (o) o.tap(id);
+  const o = G[side]; if (o) { o.tap(id); pubNet(); }
 }
 halvesBox.addEventListener('pointerdown', (e) => {
   const el = e.target.closest('[data-id]'); if (!el || el.dataset.id === 'none') return;
@@ -820,13 +842,36 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ---------- сеть ----------
+// Изменение уходит сразу (из doTap / tick), потом ещё два раза через ~120 и ~300 мс (потери на direct-канале);
+// часы Сборщика (t) — не чаще 5/с, Повар до ack повторяет окошко раз в 150 мс.
+let lastSent = 0, lastT = -1, burst = [];
 function pubNet() {
   if (mode !== 'net') return;
-  const o = {prog, sel: mySel};
+  const now = performance.now(), o = {prog: encP(prog), sel: mySel};
   if (G) Object.assign(o, G.cook ? G.cook.pub() : G.asm.pub());
-  const j = JSON.stringify(o); if (j === lastNetJson) return; lastNetJson = j; Duo.set(o);
+  const t = o.t; delete o.t;
+  const j = JSON.stringify(o);
+  let send = false;
+  if (j !== lastNetJson) { lastNetJson = j; burst = [now + 120, now + 300]; send = true; }
+  else if (burst.length && now >= burst[0]) { burst.shift(); send = true; }
+  else if (t !== undefined && t !== lastT && now - lastSent >= 200) send = true;
+  else if (o.out && o.out.length && now - lastSent >= 150) send = true;
+  if (!send) return;
+  if (t !== undefined) { o.t = t; lastT = t; }
+  lastSent = now; Duo.set(o);
 }
-setInterval(pubNet, 70);
+setInterval(pubNet, 100);
+// ping в HUD
+let rttS = 0;
+setInterval(() => {
+  const el = $('#hPing'); if (!el) return;
+  const p = mode === 'net' && screen === 'game' ? Duo.ping() : null;
+  rttS = p ? p.ms / 1000 : 0;
+  el.textContent = mode !== 'net' ? '' : p ? p.ms + ' мс · ' + p.via : 'нет связи';
+  el.style.color = !p || p.ms > 120 ? '#ff9d86' : p.ms > 40 ? '#f2c94c' : '#8fe3a4';
+}, 1000);
+let pRecv = performance.now();
+Duo.onState((P) => { pRecv = performance.now(); if (mode !== 'net') return; absorb(P.prog); if (P.sel) applySel(); });
 if (window.Duo) { Duo.onLoss(() => { if (screen === 'sel') renderSel(); }); Duo.onLink(() => { if (screen === 'sel') renderSel(); }); }
 
 // ---------- результат ----------
@@ -861,10 +906,7 @@ function frame(ts) {
 function tick(dt) {
   if (mode === 'net') {
     const P = Duo.partner();
-    if (P) {
-      absorb(P.prog);
-      if (P.sel) applySel();
-    }
+    if (P && P.sel) applySel();
     if (screen === 'sel') { const away = !Duo.linked(); if (($('#bStart').disabled) !== away) renderSel(); }
   }
   if (screen === 'sel' && effSel() && effSel().level !== selLevel && !effSel().go) { selLevel = effSel().level; renderSel(); }
@@ -882,8 +924,9 @@ function tick(dt) {
   const P = mode === 'net' ? Duo.partner() : null;
   if (mode === 'off') {
     G.cook.step(dt, G.asm.pub(), run); G.asm.step(dt, G.cook.pub(), run);
-  } else if (G.cook) G.cook.step(dt, P, run);
+  } else if (G.cook) G.cook.step(dt, P, run, {at: pRecv, rtt: rttS});
   else G.asm.step(dt, P, run);
+  pubNet();
   const view = G.asm || G.cook;
   // звуки и сообщения
   ['cook', 'asm'].forEach(k => { const o = G[k]; if (!o) return; o.ev.splice(0).forEach(sfx); });

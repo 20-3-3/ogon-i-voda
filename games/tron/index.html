@@ -79,6 +79,7 @@ background:linear-gradient(#10405a,#071b29);box-shadow:0 0 16px rgba(25,227,255,
 .pips{display:flex;gap:4px}.pip{width:11px;height:11px;border-radius:3px;border:2px solid currentColor;transform:skewX(-12deg)}.pip.f{background:currentColor;box-shadow:0 0 8px currentColor}
 .p1{color:var(--c1)}.p2{color:var(--c2)}
 #lvn{font:400 12px var(--hd);color:var(--dim);text-align:center;min-width:54px;text-transform:uppercase}
+#png{display:block;font:400 10px var(--hd);text-transform:none;opacity:.55;white-space:nowrap;pointer-events:none;letter-spacing:0}#png:empty{display:none}
 #hud .ico{pointer-events:auto;width:40px;height:40px}
 #play{position:absolute;inset:0;touch-action:none;pointer-events:auto;z-index:1}
 .msg{position:absolute;left:0;right:0;top:40%;text-align:center;font-family:var(--hd);text-transform:uppercase;font-size:clamp(34px,10vw,64px);color:#eaffff;text-shadow:0 0 10px var(--c1),0 0 30px var(--c1);pointer-events:none;z-index:4;line-height:1.05;padding:0 20px}
@@ -136,7 +137,7 @@ background:linear-gradient(#10405a,#071b29);box-shadow:0 0 16px rgba(25,227,255,
  <div id="play"></div>
  <div id="hud">
   <div class="pl p1"><span class="nm" id="n1">Игрок 1</span><div class="pips" id="pp1"></div></div>
-  <div id="lvn"></div>
+  <div id="lvn"><span id="lvt"></span><small id="png"></small></div>
   <div class="pl p2 r"><div class="pips" id="pp2"></div><span class="nm" id="n2">Игрок 2</span></div>
   <button class="ico" id="gMenu" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button>
  </div>
@@ -339,10 +340,20 @@ function schedTurn(r, curTick, side, delay) {
 var $ = function (id) { return document.getElementById(id); };
 var C1 = '#19e3ff', C2 = '#ffa11a', COL = [C1, C2];
 var mode = '', seat = 0, G = null, AUTO = false, muted = false, sel = { level: 1, ep: 0 }, prog = { u: 1, b: {} };
-var curRdN = 0, rdN = 0, offset = 0, bestRtt = 1e9, pingN = 0, lastPing = 0, curScr = 'title', LC = {};
-var GRACE_NET = 6, GRACE_LOC = 2, D_NET = 2;
+var curRdN = 0, rdN = 0, offset = 0, pingN = 0, lastPing = 0, curScr = 'title', LC = {};
+var GRACE_LOC = 2, D_NET = 1;
+/* RD — на сколько мс в прошлом рисуем партнёра (подстраивается под реальную сеть), RD_NEED — по опозданию его поворотов */
+var RD = 40, RD_NEED = 0, lateS = [], offTarget = 0, offSamples = [];
 try { muted = localStorage.getItem('tron.mute') === '1'; var sp = JSON.parse(localStorage.getItem('tron.prog') || 'null'); if (sp && sp.u) prog = sp; } catch (e) { }
 Duo.init({ game: 'tron', accent: '#19e3ff' });
+function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+/* отправить сразу и ещё дважды с интервалом: на ненадёжном канале потерянный пакет не должен стоить 0,4 с.
+   make() вернёт патч для Duo.set (всегда свежий) или null, если раунд уже сменился */
+function burst(make) {
+  var u = make(); if (u) Duo.set(u);
+  [30, 80].forEach(function (d) { setTimeout(function () { if (mode !== 'net') return; var v = make(); if (v) Duo.set(v); }, d); });
+}
+function graceNet() { return clamp(Math.ceil((2 * RD + 60) / TICK) + 1, 3, 7); }
 
 /* ---------- звук ---------- */
 var ac = null;
@@ -455,12 +466,14 @@ function onPartner(p) {
   if (p.sel && p.sel.ep > sel.ep) { sel = { level: p.sel.level, ep: p.sel.ep }; Duo.set({ sel: sel }); if (curScr === 'levels') renderLevels(); }
   if (p.ping && (!onPartner.pn || onPartner.pn !== p.ping.n + '|' + p.ping.ts)) { onPartner.pn = p.ping.n + '|' + p.ping.ts; Duo.set({ pong: { n: p.ping.n, ts: p.ping.ts, tb: Date.now() } }); }
   if (!Duo.isHost() && p.pong && p.pong.ts && Duo.mine().ping && p.pong.ts === Duo.mine().ping.ts) {
-    var rtt = Date.now() - p.pong.ts, off = p.pong.tb + rtt / 2 - Date.now();
-    if (rtt <= bestRtt + 20) { offset = bestRtt === 1e9 ? off : offset * .5 + off * .5; bestRtt = Math.min(bestRtt, rtt); }
-    bestRtt *= 1.02; Duo.set({ ping: null });
+    var rtt = Math.max(1, Date.now() - p.pong.ts), off = p.pong.tb + rtt / 2 - Date.now();
+    offSamples.push({ rtt: rtt, off: off }); if (offSamples.length > 10) offSamples.shift();
+    var best = offSamples[0]; offSamples.forEach(function (o) { if (o.rtt < best.rtt) best = o; });
+    if (offSamples.length === 1) offset = best.off; offTarget = best.off; Duo.set({ ping: null });
   }
+  noteArrival(p);
   if (p.rd && p.rd.n > curRdN && !Duo.isHost()) applyRd(p.rd);
-  if (curScr === 'levels') renderLevels();
+  if (curScr === 'levels') { renderLevels(); checkReady(); }
 }
 Duo.onState(onPartner);
 Duo.onLoss(function () { if (mode === 'net' && curScr === 'game' && G && !G.matchDone) { G.paused = true; $('lost').querySelector('h3').textContent = 'Партнёр отключился, ждём…'; $('lost').classList.add('on'); } if (curScr === 'levels') renderLevels(); });
@@ -469,14 +482,30 @@ Duo.onLink(function () {
   if (G && G.paused) { G.paused = false; $('lost').classList.remove('on'); if (Duo.isHost() && !G.matchDone && !G.concluded) hostRound(false); }
   Duo.set({ prog: prog, sel: sel }); if (curScr === 'levels') renderLevels();
 });
+/* хост запускает матч, когда оба нажали «Старт» (по событию и на всякий случай по таймеру) */
+function checkReady() {
+  var p = Duo.partner(), m = Duo.mine();
+  if (mode === 'net' && Duo.isHost() && curScr === 'levels' && p && m.rdy === sel.ep && p.rdy === sel.ep && sel.level <= prog.u) {
+    rdN = Math.max(rdN, curRdN) + 1; var rd = { n: rdN, t0: hostNow() + 3300, lvl: sel.level, first: 1 };
+    var n = rd.n; burst(function () { return curRdN === n ? { rd: rd } : null; }); applyRd(rd);
+  }
+}
+/* опоздание поворотов партнёра относительно начала их тика -> насколько в прошлом его рисовать */
+function noteArrival(p) {
+  var g = G; if (!g || g.kind !== 'net' || !p || p.n !== g.n || !p.m) return;
+  var hn = hostNow(), m = p.m;
+  for (var i = g.seenM || 0; i < m.length; i += 2) {
+    if (g.T < 0) continue;
+    lateS.push(clamp(hn - (g.t0 + m[i] * TICK), 0, 300)); if (lateS.length > 16) lateS.shift();
+    /* максимум за последние 16 поворотов (+ запас): выброс уходит из окна сам, а через RD_NEED медленно затухает */
+    RD_NEED = Math.max(RD_NEED, Math.max.apply(null, lateS) + 30);
+  }
+  g.seenM = Math.max(g.seenM || 0, m.length);
+}
 setInterval(function () {
   if (mode !== 'net' || !Duo.linked()) return;
-  if (!Duo.isHost() && Date.now() - lastPing > 700) { lastPing = Date.now(); Duo.set({ ping: { n: ++pingN, ts: Date.now() } }); }
-  var p = Duo.partner(), m = Duo.mine();
-  if (Duo.isHost() && curScr === 'levels' && p && m.rdy === sel.ep && p.rdy === sel.ep && sel.level <= prog.u) {
-    rdN = Math.max(rdN, curRdN) + 1; var rd = { n: rdN, t0: hostNow() + 3300, lvl: sel.level, first: 1 };
-    Duo.set({ rd: rd }); applyRd(rd);
-  }
+  if (!Duo.isHost() && Date.now() - lastPing > (pingN < 8 ? 400 : 2000)) { lastPing = Date.now(); Duo.set({ ping: { n: ++pingN, ts: Date.now() } }); }
+  checkReady(); var p = Duo.partner();
   if (curScr === 'game' && G && p && !G.matchDone) {
     if (p.scr === 'lv') { if (!G.lvSince) G.lvSince = Date.now(); if (!G.left && Date.now() - G.lvSince > 1800) { G.left = true; $('lost').querySelector('h3').textContent = 'Партнёр вышел к аренам'; $('lost').classList.add('on'); } }
     else { G.lvSince = 0; if (G.left) { G.left = false; $('lost').classList.remove('on'); } }
@@ -484,7 +513,7 @@ setInterval(function () {
 }, 150);
 function hostRound(first) {
   rdN = Math.max(rdN, curRdN) + 1; var rd = { n: rdN, t0: hostNow() + 3000, lvl: G.lvl, first: first ? 1 : 0 };
-  Duo.set({ rd: rd }); applyRd(rd);
+  var n = rd.n; burst(function () { return curRdN === n ? { rd: rd } : null; }); applyRd(rd);
 }
 function applyRd(rd) {
   if (rd.n <= curRdN) return; curRdN = rd.n;
@@ -494,9 +523,16 @@ function applyRd(rd) {
   G.n = rd.n; G.left = false; $('lost').classList.remove('on'); $('over').classList.remove('on');
   var u = { n: rd.n, m: [], dead: -1, rdy: -1, scr: 'game' };
   if (rd.first) { u.w = 0; u.c = 0; }
-  Duo.set(u); startRound(rd.t0);
+  u.prog = null; Duo.set(u); startRound(rd.t0);
   if (curScr !== 'game') show('game');
 }
+
+/* пинг в шапке: «8 мс · напрямую» / «140 мс · сервер» */
+setInterval(function () {
+  var e = $('png'); if (!e) return;
+  var t = ''; if (mode === 'net' && curScr === 'game') { var pg = Duo.ping(); t = pg ? pg.ms + ' мс · ' + (pg.via === 'напрямую' ? 'напрямую' : 'сервер') : '… нет связи'; }
+  if (e.textContent !== t) e.textContent = t;
+}, 1000);
 
 /* ---------- матч ---------- */
 function newMatch(lvl, kind) {
@@ -504,7 +540,7 @@ function newMatch(lvl, kind) {
   return { L: L, lvl: lvl, kind: kind, myW: 0, w: [0, 0], round: 0, matchDone: false, parts: [], shake: 0, prev: [0, 0] };
 }
 function startRound(t0) {
-  var g = G; g.round++; g.t0 = t0; g.T = -5; g.tk = 0; g.moves = []; g.dead = -1; g.concluded = false; g.res = null; g.paused = false; g.expl = [0, 0]; g.parts = []; g.cd = -1; g.goT = 0;
+  var g = G; g.round++; g.t0 = t0; g.seenM = 0; g.T = -5; g.vtR = -5 * TICK; g.tk = 0; g.moves = []; g.dead = -1; g.concluded = false; g.res = null; g.paused = false; g.expl = [0, 0]; g.parts = []; g.cd = -1; g.goT = 0;
   g.me = new Rider(g.L, seat); g.rem = new Rider(g.L, 1 - seat); g.riders = g.kind === 'net' ? (seat === 0 ? [g.me, g.rem] : [g.rem, g.me]) : [new Rider(g.L, 0), new Rider(g.L, 1)];
   g.pl = [0, 0]; g.lastLen = [1, 1];
   say('', ''); $('over').classList.remove('on');
@@ -514,7 +550,7 @@ function setupNames() {
   var k = G.kind; $('game').classList.toggle('dual', k === 'duo');
   $('n1').textContent = k === 'net' ? (seat === 0 ? 'Ты' : 'Партнёр') : k === 'bot' ? 'Ты' : 'Игрок 1';
   $('n2').textContent = k === 'net' ? (seat === 1 ? 'Ты' : 'Партнёр') : k === 'bot' ? 'Бот' : 'Игрок 2';
-  $('lvn').textContent = 'Арена ' + G.lvl;
+  $('lvt').textContent = 'Арена ' + G.lvl;
 }
 function scores() {
   var g = G; if (g.kind === 'net') { var p = Duo.partner(), pw = p && typeof p.w === 'number' ? p.w : 0; return seat === 0 ? [g.myW, pw] : [pw, g.myW]; }
@@ -532,7 +568,7 @@ function press(who, side) {
   var g = G; if (!g || g.matchDone || g.paused) return;
   if (g.kind === 'net') {
     if (g.concluded || g.dead >= 0) return; if (g.T > 0 && g.me && g.me.fatal >= 0) return;
-    schedTurn({ moves: g.moves, sd: g.me.sd }, Math.floor(g.T), side, D_NET); Duo.set({ m: g.moves.slice() }); SFX.turn();
+    schedTurn({ moves: g.moves, sd: g.me.sd }, Math.floor(g.T), side, D_NET); var n = g.n; burst(function () { return G && G.n === n ? { m: G.moves.slice() } : null; }); SFX.turn();
   } else {
     var r = g.riders[who]; if (g.concluded || r.fatal >= 0) return;
     schedTurn(r, g.tk, side, 1); SFX.turn();
@@ -542,7 +578,7 @@ function press(who, side) {
 function conclude(out) {
   var g = G; g.concluded = true; g.res = out; g.concT = Date.now();
   if (g.kind === 'net') {
-    if (out === 'win') g.myW++; Duo.set({ w: g.myW, c: g.n });
+    if (out === 'win') g.myW++; var cn = g.n; burst(function () { return G && G.n === cn ? { w: G.myW, c: cn } : null; });
     say(out === 'win' ? 'Раунд твой!' : out === 'lose' ? 'Раунд партнёра' : 'Ничья', out === 'draw' ? 'раунд переигрываем' : '');
     out === 'win' ? SFX.win() : out === 'lose' ? SFX.lose() : SFX.tick();
   } else {
@@ -577,30 +613,41 @@ function countdown(msLeft) {
   else if (v === 0 && G.goT && Date.now() - G.goT > 700 && !G.concluded && $('msg').textContent) say('', '');
 }
 function netUpdate() {
+  syncClock();
   var g = G, hn = hostNow(), T = Math.floor((hn - g.t0) / TICK); g.T = T; g.vt = hn - g.t0;
+  adaptRD(); g.vtR = g.vt - RD; var Tr = Math.floor(g.vtR / TICK);
   if (g.matchDone) return;
   if (g.paused || g.left) return;
   countdown(g.t0 - hn);
   var p = Duo.partner();
   if (!g.concluded && T >= 0) {
     var pm = [], pd = -1; if (p && p.n === g.n) { pm = p.m || []; pd = typeof p.dead === 'number' ? p.dead : -1; }
-    g.rem = buildRider(g.L, 1 - seat, pm, T, pd, null, -1);
-    g.me = buildRider(g.L, seat, g.moves, T, g.dead, g.rem, T - D_NET);
+    g.rem = buildRider(g.L, 1 - seat, pm, Tr, pd, null, -1);
+    g.me = buildRider(g.L, seat, g.moves, T, g.dead, g.rem, Tr);
     g.riders = seat === 0 ? [g.me, g.rem] : [g.rem, g.me];
-    if (g.dead < 0 && g.me.fatal >= 0) { g.dead = g.me.fatal; Duo.set({ dead: g.dead }); }
+    if (g.dead < 0 && g.me.fatal >= 0) { g.dead = g.me.fatal; var dn = g.n; burst(function () { return G && G.n === dn ? { dead: G.dead } : null; }); }
     if (g.me.fatal >= 0 && !g.expl[seat]) onDeath(seat);
     if (g.rem.fatal >= 0 && !g.expl[1 - seat]) onDeath(1 - seat);
     if (AUTO && g.dead < 0 && g.lastAuto !== T) { g.lastAuto = T; var sd = botPick(g.L, g.me, g.rem, T + 1, 12, Math.random); if (sd) press(seat, sd); }
-    var out = outcome(g.dead, pd, T, GRACE_NET);
+    var out = outcome(g.dead, pd, T, graceNet());
     if (out) conclude(out);
     sounds(g);
   } else if (g.concluded) {
     var settled = p && p.c === g.n, pw = settled ? p.w : 0;
     if (settled && !g.matchDone && (g.myW >= WINS || pw >= WINS)) {
       if (Date.now() - g.concT > 1700) { var sc = seat === 0 ? [g.myW, pw] : [pw, g.myW]; finishMatch(g.myW >= WINS ? seat : 1 - seat, sc); }
-    } else if (Duo.isHost() && Duo.linked() && Date.now() - g.concT > (settled ? 2300 : 7000)) hostRound(false);
+    } else if (Duo.isHost() && Duo.linked() && Date.now() - g.concT > (settled ? 2300 : 3500)) hostRound(false);
   }
   updateHud();
+}
+/* часы гостя подтягиваются к оценке плавно (до 1,5 мс за кадр), без скачков всей картинки */
+function syncClock() { var d = offTarget - offset; if (d) offset += clamp(d, -1.5, 1.5); }
+/* RD растёт быстро (поворот уже опоздал), падает медленно; не меньше половины пинга */
+function adaptRD() {
+  RD_NEED = Math.max(0, RD_NEED - .3);
+  var pg = Duo.ping(), base = pg ? pg.ms / 2 + 10 : 40;
+  var tgt = clamp(Math.max(RD_NEED, base), 20, 300);
+  RD = RD < tgt ? Math.min(tgt, RD + 10) : Math.max(tgt, RD - .5);
 }
 function sounds(g) {
   var r = g.me; if (!r) return;
@@ -645,7 +692,7 @@ $('bStart').onclick = function () {
 $('bNet').onclick = async function () {
   unlock();
   try { await Duo.pair(); } catch (e) { return; }
-  mode = 'net'; seat = Duo.isHost() ? 0 : 1; curRdN = 0; offset = 0; bestRtt = 1e9;
+  mode = 'net'; seat = Duo.isHost() ? 0 : 1; curRdN = 0; offset = 0; offTarget = 0; offSamples = []; pingN = 0; RD_NEED = 0; lateS = [];
   Duo.set({ prog: prog, sel: sel, rdy: -1, scr: 'lv' }); show('levels'); if (Duo.partner()) onPartner(Duo.partner());
 };
 $('bOff').onclick = function () { unlock(); $('m1').hidden = true; $('m2').hidden = false; };
@@ -766,6 +813,9 @@ function trailPath(r, vis) {
 function visHead(r, vt) {
   var n = r.cx.length; if (n < 2 || r.fatal >= 0) return null;
   var x1 = r.cx[n - 1], y1 = r.cy[n - 1], x0 = r.cx[n - 2], y0 = r.cy[n - 2];
+  var dxx = x1 - x0, dyy = y1 - y0; /* переход через край тора — едем плавно за край, а не телепортом */
+  if (Math.abs(dxx) === r.L.W - 1 && r.L.wrap & 1) x0 = x1 - DX[r.dir];
+  if (Math.abs(dyy) === r.L.H - 1 && r.L.wrap & 2) y0 = y1 - DY[r.dir];
   if (Math.abs(x1 - x0) + Math.abs(y1 - y0) !== 1) return null;
   var f = Math.max(0, Math.min(1, (vt - r.ct[n - 1] * TICK) / TICK));
   return { x: x0 + .5 + (x1 - x0) * f, y: y0 + .5 + (y1 - y0) * f };
@@ -812,7 +862,7 @@ function draw(ts) {
   cx.lineCap = 'round'; cx.lineJoin = 'round';
   var heads = [];
   for (i = 0; i < 2; i++) {
-    var r = g.riders[i]; var vis = visHead(r, vt), path = trailPath(r, vis), col = COL[i], dead = r.fatal >= 0;
+    var r = g.riders[i]; var vis = visHead(r, g.kind === 'net' && i !== seat ? g.vtR : vt), path = trailPath(r, vis), col = COL[i], dead = r.fatal >= 0;
     cx.save(); cx.globalAlpha = dead ? .7 : 1;
     cx.strokeStyle = col; cx.globalAlpha *= .22; cx.lineWidth = .95; cx.stroke(path);
     cx.globalAlpha = dead ? .6 : .95; cx.lineWidth = .5; cx.stroke(path);
@@ -856,7 +906,7 @@ layout(); renderLevels();
 /* хуки для тестов */
 window.TRON = {
   get G() { return G; }, get mode() { return mode; }, get seat() { return seat; }, get prog() { return prog; }, get sel() { return sel; },
-  auto: function (v) { AUTO = v; }, press: press, hostNow: hostNow, get offset() { return offset; },
+  auto: function (v) { AUTO = v; }, press: press, get rd() { return RD; }, get need() { return RD_NEED; }, hostNow: hostNow, get offset() { return offset; },
   cells: function (i) { var r = G.riders[i]; return r.cx.map(function (x, k) { return x + ',' + r.cy[k] + ',' + r.ct[k]; }).join(';'); }
 };
 </script>
