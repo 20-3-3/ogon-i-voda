@@ -1,0 +1,1416 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Огонь и Вода"><meta name="theme-color" content="#15130e"><style>*,*::before,*::after{box-sizing:border-box}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{height:100%}body{margin:0;font-size:14px}[hidden]{display:none!important}</style></head><body>
+<title>Огонь и Вода</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ruslan+Display&family=Nunito:wght@600;800;900&display=swap">
+<style>
+/* Layout: one full-screen game stage; menus are overlays on top of the live temple canvas. */
+:root {
+  --night: #15130e;      /* temple darkness */
+  --stone: #4d4430;      /* wall stone */
+  --stone-hi: #7a6c49;
+  --gold: #e2bd62;       /* temple trim */
+  --ink: #f4ead0;        /* text */
+  --muted: #b5a885;
+  --fire: #ff6b2c;
+  --fire-hi: #ffd04a;
+  --water: #39b4ff;
+  --water-hi: #a8e6ff;
+  --goo: #74e35b;
+  --panel: rgba(24, 21, 14, .92);
+  --line: rgba(226, 189, 98, .35);
+  --font-display: "Ruslan Display", "Georgia", serif;
+  --font-ui: "Nunito", -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; background: var(--night); color: var(--ink); overflow: hidden; overscroll-behavior: none; }
+body { font-family: var(--font-ui); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+#app { position: relative; height: 100%; width: 100%; touch-action: none; overflow: hidden; }
+#cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* HUD */
+#hud { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 10px; padding: 6px max(12px, env(safe-area-inset-left, 0px)); font-weight: 800; font-size: 14px; pointer-events: none; }
+#hud .lvl { font-family: var(--font-display); font-size: 15px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+#hud .chip { background: rgba(0,0,0,.45); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; display: flex; gap: 8px; align-items: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#hud .gr { color: var(--fire-hi); } #hud .gb { color: var(--water-hi); }
+#hud .dot { width: 8px; height: 8px; border-radius: 50%; background: #777; }
+#hud .dot.on { background: var(--goo); box-shadow: 0 0 6px var(--goo); }
+#hud button { pointer-events: auto; }
+.iconbtn { background: rgba(0,0,0,.5); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; width: 38px; height: 34px; font-size: 16px; font-weight: 900; font-family: var(--font-ui); cursor: pointer; }
+
+/* touch pad */
+#pad { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; padding: 10px max(14px, env(safe-area-inset-left, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)); pointer-events: none; }
+#pad .grp { display: flex; gap: 10px; pointer-events: auto; align-items: flex-end; }
+.pk { width: 64px; height: 64px; border-radius: 22px; border: 2px solid rgba(244,234,208,.28); background: rgba(20,17,12,.42); color: var(--ink); font-size: 28px; display: grid; place-items: center; touch-action: none; }
+.pk.j { width: 84px; height: 84px; border-radius: 50%; font-size: 32px; }
+.pk.on { background: rgba(226,189,98,.35); border-color: var(--gold); transform: scale(.96); }
+#pad.solo .pk { width: 60px; height: 60px; font-size: 22px; border-radius: 18px; }
+#pad.solo .pk.j { width: 66px; height: 66px; }
+#pad.solo .p1 .pk { border-color: rgba(255,107,44,.55); }
+#pad.solo .p2 .pk { border-color: rgba(57,180,255,.55); }
+@media (orientation: portrait) { #pad.solo .pk, #pad.solo .pk.j { width: 52px; height: 52px; font-size: 20px; border-radius: 14px; } #pad.solo .grp { gap: 6px; } }
+
+/* screens */
+.scr { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding-inline: 16px; padding-block: 16px; background: radial-gradient(ellipse at center, rgba(21,19,14,.55), rgba(21,19,14,.92)); overflow-y: auto; }
+.box { width: min(560px, 100%); display: flex; flex-direction: column; gap: 14px; align-items: stretch; margin: auto; }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(38px, 9vw, 64px); line-height: 1; margin: 0; text-align: center; text-wrap: balance; }
+h1 .f { color: var(--fire); text-shadow: 0 0 18px rgba(255,107,44,.6); }
+h1 .w { color: var(--water); text-shadow: 0 0 18px rgba(57,180,255,.6); }
+h1 .and { color: var(--gold); font-size: .6em; vertical-align: middle; }
+h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin: 0; text-align: center; color: var(--gold); }
+.sub { text-align: center; color: var(--muted); font-size: 15px; margin: 0; }
+.btn { font-family: var(--font-ui); font-weight: 900; font-size: 18px; color: var(--ink); background: linear-gradient(180deg, #5d5034, #3c3322); border: 2px solid var(--gold); border-radius: 14px; padding: 14px 18px; cursor: pointer; text-align: center; touch-action: manipulation; }
+.btn small { display: block; font-weight: 600; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.btn.hot { background: linear-gradient(90deg, #a8401a, #3c3322 50%, #165b8a); }
+.btn.ghost { background: transparent; border-color: var(--line); font-size: 15px; padding: 10px 14px; }
+.btn:disabled { opacity: .45; }
+.btn:focus-visible, .iconbtn:focus-visible, .card:focus-visible, .lv:focus-visible { outline: 3px solid var(--fire-hi); outline-offset: 2px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; } .row > * { flex: 1 1 140px; }
+.status { text-align: center; font-size: 14px; color: var(--muted); background: rgba(0,0,0,.35); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; }
+.status b { color: var(--goo); }
+.help { font-size: 14px; color: var(--muted); background: rgba(0,0,0,.35); border-radius: 12px; padding: 10px 14px; line-height: 1.45; }
+.help ol { margin: 6px 0 0; padding-left: 20px; } .help b { color: var(--ink); }
+
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.card { border-radius: 18px; padding: 14px 10px; text-align: center; border: 2px solid var(--line); background: rgba(0,0,0,.4); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--ink); font-family: var(--font-ui); }
+.card canvas { width: 84px; height: 84px; }
+.card .nm { font-family: var(--font-display); font-size: 22px; }
+.card .who { font-weight: 800; font-size: 13px; color: var(--muted); min-height: 18px; }
+.card.f .nm { color: var(--fire); } .card.w .nm { color: var(--water); }
+.card.mine { border-color: var(--gold); background: rgba(226,189,98,.15); }
+.card.taken { opacity: .5; }
+
+.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+@media (max-width: 460px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+.lv { aspect-ratio: 1; max-width: 100%; border-radius: 14px; border: 2px solid var(--line); background: rgba(0,0,0,.45); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; font-family: var(--font-ui); padding: 4px; min-width: 0; }
+.lv .n { font-family: var(--font-display); font-size: 26px; color: var(--gold); }
+.lv .t { font-size: 10px; font-weight: 800; color: var(--muted); text-align: center; line-height: 1.1; overflow: hidden; max-width: 100%; }
+.lv .s { font-size: 11px; font-weight: 900; letter-spacing: .5px; color: var(--fire-hi); font-variant-numeric: tabular-nums; }
+.lv.done { border-color: var(--gold); }
+.lv:disabled { opacity: .35; cursor: default; }
+
+/* modal */
+#ovl { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding-inline: 16px; background: rgba(10,9,6,.6); }
+#ovl .panel { width: min(420px, 100%); max-height: calc(100% - 16px); overflow-y: auto; background: var(--panel); border: 2px solid var(--gold); border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+#ovl .big { font-family: var(--font-display); font-size: 30px; }
+#ovl .stats { display: flex; justify-content: center; gap: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+#ovl .rank { font-family: var(--font-display); font-size: 44px; color: var(--gold); line-height: 1; }
+.paircode { font-family: var(--font-display); font-size: 64px; letter-spacing: 10px; text-align: center; color: var(--gold); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.pairrow input { font-family: var(--font-ui); font-weight: 900; font-size: 28px; letter-spacing: 8px; text-align: center; background: rgba(0,0,0,.45); color: var(--ink); border: 2px solid var(--gold); border-radius: 14px; padding: 10px; min-width: 0; -webkit-user-select: text; user-select: text; }
+.status.err { color: #ffb4a0; border-color: rgba(255,107,44,.5); }
+#scrPair .box .box { gap: 10px; }
+#toast { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--gold); border-radius: 999px; padding: 6px 16px; font-weight: 800; font-size: 14px; pointer-events: none; transition: opacity .3s; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; }
+#toast.off { opacity: 0; }
+@media (max-height: 430px) { #ovl .panel { padding: 12px; gap: 8px; } #ovl .big { font-size: 24px; } #ovl .rank { font-size: 32px; } #ovl .btn { padding: 9px 12px; font-size: 16px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="app">
+  <canvas id="cv"></canvas>
+  <div id="hud" hidden>
+    <span class="dot" id="netDot" title="Связь"></span>
+    <span class="lvl" id="hudLvl"></span>
+    <span class="chip"><span class="gr" id="hudR">◆ 0/0</span><span class="gb" id="hudB">◆ 0/0</span></span>
+    <span class="chip" id="hudT">0:00</span>
+    <button class="iconbtn" id="btnPause" aria-label="Пауза">II</button>
+  </div>
+  <div id="pad" hidden>
+    <div class="grp p1"><div class="pk" data-k="L">◀</div><div class="pk" data-k="R">▶</div><div class="pk j" data-k="J" id="pkJ1">▲</div></div>
+    <div class="grp p2"><div class="pk j" data-k="J" id="pkJ">▲</div><div class="pk" data-k="2L" id="pk2L">◀</div><div class="pk" data-k="2R" id="pk2R">▶</div><div class="pk j" data-k="2J" id="pk2J">▲</div></div>
+  </div>
+
+  <section class="scr" id="scrTitle">
+    <div class="box">
+      <h1><span class="f">Огонь</span> <span class="and">и</span> <span class="w">Вода</span></h1>
+      <p class="sub">Храм на двоих. 10 уровней.</p>
+      <button class="btn hot" id="btnNet">Играть вдвоём по сети<small>Два айфона, у каждого свой герой</small></button>
+      <button class="btn" id="btnSolo">Вдвоём на одном телефоне<small>Слева огонь, справа вода</small></button>
+      <div class="status" id="netStatus">Подключаюсь к сети…</div>
+      <details class="help"><summary><b>Как подключить второй айфон</b></summary>
+        <ol>
+          <li>Оба открывают эту страницу по одной ссылке. Аккаунты и регистрация не нужны, нужен только интернет.</li>
+          <li>Первый жмёт «Играть вдвоём по сети» → «Создать комнату» и получает код из 4 цифр.</li>
+          <li>Второй жмёт «Играть вдвоём по сети» и вводит этот код. Или первый отправляет ссылку с кодом кнопкой «Поделиться».</li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+  <section class="scr" id="scrPair" hidden>
+    <div class="box">
+      <h2>Игра по сети</h2>
+      <div id="pairHost" class="box" hidden>
+        <p class="sub">Код комнаты</p>
+        <div class="paircode" id="pairCode">····</div>
+        <p class="sub">Пусть партнёр откроет игру и введёт этот код. Как только он подключится, игра продолжится сама.</p>
+        <button class="btn" id="pairShare">Поделиться ссылкой с кодом</button>
+      </div>
+      <div id="pairJoin" class="box">
+        <button class="btn hot" id="pairNew">Создать комнату<small>Получишь код для партнёра</small></button>
+        <p class="sub">или войди по коду партнёра</p>
+        <div class="row pairrow">
+          <input id="pairInput" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" aria-label="Код комнаты" autocomplete="off">
+          <button class="btn" id="pairGo">Войти</button>
+        </div>
+      </div>
+      <div class="status" id="pairWait" hidden></div>
+      <div class="status err" id="pairErr" hidden></div>
+      <button class="btn ghost" id="pairBack">Назад</button>
+    </div>
+  </section>
+
+  <section class="scr" id="scrRole" hidden>
+    <div class="box">
+      <h2>Кто ты сегодня?</h2>
+      <div class="cards">
+        <button class="card f" id="cardF"><canvas width="168" height="168" id="avF"></canvas><span class="nm">Огонь</span><span class="who" id="whoF"></span></button>
+        <button class="card w" id="cardW"><canvas width="168" height="168" id="avW"></canvas><span class="nm">Вода</span><span class="who" id="whoW"></span></button>
+      </div>
+      <div class="status" id="roleStatus"></div>
+      <button class="btn ghost" id="roleBack">Назад</button>
+    </div>
+  </section>
+
+  <section class="scr" id="scrLevels" hidden>
+    <div class="box">
+      <h2>Уровни</h2>
+      <div class="grid" id="lvGrid"></div>
+      <div class="status" id="lvStatus"></div>
+      <div class="row"><button class="btn ghost" id="lvRole">Сменить героя</button><button class="btn ghost" id="lvMenu">Главное меню</button></div>
+    </div>
+  </section>
+
+  <div id="ovl" hidden><div class="panel" id="ovlPanel"></div></div>
+  <div id="toast" class="off"></div>
+</div>
+
+<script>
+// ===== ENGINE (shared by game page and level checker) =====
+const COLS = 32, ROWS = 18;
+const PH = { G: 48, JUMP: 16.4, MOVE: 7.2, ACC_G: 70, ACC_A: 45, MAXF: 24, W: 0.7, H: 1.25, PSPD: 3.2, COYOTE: 0.09, BUFFER: 0.12 };
+const HAZ = { L: 'lava', W: 'water', G: 'goo' };
+
+function isSolidCh(c) { return c === '#' || c === 'L' || c === 'W' || c === 'G'; }
+function killsRole(c, role) { return c === 'G' || (c === 'L' && role === 'w') || (c === 'W' && role === 'f'); }
+
+// Level builder: levels are written as code so they stay readable and editable.
+function buildLevel(def) {
+  const g = [];
+  for (let y = 0; y < ROWS; y++) { const r = []; for (let x = 0; x < COLS; x++) r.push((y === 0 || y === ROWS - 1 || x === 0 || x === COLS - 1) ? '#' : '.'); g.push(r); }
+  const lv = { name: def.name, hint: def.hint || '', grid: g, gems: [], doors: {}, start: {}, btn: [], lev: [], plat: [], par: def.par || 90 };
+  const b = {
+    box(x1, y1, x2, y2, c = '#') { for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) g[y][x] = c; },
+    clear(x1, y1, x2, y2) { b.box(x1, y1, x2, y2, '.'); },
+    fire(x, y) { lv.start.f = { x: x + 0.5 - PH.W / 2, y: y + 1 - PH.H }; },
+    water(x, y) { lv.start.w = { x: x + 0.5 - PH.W / 2, y: y + 1 - PH.H }; },
+    doorF(x, y) { lv.doors.f = { x, y }; },
+    doorW(x, y) { lv.doors.w = { x, y }; },
+    red(x, y) { lv.gems.push({ id: lv.gems.length, t: 'f', x: x + 0.5, y: y + 0.5 }); },
+    blue(x, y) { lv.gems.push({ id: lv.gems.length, t: 'w', x: x + 0.5, y: y + 0.5 }); },
+    button(x, y, grp) { lv.btn.push({ x, y, g: grp }); },
+    lever(x, y, grp) { lv.lev.push({ x, y, g: grp }); },
+    // moving block: rest rect (x,y,w,h); when its group is active it slides to (x+dx, y+dy)
+    plat(x, y, w, h, dx, dy, grp, opt) { lv.plat.push({ x, y, w, h, dx, dy, g: grp, ...(opt || {}) }); },
+    // platform that moves back and forth on its own; sec = time for one pass
+    mover(x, y, w, h, dx, dy, sec) { lv.plat.push({ x, y, w, h, dx, dy, g: -1, auto: sec }); },
+  };
+  def.build(b);
+  return lv;
+}
+
+function newWorld(lv) { return { lv, pt: lv.plat.map(() => 0), latch: lv.plat.map(() => false), clock: 0 }; }
+// which groups are on: buttons pressed by any body, levers set to 1
+function groupState(lv, bodies, levState) {
+  const any = {}, all = {}, seen = {};
+  lv.btn.forEach((b) => {
+    const pr = bodies.some(p => p && !p.dead && onButton(b, p));
+    b.pressed = pr;
+    if (pr) any[b.g] = true;
+    all[b.g] = (seen[b.g] ? all[b.g] : true) && pr; seen[b.g] = true;
+  });
+  lv.lev.forEach((l, i) => { if (levState[i]) any[l.g] = true; });
+  return { any, all };
+}
+function tileAt(lv, x, y) { if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return '#'; return lv.grid[y][x]; }
+
+function platPos(p, t) { return { x: p.x + p.dx * t, y: p.y + p.dy * t, w: p.w, h: p.h }; }
+
+// world = { lv, pt: [t per plat] }
+function overlapsSolid(world, x, y, w, h) {
+  const e = 1e-6;
+  for (let ty = Math.floor(y + e); ty <= Math.floor(y + h - e); ty++)
+    for (let tx = Math.floor(x + e); tx <= Math.floor(x + w - e); tx++)
+      if (isSolidCh(tileAt(world.lv, tx, ty))) return { x: tx, y: ty, w: 1, h: 1, tile: true };
+  const pl = world.lv.plat;
+  for (let i = 0; i < pl.length; i++) {
+    const r = platPos(pl[i], world.pt[i]);
+    if (x < r.x + r.w - e && x + w > r.x + e && y < r.y + r.h - e && y + h > r.y + e) return { ...r, plat: i };
+  }
+  return null;
+}
+
+function moveX(world, p, dx) {
+  if (!dx) return false;
+  p.x += dx;
+  let hit = false, s;
+  for (let k = 0; k < 4 && (s = overlapsSolid(world, p.x, p.y, PH.W, PH.H)); k++) {
+    hit = true;
+    if (dx > 0) p.x = s.x - PH.W; else p.x = s.x + s.w;
+  }
+  if (hit) p.vx = 0;
+  return hit;
+}
+function moveY(world, p, dy) {
+  if (!dy) return null;
+  p.y += dy;
+  let s, res = null;
+  for (let k = 0; k < 4 && (s = overlapsSolid(world, p.x, p.y, PH.W, PH.H)); k++) {
+    res = s;
+    if (dy > 0) p.y = s.y - PH.H; else p.y = s.y + s.h;
+  }
+  return res;
+}
+
+function newPlayer(lv, role) {
+  const s = lv.start[role];
+  return { role, x: s.x, y: s.y, vx: 0, vy: 0, gr: false, on: -1, coy: 0, buf: 0, face: 1, dead: false, door: false, jh: false, cut: false };
+}
+
+// is player standing on platform i (feet on its top, horizontal overlap)
+function ridingPlat(world, p) {
+  const pl = world.lv.plat;
+  for (let i = 0; i < pl.length; i++) {
+    const r = platPos(pl[i], world.pt[i]);
+    if (Math.abs(p.y + PH.H - r.y) < 0.02 && p.x < r.x + r.w && p.x + PH.W > r.x) return i;
+  }
+  return -1;
+}
+
+// Advance platforms; carry riders and push players out of the way.
+function rectHit(x, y, r) { const e = 1e-6; return x < r.x + r.w - e && x + PH.W > r.x + e && y < r.y + r.h - e && y + PH.H > r.y + e; }
+function stepPlatforms(world, active, players, dt) {
+  const pl = world.lv.plat;
+  for (let i = 0; i < pl.length; i++) {
+    const p = pl[i];
+    const len = Math.hypot(p.dx, p.dy) || 1;
+    const t0 = world.pt[i];
+    let t1;
+    if (p.auto) { const u = ((world.clock / p.auto) % 2 + 2) % 2; t1 = u < 1 ? u : 2 - u; }
+    else {
+      let on = p.and ? !!active.all[p.g] : !!active.any[p.g];
+      if (p.latch) { if (on) world.latch[i] = true; on = !!world.latch[i]; }
+      const target = on ? 1 : 0;
+      t1 = t0 + Math.sign(target - t0) * Math.min(Math.abs(target - t0), PH.PSPD * dt / len);
+    }
+    if (t1 === t0) continue;
+    const a = platPos(p, t0), b = platPos(p, t1);
+    const ddx = b.x - a.x, ddy = b.y - a.y;
+    const moves = [];
+    for (const q of players) {
+      if (q.dead) continue;
+      const rides = Math.abs(q.y + PH.H - a.y) < 0.03 && q.x < a.x + a.w && q.x + PH.W > a.x;
+      let nx = q.x, ny = q.y;
+      if (rides) { nx += ddx; ny += ddy; }
+      if (rectHit(nx, ny, b)) { if (ddy < 0) ny = b.y - PH.H; else if (ddy > 0) ny = b.y + b.h; else if (ddx > 0) nx = b.x + b.w; else nx = b.x - PH.W; }
+      if (nx !== q.x || ny !== q.y) moves.push([q, nx, ny, rides]);
+    }
+    world.pt[i] = t1;
+    let ok = true;
+    for (const m of moves) {
+      if (!overlapsSolid(world, m[1], m[2], PH.W, PH.H)) continue;
+      if (m[3] && !overlapsSolid(world, m[0].x, m[2], PH.W, PH.H)) { m[1] = m[0].x; continue; }
+      ok = false;
+    }
+    if (!ok && !p.auto) { world.pt[i] = t0; continue; }
+    for (const [q, nx, ny] of moves) { q.x = nx; q.y = ny; }
+  }
+}
+
+// One physics tick for one player. inp = {l,r,j}
+function stepPlayer(world, p, inp, dt) {
+  if (p.dead) return;
+  const dir = (inp.r ? 1 : 0) - (inp.l ? 1 : 0);
+  if (dir) p.face = dir;
+  const target = dir * PH.MOVE, acc = p.gr ? PH.ACC_G : PH.ACC_A;
+  if (p.vx < target) p.vx = Math.min(target, p.vx + acc * dt); else if (p.vx > target) p.vx = Math.max(target, p.vx - acc * dt);
+  if (p.gr) p.coy = PH.COYOTE; else p.coy -= dt;
+  if (inp.j && !p.jh) p.buf = PH.BUFFER; else p.buf -= dt;
+  p.jh = !!inp.j;
+  if (p.buf > 0 && p.coy > 0) { p.vy = -PH.JUMP; p.buf = 0; p.coy = 0; p.gr = false; p.cut = false; }
+  if (!inp.j && p.vy < -6 && !p.cut) { p.vy *= 0.55; p.cut = true; }
+  p.vy = Math.min(PH.MAXF, p.vy + PH.G * dt);
+  moveX(world, p, p.vx * dt);
+  const hit = moveY(world, p, p.vy * dt);
+  p.gr = false; p.on = -1;
+  if (hit) { if (p.vy > 0) { p.gr = true; p.on = hit.plat ?? -1; } p.vy = 0; }
+  else if (p.vy >= 0) {
+    // probe ground just below (keeps grounded on moving platforms)
+    if (overlapsSolid(world, p.x, p.y + 0.02, PH.W, PH.H)) p.gr = true;
+  }
+  if (p.y > ROWS + 2) p.dead = 'fall';
+}
+
+// Hazard / gem / door checks after a tick
+function hazardUnder(world, p) {
+  if (!p.gr) return null;
+  const y = Math.floor(p.y + PH.H + 0.01);
+  // only the tiles most of the body is over count (lets you graze a pool edge)
+  const cx1 = p.x + 0.15, cx2 = p.x + PH.W - 0.15;
+  for (let tx = Math.floor(cx1); tx <= Math.floor(cx2); tx++) {
+    const c = tileAt(world.lv, tx, y);
+    if (killsRole(c, p.role)) return c;
+  }
+  return null;
+}
+function gemsTouched(lv, p) {
+  const out = [];
+  for (const g of lv.gems) {
+    if (g.t !== p.role) continue;
+    if (g.x > p.x - 0.3 && g.x < p.x + PH.W + 0.3 && g.y > p.y - 0.3 && g.y < p.y + PH.H + 0.3) out.push(g.id);
+  }
+  return out;
+}
+function atDoor(lv, p) {
+  const d = lv.doors[p.role];
+  if (!d || !p.gr) return false;
+  const cx = p.x + PH.W / 2;
+  return Math.abs(cx - (d.x + 0.5)) < 0.55 && Math.abs(p.y + PH.H - (d.y + 1)) < 0.1;
+}
+function onButton(b, p) {
+  return p.x < b.x + 0.9 && p.x + PH.W > b.x + 0.1 && p.y + PH.H > b.y + 0.6 && p.y + PH.H <= b.y + 1.05;
+}
+function inLever(l, p) {
+  return p.x < l.x + 0.85 && p.x + PH.W > l.x + 0.15 && p.y < l.y + 1 && p.y + PH.H > l.y + 0.2;
+}
+
+// module.exports = { newWorld, groupState, COLS, ROWS, PH, buildLevel, tileAt, isSolidCh, killsRole, platPos, overlapsSolid, newPlayer, stepPlatforms, stepPlayer, hazardUnder, gemsTouched, atDoor, onButton, inLever, ridingPlat };
+
+// ===== LEVELS =====
+// Grid 32 x 18 (x 0..31, y 0..17). Border is wall. A tile row y is "floor" for a
+// character standing in row y-1.  b.box(x1,y1,x2,y2,c): '#' wall, 'L' lava (kills
+// water), 'W' water (kills fire), 'G' green goo (kills both).
+// Jump: about 2.8 tiles up, about 4.5 tiles across. Characters need 2 free rows.
+const LEVELS = [
+  {
+    name: 'Первые шаги', par: 45,
+    hint: 'Огонь не любит воду, вода не любит лаву. Зелёная жижа опасна для обоих.',
+    build(b) {
+      b.box(1, 13, 24, 13); b.box(7, 9, 30, 9); b.box(1, 5, 24, 5);
+      b.box(27, 15, 28, 16); b.box(3, 11, 4, 12); b.box(27, 7, 28, 8);
+      b.box(8, 17, 9, 17, 'L'); b.box(15, 17, 16, 17, 'W');
+      b.box(12, 13, 13, 13, 'G');
+      b.box(12, 9, 13, 9, 'W'); b.box(18, 9, 19, 9, 'L');
+      b.fire(2, 16); b.water(4, 16);
+      b.doorF(17, 4); b.doorW(20, 4);
+      b.blue(8, 16); b.red(15, 15); b.red(9, 12); b.blue(18, 12);
+      b.red(12, 7); b.blue(18, 7); b.red(10, 4); b.blue(12, 4);
+    },
+  },
+  {
+    name: 'Подъёмник', par: 60,
+    hint: 'Один стоит на кнопке, другой едет на лифте. Наверху есть кнопка для второго.',
+    build(b) {
+      b.box(1, 9, 23, 9); b.box(27, 9, 30, 9);
+      b.box(8, 17, 9, 17, 'W'); b.box(13, 17, 14, 17, 'L');
+      b.box(16, 9, 17, 9, 'G');
+      b.box(10, 7, 10, 8); b.box(12, 5, 17, 5);
+      b.plat(24, 16, 3, 1, 0, -7, 0);
+      b.button(20, 16, 0); b.button(21, 8, 0);
+      b.fire(2, 16); b.water(4, 16);
+      b.doorF(4, 8); b.doorW(7, 8);
+      b.blue(8, 16); b.red(13, 16); b.red(13, 4); b.blue(16, 4);
+      b.red(28, 8); b.blue(29, 8); b.red(16, 7); b.blue(18, 14);
+    },
+  },
+  {
+    name: 'Рычаг', par: 60,
+    hint: 'Толкни рычаг, чтобы поднять мост над жижей.',
+    build(b) {
+      b.box(11, 17, 16, 17, 'G');
+      b.plat(11, 17, 6, 1, 0, -1, 0);
+      b.box(1, 13, 4, 13); b.box(6, 15, 7, 16);
+      b.lever(2, 12, 0);
+      b.box(28, 15, 29, 16); b.box(18, 13, 26, 13);
+      b.box(22, 13, 23, 13, 'L'); b.box(24, 13, 25, 13, 'W');
+      b.box(19, 11, 19, 12); b.box(21, 9, 30, 9);
+      b.fire(2, 16); b.water(4, 16);
+      b.doorF(25, 8); b.doorW(28, 8);
+      b.red(13, 14); b.blue(14, 14); b.red(1, 12); b.blue(4, 12);
+      b.red(24, 11); b.blue(22, 11); b.red(22, 16); b.blue(25, 16);
+    },
+  },
+  {
+    name: 'Разные дорожки', par: 75,
+    hint: 'Огонь идёт верхом, вода низом. Рычаг каждого открывает мост другому.',
+    build(b) {
+      b.box(6, 11, 30, 11);
+      b.box(1, 15, 2, 16); b.box(4, 13, 5, 14);
+      b.box(9, 17, 13, 17, 'W'); b.box(19, 17, 23, 17, 'G');
+      b.box(9, 11, 13, 11, 'L'); b.box(19, 11, 23, 11, 'G');
+      b.lever(16, 16, 0); b.lever(16, 10, 1);
+      b.plat(19, 17, 5, 1, 0, -1, 1);
+      b.plat(19, 11, 5, 1, 0, -1, 0);
+      b.fire(3, 16); b.water(4, 16);
+      b.doorF(27, 10); b.doorW(27, 16);
+      b.blue(11, 16); b.red(11, 10); b.blue(21, 14); b.red(21, 8);
+      b.red(1, 12); b.blue(2, 12); b.red(29, 10); b.blue(29, 16);
+    },
+  },
+  {
+    name: 'Два лифта', par: 75,
+    hint: 'Кнопка внизу поднимает левый лифт, кнопка наверху — правый.',
+    build(b) {
+      b.box(1, 9, 2, 9); b.box(6, 9, 25, 9); b.box(29, 9, 30, 9);
+      b.box(14, 17, 16, 17, 'G');
+      b.box(11, 9, 12, 9, 'L'); b.box(19, 9, 20, 9, 'W');
+      b.box(11, 7, 11, 8); b.box(13, 5, 18, 5);
+      b.plat(3, 16, 3, 1, 0, -7, 0); b.plat(26, 16, 3, 1, 0, -7, 1);
+      b.button(24, 16, 0); b.button(14, 8, 1);
+      b.fire(10, 16); b.water(20, 16);
+      b.doorF(22, 8); b.doorW(8, 8);
+      b.red(14, 4); b.blue(17, 4); b.red(15, 14); b.blue(15, 13);
+      b.red(19, 7); b.blue(12, 7); b.red(1, 8); b.blue(30, 8);
+    },
+  },
+  {
+    name: 'Зелёная топь', par: 70,
+    hint: 'Прыгай по столбам. Падать нельзя никому.',
+    build(b) {
+      b.box(4, 17, 27, 17, 'G');
+      b.box(6, 15, 7, 16); b.box(11, 14, 12, 16); b.box(16, 15, 17, 16); b.box(21, 13, 22, 16); b.box(25, 15, 26, 16);
+      b.box(30, 15, 30, 16); b.box(27, 13, 28, 13); b.box(30, 11, 30, 11);
+      b.box(1, 9, 27, 9);
+      b.box(18, 9, 19, 9, 'L'); b.box(14, 9, 15, 9, 'W'); b.box(10, 9, 11, 9, 'G');
+      b.box(8, 7, 8, 8); b.box(4, 5, 6, 5); b.box(22, 7, 22, 8); b.box(24, 5, 27, 5);
+      b.fire(1, 16); b.water(2, 16);
+      b.doorF(3, 8); b.doorW(6, 8);
+      b.red(9, 13); b.blue(14, 12); b.red(19, 12); b.blue(24, 12);
+      b.red(18, 7); b.blue(14, 7); b.red(5, 4); b.blue(26, 4);
+    },
+  },
+  {
+    name: 'Сторожевые ворота', par: 80,
+    hint: 'Держите кнопки по очереди, чтобы пропустить друг друга через ворота.',
+    build(b) {
+      b.box(1, 1, 30, 4); b.box(1, 10, 26, 12);
+      b.box(29, 15, 30, 16); b.box(27, 13, 27, 13); b.box(29, 11, 30, 11);
+      b.plat(8, 13, 1, 4, 0, -3, 0); b.plat(12, 5, 1, 5, 0, -3, 1);
+      b.button(5, 9, 0); b.button(14, 16, 1);
+      b.box(18, 17, 19, 17, 'W'); b.box(16, 10, 17, 10, 'L');
+      b.fire(2, 16); b.water(2, 9);
+      b.doorF(21, 9); b.doorW(24, 9);
+      b.red(11, 16); b.blue(9, 8); b.red(18, 14); b.blue(16, 7);
+      b.red(28, 10); b.blue(20, 7); b.red(23, 15); b.blue(3, 7);
+    },
+  },
+  {
+    name: 'Паромы', par: 70,
+    hint: 'Платформы ездят сами. Ловите момент для прыжка.',
+    build(b) {
+      b.box(5, 17, 26, 17, 'G');
+      b.mover(5, 15, 3, 1, 6, 0, 2.6);
+      b.mover(15, 15, 3, 1, 0, -5, 2.2);
+      b.mover(19, 11, 3, 1, 5, 0, 2.4);
+      b.box(27, 13, 30, 13); b.box(27, 14, 27, 16);
+      b.box(9, 8, 12, 8); b.box(28, 9, 30, 9);
+      b.fire(1, 16); b.water(3, 16);
+      b.doorF(28, 12); b.doorW(30, 12);
+      b.red(9, 13); b.blue(12, 13); b.red(16, 9); b.blue(17, 12);
+      b.red(10, 7); b.blue(11, 7); b.red(29, 8); b.blue(30, 8);
+    },
+  },
+  {
+    name: 'Двойной замок', par: 80,
+    hint: 'Ворота откроются, только если обе кнопки нажаты одновременно.',
+    build(b) {
+      b.box(1, 1, 30, 4);
+      b.box(13, 17, 18, 17, 'G');
+      b.box(6, 17, 10, 17, 'L'); b.box(21, 17, 25, 17, 'W');
+      b.box(1, 15, 2, 16); b.box(4, 13, 4, 13); b.box(1, 11, 2, 11);
+      b.box(29, 15, 30, 16); b.box(27, 13, 27, 13); b.box(29, 11, 30, 11);
+      b.box(4, 9, 27, 9);
+      b.box(10, 9, 11, 9, 'W'); b.box(20, 9, 21, 9, 'L');
+      b.plat(8, 5, 1, 4, 0, -4, 0, { and: true, latch: true });
+      b.plat(23, 5, 1, 4, 0, -4, 0, { and: true, latch: true });
+      b.button(12, 16, 0); b.button(19, 16, 0);
+      b.fire(3, 16); b.water(28, 16);
+      b.doorF(14, 8); b.doorW(17, 8);
+      b.red(8, 15); b.blue(23, 15); b.red(15, 6); b.blue(16, 6);
+      b.red(3, 10); b.blue(28, 10); b.red(10, 7); b.blue(21, 7);
+    },
+  },
+  {
+    name: 'Храм Стихий', par: 120,
+    hint: 'Финал: рычаг, лифт, паром и двойной замок. Действуйте вместе.',
+    build(b) {
+      b.box(1, 13, 9, 13); b.box(3, 13, 7, 13, 'L'); b.lever(2, 12, 0);
+      b.box(11, 15, 12, 16);
+      b.box(14, 17, 19, 17, 'G'); b.plat(14, 17, 6, 1, 0, -1, 0);
+      b.box(1, 8, 26, 8); b.box(30, 8, 30, 8);
+      b.plat(27, 16, 3, 1, 0, -8, 1); b.button(22, 16, 1); b.button(23, 7, 1);
+      b.box(16, 8, 22, 8, 'G'); b.mover(16, 7, 3, 1, 4, 0, 2.4);
+      b.box(1, 1, 12, 3);
+      b.plat(9, 4, 1, 4, 0, -3, 2, { and: true, latch: true });
+      b.button(11, 7, 2); b.button(13, 7, 2);
+      b.box(4, 8, 5, 8, 'W');
+      b.fire(5, 16); b.water(7, 16);
+      b.doorF(3, 7); b.doorW(7, 7);
+      b.red(1, 11); b.blue(9, 12); b.red(16, 15); b.blue(18, 15); b.red(24, 15);
+      b.blue(25, 14); b.red(19, 5); b.blue(20, 5); b.red(14, 5); b.blue(8, 5);
+    },
+  },
+  {
+    name: 'Шлюз', par: 90,
+    hint: 'Один держит кнопку, другой дёргает рычаг за воротами. Мосты открывают те, кто может пройти по яду.',
+    build(b) {
+      b.box(12, 17, 16, 17, 'L'); b.plat(12, 17, 5, 1, 0, -1, 1);
+      b.box(22, 17, 26, 17, 'W'); b.plat(22, 17, 5, 1, 0, -1, 2);
+      b.plat(8, 13, 1, 4, 0, -4, 0);
+      b.button(6, 16, 0); b.lever(10, 16, 0); b.lever(17, 16, 1); b.lever(28, 16, 2);
+      b.box(18, 15, 19, 16); b.box(20, 13, 21, 16);
+      b.box(3, 11, 7, 11); b.box(2, 15, 2, 16); b.box(1, 13, 1, 16);
+      b.fire(4, 16); b.water(5, 16);
+      b.doorF(29, 16); b.doorW(30, 16);
+      b.red(14, 15); b.blue(24, 15); b.red(20, 11); b.blue(21, 11); b.red(13, 13); b.blue(24, 13); b.red(4, 9); b.blue(6, 9);
+    },
+  },
+  {
+    name: 'Колодец', par: 100,
+    hint: 'Вода держит кнопку у лифта, огонь едет наверх и дёргает рычаг — второй лифт для воды.',
+    build(b) {
+      b.box(1, 9, 6, 9); b.box(11, 9, 12, 9); b.box(16, 9, 18, 9); b.box(25, 9, 30, 9);
+      b.box(19, 10, 24, 10, 'G');
+      b.box(20, 17, 22, 17, 'L'); b.box(25, 17, 27, 17, 'W');
+      b.plat(7, 16, 4, 1, 0, -7, 0); b.plat(13, 16, 3, 1, 0, -7, 1);
+      b.button(5, 16, 0); b.lever(11, 8, 1);
+      b.plat(19, 9, 3, 1, 3, 0, 2); b.button(17, 8, 2);
+      b.plat(19, 10, 6, 1, 0, -1, 3); b.lever(26, 8, 3);
+      b.fire(3, 16); b.water(4, 16);
+      b.doorF(28, 8); b.doorW(29, 8);
+      b.red(21, 15); b.blue(26, 15); b.red(3, 8); b.blue(5, 8);
+      b.red(23, 6); b.blue(22, 6); b.red(14, 5); b.blue(8, 5);
+    },
+  },
+  {
+    name: 'Эстафета', par: 110,
+    hint: 'Огонь держит мост для воды, вода держит мост для огня. В конце обе печати нажимаются вместе.',
+    build(b) {
+      b.box(4, 17, 9, 17, 'L'); b.plat(4, 17, 6, 1, 0, -1, 0);
+      b.box(15, 17, 20, 17, 'W'); b.plat(15, 17, 6, 1, 0, -1, 1);
+      b.box(10, 15, 10, 16); b.box(11, 13, 14, 13);
+      b.button(12, 16, 0); b.button(21, 16, 1);
+      b.box(22, 17, 24, 17, 'L'); b.box(25, 17, 27, 17, 'W');
+      b.button(23, 16, 2); b.button(26, 16, 2);
+      b.plat(28, 11, 1, 6, 0, -6, 2, { and: true, latch: true });
+      b.fire(2, 16); b.water(3, 16);
+      b.doorF(29, 16); b.doorW(30, 16);
+      b.red(7, 15); b.red(23, 14); b.red(12, 11); b.red(17, 12);
+      b.blue(26, 14); b.blue(17, 15); b.blue(13, 11); b.blue(7, 12);
+    },
+  },
+];
+// module.exports = { LEVELS };
+
+// ===== P2P NET (used when the page runs outside Claude) =====
+// Gives the game the same "room" API it uses inside Claude (presence/peers/onPeers/onConnection),
+// but over a direct WebRTC link between two phones, paired by a 4-digit room code.
+(function () {
+  if (window.claude && window.claude.use) return; // inside Claude: platform room is used
+  const PREFIX = 'ogon-voda-v1-';
+  const myId = Math.random().toString(36).slice(2, 12);
+  const me = { peer: myId, presence: {}, updatedAt: Date.now() };
+  let partner = null, conn = null, peer = null, libP = null;
+  const peerHs = [], connHs = [];
+  const NET = window.FWNET = { state: 'idle', code: '', isHost: false, error: '' };
+
+  function snap() {
+    const a = [{ ...me, by: null, isMe: true, sameTab: true, kind: 'viewer', guest: false }];
+    if (partner) a.push({ ...partner, by: null, isMe: false, sameTab: false, kind: 'viewer', guest: false });
+    return a;
+  }
+  function firePeers() { const ps = snap(); peerHs.forEach(h => { try { h({ peers: ps, joined: [], left: [], updated: [] }); } catch (e) {} }); }
+  function fireConn() { const c = !!conn; connHs.forEach(h => { try { h(c); } catch (e) {} }); }
+  function send(o) { if (conn && conn.open) { try { conn.send(o); } catch (e) {} } }
+
+  const room = {
+    presence: async (patch) => {
+      const p = { ...me.presence };
+      for (const k in patch) { if (patch[k] === null) delete p[k]; else p[k] = patch[k]; }
+      me.presence = p; me.updatedAt = Date.now();
+      send({ t: 'p', id: myId, p });
+    },
+    peers: snap,
+    onPeers: (h) => { peerHs.push(h); setTimeout(() => h({ peers: snap(), joined: [], left: [], updated: [] }), 0); return () => {}; },
+    onConnection: (h) => { connHs.push(h); setTimeout(() => h(!!conn), 0); return () => {}; },
+    connected: () => !!conn,
+    emit: async () => {}, on: () => () => {},
+  };
+  window.claude = { use: async (n) => (n === 'room' ? room : null) };
+
+  function loadLib() {
+    if (window.Peer) return Promise.resolve();
+    if (libP) return libP;
+    libP = new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+      s.onload = res; s.onerror = () => { libP = null; rej(new Error('lib')); };
+      document.head.appendChild(s);
+    });
+    return libP;
+  }
+  const ICE = { config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }, debug: 0 };
+
+  function attach(c) {
+    c.on('open', () => {
+      if (conn && conn !== c) { try { conn.close(); } catch (e) {} }
+      conn = c; NET.state = 'linked'; NET.error = '';
+      send({ t: 'p', id: myId, p: me.presence });
+      fireConn(); firePeers(); ui();
+    });
+    c.on('data', (d) => {
+      if (!d || d.t !== 'p' || typeof d.id !== 'string') return;
+      partner = { peer: d.id, presence: d.p && typeof d.p === 'object' ? d.p : {}, updatedAt: Date.now() };
+      firePeers();
+    });
+    const gone = () => {
+      if (conn !== c) return;
+      conn = null; partner = null; NET.state = NET.isHost ? 'hosting' : 'lost';
+      fireConn(); firePeers(); ui();
+      if (!NET.isHost && NET.code) setTimeout(() => { if (!conn && NET.state === 'lost') join(NET.code, true); }, 2500);
+    };
+    c.on('close', gone); c.on('error', gone);
+  }
+
+  function reset() { try { if (conn) conn.close(); } catch (e) {} try { if (peer) peer.destroy(); } catch (e) {} conn = null; partner = null; peer = null; fireConn(); firePeers(); }
+
+  async function host() {
+    reset();
+    NET.isHost = true; NET.state = 'starting'; NET.error = ''; ui();
+    try { await loadLib(); } catch (e) { NET.state = 'error'; NET.error = 'Нет интернета: не удалось загрузить модуль связи.'; ui(); return; }
+    const code = String(1000 + Math.floor(Math.random() * 9000));
+    NET.code = code;
+    peer = new window.Peer(PREFIX + code, ICE);
+    peer.on('open', () => { NET.state = 'hosting'; ui(); });
+    peer.on('connection', (c) => attach(c));
+    peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
+    peer.on('error', (e) => {
+      if (e && e.type === 'unavailable-id') { host(); return; }
+      if (!conn) { NET.state = 'error'; NET.error = 'Сервер соединения не отвечает. Проверь интернет и попробуй ещё раз.'; ui(); }
+    });
+  }
+
+  async function join(code, quiet) {
+    code = String(code || '').replace(/\D/g, '').slice(0, 4);
+    if (code.length !== 4) { NET.error = 'Код — это 4 цифры'; ui(); return; }
+    if (!quiet) reset(); else { try { if (peer) peer.destroy(); } catch (e) {} peer = null; }
+    NET.isHost = false; NET.code = code; NET.state = 'joining'; NET.error = ''; ui();
+    try { await loadLib(); } catch (e) { NET.state = 'error'; NET.error = 'Нет интернета: не удалось загрузить модуль связи.'; ui(); return; }
+    peer = new window.Peer(undefined, ICE);
+    peer.on('open', () => attach(peer.connect(PREFIX + code, { reliable: true })));
+    peer.on('error', (e) => {
+      if (conn) return;
+      NET.state = 'error';
+      NET.error = e && e.type === 'peer-unavailable' ? 'Игра с кодом ' + code + ' не найдена. Проверь код: на первом телефоне должен быть открыт экран с ним.' : 'Не получилось соединиться. Попробуй ещё раз.';
+      ui();
+    });
+    setTimeout(() => { if (!conn && NET.state === 'joining') { NET.state = 'error'; NET.error = 'Соединение не устанавливается. Убедитесь, что оба телефона в интернете, и попробуйте снова.'; ui(); } }, 15000);
+  }
+
+  // ---------- pairing screen ----------
+  const $ = (id) => document.getElementById(id);
+  function shareLink() { return location.href.split('#')[0] + '#' + NET.code; }
+  function ui() {
+    const scr = $('scrPair'); if (!scr) return;
+    const s = NET.state;
+    $('pairHost').hidden = !(NET.isHost && (s === 'hosting' || s === 'starting'));
+    $('pairCode').textContent = s === 'starting' ? '····' : NET.code;
+    $('pairJoin').hidden = NET.isHost && (s === 'hosting' || s === 'starting');
+    $('pairErr').textContent = NET.error;
+    $('pairErr').hidden = !NET.error;
+    $('pairWait').textContent = s === 'joining' ? 'Соединяюсь…' : s === 'lost' ? 'Связь пропала, переподключаюсь…' : '';
+    $('pairWait').hidden = !(s === 'joining' || s === 'lost');
+    if (s === 'linked' && !scr.hidden) { scr.hidden = true; $('btnNet').click(); }
+  }
+  NET.statusHtml = (pt) => {
+    if (conn && pt) return '<b>●</b> Партнёр на связи' + (NET.code ? ' · комната ' + NET.code : '');
+    if (conn) return '<b>●</b> Связь есть · комната ' + NET.code;
+    if (NET.state === 'hosting') return 'Комната ' + NET.code + ' открыта, ждём партнёра';
+    return 'Нажми «Играть вдвоём по сети», чтобы создать комнату или войти по коду';
+  };
+
+  function setup() {
+    const btn = $('btnNet');
+    btn.disabled = false;
+    // before a link exists, the network button opens pairing instead of the hero screen
+    btn.addEventListener('click', (e) => {
+      if (conn) return;
+      e.stopImmediatePropagation(); e.preventDefault();
+      $('scrTitle').hidden = true; $('scrPair').hidden = false; ui();
+    }, true);
+    $('pairNew').addEventListener('click', () => host());
+    $('pairGo').addEventListener('click', () => join($('pairInput').value));
+    $('pairInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') join($('pairInput').value); });
+    $('pairBack').addEventListener('click', () => { if (!conn) reset(); NET.state = 'idle'; NET.isHost = false; NET.error = ''; $('scrPair').hidden = true; $('scrTitle').hidden = false; });
+    $('pairShare').addEventListener('click', async () => {
+      const url = shareLink();
+      try { if (navigator.share) { await navigator.share({ title: 'Огонь и Вода', text: 'Заходи играть! Код комнаты ' + NET.code, url }); return; } } catch (e) { return; }
+      try { await navigator.clipboard.writeText(url); $('pairShare').textContent = 'Ссылка скопирована'; } catch (e) { $('pairShare').textContent = url; }
+    });
+    const m = /^#(\d{4})$/.exec(location.hash);
+    if (m) { $('pairInput').value = m[1]; $('scrTitle').hidden = true; $('scrPair').hidden = false; join(m[1]); }
+    ui();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setTimeout(setup, 0);
+})();
+
+// ===== GAME =====
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const cv = $('cv'); let ctx = cv.getContext('2d');
+  const GROUP_COL = ['#b48cff', '#ffd75e', '#5ee6c8', '#ff8fc8', '#9fe870'];
+  const ROLE_NAME = { f: 'Огонь', w: 'Вода' };
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('fw.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('fw.' + k, JSON.stringify(v)); } catch (e) {} },
+  };
+
+  const S = {
+    scr: 'title', solo: false, role: null,
+    room: null, roomState: 'wait', myPeer: null,
+    sel: { l: -1, ep: 0 }, cur: { l: -1, ep: 0 },
+    lv: null, world: null, pl: {}, remote: null,
+    gems: new Set(), lev: {}, t0: 0, tNow: 0, end: null, paused: false,
+    unlocked: store.get('un', 1), best: store.get('best', {}),
+    parts: [], keys: new Set(), padKeys: new Set(), lastPresence: '',
+    camX: 0, shake: 0, partnerSeen: false, partnerGoneAt: 0,
+  };
+
+  // ---------- sound ----------
+  let AC = null;
+  function beep(type) {
+    if (!AC) return;
+    const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime;
+    const P = { jump: [520, 760, .08, 'square', .04], gem: [880, 1320, .12, 'triangle', .07], die: [220, 60, .45, 'sawtooth', .07], win: [523, 1046, .5, 'triangle', .08], click: [600, 600, .04, 'square', .03], lever: [300, 180, .1, 'square', .05] }[type];
+    if (!P) return;
+    o.type = P[3]; o.frequency.setValueAtTime(P[0], t); o.frequency.exponentialRampToValueAtTime(P[1], t + P[2]);
+    g.gain.setValueAtTime(P[4], t); g.gain.exponentialRampToValueAtTime(0.0001, t + P[2]);
+    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + P[2] + .02);
+  }
+  function unlockAudio() { if (AC) return; try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  document.addEventListener('pointerdown', unlockAudio, { once: false });
+
+  // ---------- network (room) ----------
+  function partner() {
+    if (!S.room) return null;
+    let best = null;
+    for (const p of S.room.peers()) {
+      if (p.sameTab || p.kind !== 'viewer') continue;
+      if (!p.presence || p.presence.g !== 'fw') continue;
+      if (!best || p.updatedAt > best.updatedAt) best = p;
+    }
+    return best;
+  }
+  function pres(patch) { if (S.room) S.room.presence(patch).catch(() => {}); }
+  function initRoom() {
+    let done = false;
+    setTimeout(() => { if (!done) { S.roomState = 'none'; refreshMenus(); } }, 11000);
+    (async () => {
+      try {
+        const room = window.claude && window.claude.use ? await window.claude.use('room') : null;
+        done = true;
+        if (!room) { S.roomState = 'none'; refreshMenus(); return; }
+        S.room = room;
+        S.roomState = 'wait';
+        room.onConnection((c) => { S.roomState = c ? 'on' : (S.roomState === 'dead' ? 'dead' : 'wait'); refreshMenus(); }, () => { S.roomState = 'dead'; refreshMenus(); });
+        room.onPeers((ch) => {
+          const me = ch.peers.find(p => p.sameTab); if (me) S.myPeer = me.peer;
+          onPartnerChange();
+        }, () => {});
+        pres(basePresence());
+      } catch (e) { done = true; S.roomState = 'none'; refreshMenus(); }
+    })();
+  }
+  function basePresence() { return { g: 'fw', r: S.solo ? null : S.role, sel: S.sel, un: S.unlocked, sc: S.scr }; }
+
+  function onPartnerChange() {
+    const pt = partner();
+    if (pt && !S.partnerSeen) { S.partnerSeen = true; toast('Партнёр в игре'); }
+    if (!pt && S.partnerSeen) { S.partnerSeen = false; if (!S.solo && S.role) toast('Партнёр отключился'); }
+    if (pt && !S.solo) {
+      const pr = pt.presence;
+      // two players took the same hero: the one with the larger label steps aside
+      if (S.role && pr.r === S.role && S.myPeer && pt.peer < S.myPeer) { S.role = null; pres({ r: null }); toast('Партнёр уже выбрал «' + ROLE_NAME[pr.r] + '»'); if (S.scr !== 'title') show('role'); }
+      if (typeof pr.un === 'number' && pr.un > S.unlocked) { S.unlocked = Math.min(10, pr.un); store.set('un', S.unlocked); }
+    }
+    syncSelection();
+    if (S.scr !== 'play') refreshMenus();
+  }
+
+  function partnerSel() { const pt = partner(); return pt && pt.presence.sel && typeof pt.presence.sel.ep === 'number' ? pt.presence.sel : null; }
+  function effectiveSel() {
+    if (S.solo) return S.sel;
+    const ps = partnerSel();
+    if (ps && ps.ep > S.sel.ep) return ps;
+    return S.sel;
+  }
+  function choose(l) {
+    const ps = !S.solo ? partnerSel() : null;
+    S.sel = { l, ep: Math.max(Date.now(), ps ? ps.ep + 1 : 0) };
+    if (!S.solo) pres({ sel: S.sel });
+    syncSelection();
+  }
+  function bothReady() { if (S.solo) return true; const pt = partner(); return !!(S.role && pt && pt.presence.r && pt.presence.r !== S.role); }
+  function syncSelection() {
+    if (!S.solo && (!S.role || S.scr === 'title' || S.scr === 'role')) return;
+    const e = effectiveSel();
+    if (e.ep === S.cur.ep && e.l === S.cur.l) return;
+    S.cur = { l: e.l, ep: e.ep };
+    if (e.l < 0) { S.lv = null; show('levels'); }
+    else loadLevel(e.l, e.ep);
+  }
+
+  // ---------- level lifecycle ----------
+  function loadLevel(i, ep) {
+    S.lv = buildLevel(LEVELS[i]); S.lvDemo = false;
+    S.world = newWorld(S.lv);
+    S.pl = {};
+    const roles = S.solo ? ['f', 'w'] : [S.role];
+    for (const r of roles) S.pl[r] = newPlayer(S.lv, r);
+    S.remote = null;
+    S.gems = new Set(); S.lev = {}; S.end = null; S.paused = false; S.parts = [];
+    S.t0 = performance.now(); S.tNow = 0; S.wallClock0 = ep;
+    S.camX = 0; S.introT = 2.2;
+    renderStatic();
+    hideOverlay();
+    show('play');
+    $('hudLvl').textContent = (i + 1) + '. ' + S.lv.name;
+    if (S.lv.hint) toast(S.lv.hint, 4200);
+    requestWake();
+  }
+
+  function levelClock() { return S.solo ? S.tNow : (Date.now() - S.cur.ep) / 1000; }
+
+  // ---------- screens ----------
+  function show(scr) {
+    S.scr = scr;
+    $('scrTitle').hidden = scr !== 'title';
+    $('scrRole').hidden = scr !== 'role';
+    $('scrLevels').hidden = scr !== 'levels';
+    $('hud').hidden = scr !== 'play';
+    $('pad').hidden = scr !== 'play';
+    if (scr !== 'play') hideOverlay();
+    $('pad').classList.toggle('solo', S.solo);
+    $('pkJ1').hidden = !S.solo; $('pkJ').hidden = S.solo;
+    $('pk2L').hidden = !S.solo; $('pk2R').hidden = !S.solo; $('pk2J').hidden = !S.solo;
+    if (scr === 'title' || scr === 'levels' || scr === 'role') demoLevel();
+    if (!S.solo) pres({ sc: scr });
+    refreshMenus();
+  }
+
+  function refreshMenus() {
+    const pt = partner();
+    const rs = S.roomState;
+    let st;
+    if (rs === 'none' || rs === 'dead') st = 'Сеть недоступна в этом окне. Можно играть вдвоём на одном телефоне.';
+    else if (rs === 'wait') st = 'Подключаюсь к сети…';
+    else if (pt) st = '<b>●</b> Партнёр в игре' + (pt.presence.r ? ' · выбрал «' + ROLE_NAME[pt.presence.r] + '»' : '');
+    else st = 'Сеть есть. Откройте игру на втором айфоне.';
+    if (window.FWNET) st = window.FWNET.statusHtml(pt);
+    $('netStatus').innerHTML = st;
+    $('btnNet').disabled = rs === 'none' || rs === 'dead';
+    $('netDot').classList.toggle('on', S.solo || (!!pt && rs === 'on'));
+
+    // role cards
+    const pr = pt ? pt.presence.r : null;
+    for (const r of ['f', 'w']) {
+      const card = $(r === 'f' ? 'cardF' : 'cardW');
+      const mine = S.role === r, taken = pr === r;
+      card.classList.toggle('mine', mine); card.classList.toggle('taken', taken && !mine);
+      $(r === 'f' ? 'whoF' : 'whoW').textContent = mine ? 'Это ты' : taken ? 'Партнёр' : 'Свободно';
+    }
+    $('roleStatus').innerHTML = !pt ? 'Ждём второго игрока…' : !S.role ? 'Выбери героя' : !pr ? 'Ждём, пока партнёр выберет героя…' : pr === S.role ? 'Выберите разных героев' : '<b>●</b> Готово! Переходим к уровням…';
+
+    // level grid
+    const grid = $('lvGrid');
+    if (grid.childElementCount !== LEVELS.length) {
+      grid.innerHTML = '';
+      LEVELS.forEach((L, i) => {
+        const b = document.createElement('button'); b.className = 'lv'; b.id = 'lv' + i;
+        b.innerHTML = '<span class="n">' + (i + 1) + '</span><span class="t"></span><span class="s"></span>';
+        b.addEventListener('click', () => { beep('click'); choose(i); });
+        grid.appendChild(b);
+      });
+    }
+    LEVELS.forEach((L, i) => {
+      const b = $('lv' + i); const best = S.best[i];
+      b.disabled = i >= S.unlocked;
+      b.classList.toggle('done', !!best);
+      b.querySelector('.t').textContent = i >= S.unlocked ? '🔒' : L.name;
+      b.querySelector('.s').textContent = best ? best.rank + ' · ' + fmtT(best.t) : '';
+    });
+    $('lvStatus').innerHTML = S.solo ? 'На одном телефоне: слева огонь, справа вода' :
+      (pt ? '<b>●</b> Ты — ' + ROLE_NAME[S.role] + ', партнёр — ' + (pr ? ROLE_NAME[pr] : '?') + '. Уровень может выбрать любой.' : 'Партнёр не в сети');
+
+    if (S.scr === 'role' && bothReady() && !S.advTimer) S.advTimer = setTimeout(() => { S.advTimer = 0; if (S.scr === 'role' && bothReady()) { show('levels'); S.cur = { l: -2, ep: -1 }; syncSelection(); } }, 700);
+  }
+
+  $('btnNet').addEventListener('click', () => { beep('click'); S.solo = false; pres(basePresence()); show('role'); });
+  $('btnSolo').addEventListener('click', () => { beep('click'); S.solo = true; S.sel = { l: -1, ep: 0 }; S.cur = { l: -1, ep: 0 }; show('levels'); });
+  $('roleBack').addEventListener('click', () => { S.role = null; pres({ r: null }); show('title'); });
+  $('cardF').addEventListener('click', () => pickRole('f'));
+  $('cardW').addEventListener('click', () => pickRole('w'));
+  $('lvRole').addEventListener('click', () => { if (S.solo) { show('title'); return; } S.role = null; pres({ r: null }); show('role'); });
+  $('lvMenu').addEventListener('click', () => { show('title'); });
+  $('btnPause').addEventListener('click', () => { beep('click'); openPause(); });
+
+  function pickRole(r) {
+    beep('click');
+    const pt = partner();
+    if (pt && pt.presence.r === r && S.role !== r) { toast('Этого героя уже выбрал партнёр'); return; }
+    S.role = r; pres({ r });
+    refreshMenus();
+  }
+
+  // ---------- overlays ----------
+  function overlay(html, binds) {
+    $('ovlPanel').innerHTML = html; $('ovl').hidden = false; $('toast').classList.add('off');
+    for (const id in binds) { const el = $(id); if (el) el.addEventListener('click', () => { beep('click'); binds[id](); }); }
+  }
+  function hideOverlay() { $('ovl').hidden = true; }
+  function openPause() {
+    if (S.end) return;
+    S.paused = true;
+    overlay('<div class="big">Пауза</div><button class="btn" id="oRes">Продолжить</button><button class="btn" id="oRe">Начать уровень заново</button><button class="btn ghost" id="oLv">К списку уровней</button>' + (S.solo ? '' : '<p class="sub">Заново и выход к уровням сработают на обоих телефонах.</p>'),
+      { oRes: () => { S.paused = false; hideOverlay(); }, oRe: () => choose(S.cur.l), oLv: () => choose(-1) });
+  }
+  const DEATH = { f: 'Огонь погас', w: 'Вода испарилась' };
+  function showDeath(role) {
+    if (S.end) return; S.end = 'dead';
+    overlay('<div class="big" style="color:var(--fire)">' + DEATH[role] + '</div><p class="sub">Попробуйте ещё раз, вместе получится.</p><button class="btn hot" id="oRe">Заново</button><button class="btn ghost" id="oLv">К уровням</button>',
+      { oRe: () => choose(S.cur.l), oLv: () => choose(-1) });
+  }
+  function rankOf(t, got, total, par) { if (got === total && t <= par) return 'A'; if (got >= total * 0.6 && t <= par * 1.5) return 'B'; return 'C'; }
+  function showWin() {
+    if (S.end) return; S.end = 'win'; beep('win');
+    const i = S.cur.l, t = S.tNow;
+    const got = collected().size, total = S.lv.gems.length;
+    const rank = rankOf(t, got, total, S.lv.par);
+    const prev = S.best[i];
+    if (!prev || 'ABC'.indexOf(rank) < 'ABC'.indexOf(prev.rank) || (rank === prev.rank && t < prev.t)) { S.best[i] = { t, rank, gems: got }; store.set('best', S.best); }
+    if (S.unlocked < Math.min(10, i + 2)) { S.unlocked = Math.min(10, i + 2); store.set('un', S.unlocked); pres({ un: S.unlocked }); }
+    const last = i >= LEVELS.length - 1;
+    overlay('<div class="big" style="color:var(--gold)">' + (last ? 'Храм пройден!' : 'Уровень пройден!') + '</div><div class="rank">' + rank + '</div><div class="stats"><span>⏱ ' + fmtT(t) + '</span><span>◆ ' + got + '/' + total + '</span></div>' +
+      (last ? '<p class="sub">Все 10 уровней позади. Новые уровни скоро.</p>' : '<button class="btn hot" id="oNx">Следующий уровень</button>') +
+      '<div class="row"><button class="btn ghost" id="oRe">Ещё раз</button><button class="btn ghost" id="oLv">К уровням</button></div>',
+      { oNx: () => choose(i + 1), oRe: () => choose(i), oLv: () => choose(-1) });
+    refreshMenus();
+  }
+
+  let toastTimer = 0;
+  function toast(msg, ms) { if (S.scr !== 'play' && S.scr !== 'role') return; const t = $('toast'); t.textContent = msg; t.classList.remove('off'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add('off'), ms || 2200); }
+  function fmtT(t) { t = Math.max(0, t); const m = Math.floor(t / 60), s = Math.floor(t % 60); return m + ':' + String(s).padStart(2, '0'); }
+
+  let wake = null;
+  async function requestWake() { try { if (!wake && navigator.wakeLock) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); } } catch (e) {} }
+
+  // ---------- input ----------
+  const KEYMAP = { ArrowLeft: 'L', ArrowRight: 'R', ArrowUp: 'J', ' ': 'J', a: '2L', d: '2R', w: '2J', A: '2L', D: '2R', W: '2J', 'ф': '2L', 'в': '2R', 'ц': '2J' };
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && S.scr === 'play') { if (S.paused) { S.paused = false; hideOverlay(); } else openPause(); return; }
+    const k = KEYMAP[e.key]; if (!k) return; S.keys.add(k); if (S.scr === 'play') e.preventDefault();
+  });
+  addEventListener('keyup', (e) => { const k = KEYMAP[e.key]; if (k) S.keys.delete(k); });
+  addEventListener('blur', () => { S.keys.clear(); ptrs.clear(); updatePad(); });
+  const ptrs = new Map();
+  function keyAt(x, y) { const el = document.elementFromPoint(x, y); const k = el && el.closest && el.closest('[data-k]'); return k && !k.hidden ? k.dataset.k : null; }
+  function updatePad() {
+    S.padKeys = new Set(ptrs.values());
+    document.querySelectorAll('.pk').forEach(el => el.classList.toggle('on', S.padKeys.has(el.dataset.k)));
+  }
+  const pad = $('pad');
+  pad.addEventListener('pointerdown', (e) => { ptrs.set(e.pointerId, keyAt(e.clientX, e.clientY)); updatePad(); e.preventDefault(); });
+  addEventListener('pointermove', (e) => { if (!ptrs.has(e.pointerId)) return; ptrs.set(e.pointerId, keyAt(e.clientX, e.clientY)); updatePad(); });
+  const up = (e) => { if (ptrs.delete(e.pointerId)) updatePad(); };
+  addEventListener('pointerup', up); addEventListener('pointercancel', up);
+  pad.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+  document.addEventListener('gesturestart', (e) => e.preventDefault());
+
+  function inputFor(role) {
+    const P = S.padKeys, K = S.keys;
+    if (S.solo) {
+      if (role === 'f') return { l: P.has('L') || K.has('2L'), r: P.has('R') || K.has('2R'), j: P.has('J') || K.has('2J') };
+      return { l: P.has('2L') || K.has('L'), r: P.has('2R') || K.has('R'), j: P.has('2J') || K.has('J') };
+    }
+    const A = new Set([...P, ...K]);
+    return { l: A.has('L') || A.has('2L'), r: A.has('R') || A.has('2R'), j: A.has('J') || A.has('2J') };
+  }
+
+  // ---------- game update ----------
+  function remoteBody() {
+    if (S.solo) return null;
+    const pt = partner(); if (!pt) return null;
+    const pr = pt.presence;
+    if (pr.ce !== S.cur.ep || typeof pr.x !== 'number') return null;
+    const lag = Math.min(0.12, Math.max(0, (Date.now() - (pr.ts || Date.now())) / 1000));
+    const tx = pr.x + (pr.vx || 0) * lag, ty = pr.y + (pr.gr ? 0 : (pr.vy || 0) * lag);
+    if (!S.remote || S.remote.role !== pr.r || Math.hypot(S.remote.x - tx, S.remote.y - ty) > 3) S.remote = { role: pr.r, x: tx, y: ty, vx: 0, vy: 0, face: 1, gr: true };
+    const R = S.remote;
+    R.x += (tx - R.x) * 0.35; R.y += (ty - R.y) * 0.35;
+    R.vx = pr.vx || 0; R.vy = pr.vy || 0; R.face = pr.f || 1; R.gr = !!pr.gr; R.dead = !!pr.d; R.door = !!pr.dr; R.role = pr.r;
+    R.gm = Array.isArray(pr.gm) ? pr.gm : []; R.lv = pr.lv && typeof pr.lv === 'object' ? pr.lv : {};
+    return R;
+  }
+  function collected() {
+    const s = new Set(S.gems);
+    if (S.remote && S.remote.gm) S.remote.gm.forEach(id => typeof id === 'number' && s.add(id));
+    return s;
+  }
+  function leverState(i) {
+    let a = S.lev[i], b = S.remote && S.remote.lv ? S.remote.lv[i] : null;
+    if (!Array.isArray(b)) b = null;
+    const pick = !a ? b : !b ? a : (b[1] > a[1] ? b : a);
+    return pick ? pick[0] : 0;
+  }
+
+  let acc = 0, last = performance.now();
+  function frame(now) {
+    const dtReal = Math.min(0.1, (now - last) / 1000); last = now;
+    if (S.scr === 'play' && S.lv) {
+      const R = remoteBody();
+      if (!S.paused && !S.end) {
+        acc += dtReal;
+        while (acc >= 1 / 60) { acc -= 1 / 60; tick(1 / 60, R); }
+        S.tNow = (performance.now() - S.t0) / 1000;
+      } else acc = 0;
+      if (!S.solo) sendState();
+      // partner-driven outcomes
+      if (R && !S.end) { if (R.dead) showDeath(R.role); }
+      const pt = !S.solo ? partner() : true;
+      if (!S.solo && !pt && S.partnerGoneAt === 0) S.partnerGoneAt = now;
+      if (pt) S.partnerGoneAt = 0;
+      updateHud();
+    }
+    draw(now / 1000, dtReal);
+    requestAnimationFrame(frame);
+  }
+
+  function tick(dt, R) {
+    const lv = S.lv, w = S.world;
+    w.clock = levelClock();
+    const bodies = Object.values(S.pl).concat(R && !R.dead ? [R] : []);
+    const levs = lv.lev.map((_, i) => leverState(i));
+    const active = groupState(lv, bodies, levs);
+    stepPlatforms(w, active, Object.values(S.pl), dt);
+    for (const role in S.pl) {
+      const p = S.pl[role];
+      if (p.dead) continue;
+      const inp = inputFor(role);
+      const wasGr = p.gr, vy0 = p.vy;
+      stepPlayer(w, p, inp, dt);
+      if (!wasGr && p.vy < -5 && vy0 >= -1) { beep('jump'); }
+      if (p.gr && !wasGr && vy0 > 12) dust(p);
+      const hz = hazardUnder(w, p);
+      if (hz || p.dead) { p.dead = true; burst(p.x + PH.W / 2, p.y + PH.H - .3, role === 'f' ? '#ff8a3c' : '#6cc8ff', 26, true); beep('die'); S.shake = .35; showDeath(role); continue; }
+      for (const id of gemsTouched(lv, p)) if (!S.gems.has(id) && !(R && R.gm && R.gm.includes(id))) { S.gems.add(id); const g = lv.gems[id]; burst(g.x, g.y, role === 'f' ? '#ffcf4a' : '#9fe3ff', 14); beep('gem'); }
+      lv.lev.forEach((l, i) => {
+        if (!inLever(l, p)) return;
+        const cur = levs[i];
+        if (p.vx > 1.5 && cur !== 1) { S.lev[i] = [1, Date.now()]; levs[i] = 1; beep('lever'); }
+        else if (p.vx < -1.5 && cur !== 0) { S.lev[i] = [0, Date.now()]; levs[i] = 0; beep('lever'); }
+      });
+      p.door = atDoor(lv, p);
+      // embers / drips
+      if (Math.random() < (Math.abs(p.vx) > 1 ? .5 : .15)) S.parts.push({ x: p.x + PH.W / 2 + (Math.random() - .5) * .4, y: p.y + .15, vx: (Math.random() - .5) * .6, vy: role === 'f' ? -1.2 - Math.random() : .4, life: .6, max: .6, c: role === 'f' ? '#ffb347' : '#8fd8ff', r: .06 });
+    }
+    // remote gems sparkle when they appear
+    if (S.solo) { if (S.pl.f.door && S.pl.w.door) showWin(); }
+    else if (S.pl[S.role].door && R && R.door) showWin();
+  }
+
+  function sendState() {
+    const p = S.pl[S.role]; if (!p) return;
+    const o = { ce: S.cur.ep, x: +p.x.toFixed(3), y: +p.y.toFixed(3), vx: +p.vx.toFixed(2), vy: +p.vy.toFixed(2), f: p.face, gr: p.gr, d: !!p.dead, dr: !!p.door, gm: [...S.gems], lv: S.lev, ts: Date.now() };
+    const key = JSON.stringify([o.x, o.y, o.vx, o.d, o.dr, o.gm, o.lv, o.ce, o.f]);
+    if (key === S.lastPresence && (performance.now() - (S.lastSent || 0)) < 500) return;
+    S.lastPresence = key; S.lastSent = performance.now();
+    pres(o);
+  }
+
+  function updateHud() {
+    const got = collected();
+    const rT = S.lv.gems.filter(g => g.t === 'f'), bT = S.lv.gems.filter(g => g.t === 'w');
+    $('hudR').textContent = '◆ ' + rT.filter(g => got.has(g.id)).length + '/' + rT.length;
+    $('hudB').textContent = '◆ ' + bT.filter(g => got.has(g.id)).length + '/' + bT.length;
+    $('hudT').textContent = fmtT(S.tNow);
+    $('netDot').classList.toggle('on', S.solo || !!partner());
+  }
+
+  // ---------- particles ----------
+  function burst(x, y, c, n, smoke) {
+    for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, s = 1 + Math.random() * 4; S.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 2, life: .8, max: .8, c: smoke && i % 2 ? '#8a8577' : c, r: .08 + Math.random() * .1, g: 6 }); }
+  }
+  function dust(p) { for (let i = 0; i < 6; i++) S.parts.push({ x: p.x + PH.W / 2, y: p.y + PH.H, vx: (Math.random() - .5) * 3, vy: -Math.random(), life: .35, max: .35, c: '#a89878', r: .07 }); }
+
+  // ---------- rendering ----------
+  let W = 0, H = 0, DPR = 1, ts = 20, ox = 0, oy = 0, viewW = 0;
+  const bgLayer = document.createElement('canvas'), wallLayer = document.createElement('canvas');
+  function resize() {
+    DPR = Math.min(3, window.devicePixelRatio || 1);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    const top = 44;
+    const portrait = H > W * 1.05;
+    if (portrait) {
+      const availH = Math.max(200, H - top - 150);
+      ts = Math.max(10, Math.min(availH / ROWS, 24));
+      oy = top + Math.max(0, (availH - ROWS * ts) / 2);
+    } else {
+      const availH = H - top - 4, side = W > 640 ? 150 : 0;
+      ts = Math.max(8, Math.min((W - side * 2) / COLS, availH / ROWS));
+      oy = top + (availH - ROWS * ts) / 2;
+    }
+    viewW = W;
+    renderStatic();
+  }
+  addEventListener('resize', resize);
+
+  function stoneRand(x, y) { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); }
+  function renderStatic() {
+    if (!S.lv) return;
+    const lw = Math.ceil(COLS * ts * DPR), lh = Math.ceil(ROWS * ts * DPR);
+    for (const c of [bgLayer, wallLayer]) { c.width = lw; c.height = lh; }
+    const b = bgLayer.getContext('2d'); b.setTransform(DPR * ts, 0, 0, DPR * ts, 0, 0);
+    // background: big carved blocks
+    const grad = b.createLinearGradient(0, 0, 0, ROWS); grad.addColorStop(0, '#2a2618'); grad.addColorStop(1, '#1a170f');
+    b.fillStyle = grad; b.fillRect(0, 0, COLS, ROWS);
+    b.lineWidth = 0.04; b.strokeStyle = 'rgba(0,0,0,.35)';
+    for (let y = 0; y < ROWS; y += 1) for (let x = (y % 2) * 1; x < COLS; x += 2) {
+      b.fillStyle = 'rgba(255,240,200,' + (0.015 + stoneRand(x, y) * 0.03) + ')'; b.fillRect(x, y, 2, 1); b.strokeRect(x + .02, y + .02, 1.96, .96);
+    }
+    // carved suns
+    b.globalAlpha = .07; b.strokeStyle = '#e2bd62'; b.lineWidth = .08;
+    for (const [cx, cy] of [[8, 6], [24, 11], [15, 3]]) { b.beginPath(); b.arc(cx, cy, 1.6, 0, 7); b.stroke(); for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6; b.beginPath(); b.moveTo(cx + Math.cos(a) * 2, cy + Math.sin(a) * 2); b.lineTo(cx + Math.cos(a) * 2.7, cy + Math.sin(a) * 2.7); b.stroke(); } }
+    b.globalAlpha = 1;
+    // walls
+    const g = wallLayer.getContext('2d'); g.setTransform(DPR * ts, 0, 0, DPR * ts, 0, 0); g.clearRect(0, 0, COLS, ROWS);
+    const lv = S.lv;
+    const solid = (x, y) => isSolidCh(tileAt(lv, x, y));
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+      const c = lv.grid[y][x];
+      if (!isSolidCh(c)) continue;
+      const r = stoneRand(x, y);
+      g.fillStyle = c === '#' ? (r < .5 ? '#4d4430' : '#554a34') : '#3b3424';
+      g.fillRect(x, y, 1.01, 1.01);
+      // brick seams
+      g.strokeStyle = 'rgba(0,0,0,.28)'; g.lineWidth = .05;
+      if (c === '#') { g.beginPath(); g.moveTo(x, y + .5); g.lineTo(x + 1, y + .5); const off = (y % 2) * .5; g.moveTo(x + .25 + off, y); g.lineTo(x + .25 + off, y + .5); g.moveTo(x + .75 - off, y + .5); g.lineTo(x + .75 - off, y + 1); g.stroke(); }
+      // exposed edges
+      if (!solid(x, y - 1)) { g.fillStyle = '#9b8a5c'; g.fillRect(x, y, 1.01, .1); g.fillStyle = 'rgba(226,189,98,.5)'; g.fillRect(x, y, 1.01, .04); }
+      if (!solid(x, y + 1)) { g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(x, y + .88, 1.01, .12); }
+      if (!solid(x - 1, y)) { g.fillStyle = 'rgba(255,240,200,.08)'; g.fillRect(x, y, .07, 1); }
+      if (!solid(x + 1, y)) { g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x + .93, y, .07, 1); }
+    }
+  }
+
+  const LIQ = { L: ['#ff5a1f', '#ffb13b'], W: ['#1f7fe0', '#6fd0ff'], G: ['#3fae2f', '#9cf06e'] };
+  function draw(t, dt) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#15130e'; ctx.fillRect(0, 0, cv.width, cv.height);
+    if (!S.lv) return;
+    const lv = S.lv;
+    // camera
+    const worldW = COLS * ts;
+    let camTarget;
+    if (worldW <= viewW) { ox = (viewW - worldW) / 2; }
+    else {
+      const ps = Object.values(S.pl).filter(Boolean);
+      let fx = ps.length ? ps.reduce((a, p) => a + p.x + PH.W / 2, 0) / ps.length : COLS / 2;
+      if (S.scr !== 'play') fx = COLS / 2 + Math.sin(t * .2) * 6;
+      camTarget = Math.max(viewW - worldW, Math.min(0, viewW / 2 - fx * ts));
+      S.camX += (camTarget - S.camX) * Math.min(1, dt * 6);
+      ox = S.camX;
+    }
+    let sx = 0, sy = 0;
+    if (S.shake > 0) { S.shake -= dt; sx = (Math.random() - .5) * 6; sy = (Math.random() - .5) * 6; }
+    ctx.setTransform(DPR, 0, 0, DPR, (ox + sx) * DPR, (oy + sy) * DPR);
+    ctx.drawImage(bgLayer, 0, 0, COLS * ts, ROWS * ts);
+    ctx.setTransform(DPR * ts, 0, 0, DPR * ts, (ox + sx) * DPR, (oy + sy) * DPR);
+
+    // doors
+    const players = Object.values(S.pl);
+    const R = S.remote;
+    for (const role of ['f', 'w']) {
+      const d = lv.doors[role]; if (!d) continue;
+      const occ = players.some(p => p.role === role && p.door) || (R && R.role === role && R.door);
+      drawDoor(d.x, d.y, role, occ, t);
+    }
+    // platforms (behind walls and liquids)
+    lv.plat.forEach((p, i) => {
+      const r = platPos(p, S.world ? S.world.pt[i] : 0);
+      const col = p.auto ? '#c9c2ad' : GROUP_COL[p.g % GROUP_COL.length];
+      ctx.fillStyle = '#6b5d3c'; ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.fillStyle = '#8f7d50'; ctx.fillRect(r.x, r.y, r.w, .12);
+      ctx.strokeStyle = '#2a2414'; ctx.lineWidth = .05; ctx.strokeRect(r.x + .03, r.y + .03, r.w - .06, r.h - .06);
+      ctx.fillStyle = col; ctx.globalAlpha = .9;
+      if (r.h > r.w) ctx.fillRect(r.x + r.w / 2 - .1, r.y + .25, .2, r.h - .5); else ctx.fillRect(r.x + .25, r.y + r.h / 2 - .06, r.w - .5, .14);
+      ctx.globalAlpha = 1;
+    });
+    ctx.setTransform(DPR, 0, 0, DPR, (ox + sx) * DPR, (oy + sy) * DPR);
+    ctx.drawImage(wallLayer, 0, 0, COLS * ts, ROWS * ts);
+    ctx.setTransform(DPR * ts, 0, 0, DPR * ts, (ox + sx) * DPR, (oy + sy) * DPR);
+
+    // liquids
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+      const c = lv.grid[y][x]; const L = LIQ[c]; if (!L) continue;
+      const gr = ctx.createLinearGradient(0, y, 0, y + 1); gr.addColorStop(0, L[1]); gr.addColorStop(1, L[0]);
+      ctx.fillStyle = gr;
+      ctx.beginPath(); ctx.moveTo(x, y + 1);
+      for (let k = 0; k <= 6; k++) { const xx = x + k / 6; ctx.lineTo(xx, y + .12 + Math.sin(t * 3 + xx * 2.6) * .05); }
+      ctx.lineTo(x + 1, y + 1); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(x + ((t * .7 + x * .37) % 1) * .8, y + .3 + stoneRand(x, y) * .4, .12, .05);
+      if (c === 'L' && Math.random() < dt * 1.2) S.parts.push({ x: x + Math.random(), y: y + .1, vx: 0, vy: -1.5, life: .7, max: .7, c: '#ffcf6a', r: .05 });
+      if (c === 'G' && Math.random() < dt * .8) S.parts.push({ x: x + Math.random(), y: y + .15, vx: 0, vy: -.5, life: .9, max: .9, c: '#b9ff8f', r: .07, bub: 1 });
+    }
+    // buttons
+    lv.btn.forEach((b) => {
+      const pr = b.pressed; const col = GROUP_COL[b.g % GROUP_COL.length];
+      ctx.fillStyle = '#8f7d50'; ctx.fillRect(b.x + .1, b.y + .86, .8, .14);
+      ctx.fillStyle = col; ctx.fillRect(b.x + .22, b.y + (pr ? .8 : .66), .56, pr ? .08 : .2);
+    });
+    // levers
+    lv.lev.forEach((l, i) => {
+      const on = leverState(i) === 1; const col = GROUP_COL[l.g % GROUP_COL.length];
+      const cx = l.x + .5, cy = l.y + .95, a = on ? .6 : -.6;
+      ctx.strokeStyle = '#d8c79a'; ctx.lineWidth = .1; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.sin(a) * .75, cy - Math.cos(a) * .75); ctx.stroke();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(cx + Math.sin(a) * .75, cy - Math.cos(a) * .75, .14, 0, 7); ctx.fill();
+      ctx.fillStyle = '#8f7d50'; ctx.beginPath(); ctx.arc(cx, cy + .05, .32, Math.PI, 0); ctx.fill();
+    });
+    // gems
+    const got = collected();
+    lv.gems.forEach((g) => {
+      if (got.has(g.id)) return;
+      const s = Math.cos(t * 2.4 + g.id) * .5 + .5, bob = Math.sin(t * 2 + g.id) * .06;
+      const col = g.t === 'f' ? ['#ff4d2e', '#ffd166'] : ['#2b8cff', '#b5ecff'];
+      ctx.save(); ctx.translate(g.x, g.y + bob);
+      ctx.globalAlpha = .25; ctx.fillStyle = col[1]; ctx.beginPath(); ctx.arc(0, 0, .42, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.scale(.45 + s * .55, 1);
+      ctx.fillStyle = col[0]; ctx.beginPath(); ctx.moveTo(0, -.32); ctx.lineTo(.26, -.08); ctx.lineTo(0, .32); ctx.lineTo(-.26, -.08); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = col[1]; ctx.beginPath(); ctx.moveTo(0, -.32); ctx.lineTo(.26, -.08); ctx.lineTo(0, -.02); ctx.lineTo(-.26, -.08); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    });
+    // characters
+    if (R && !R.dead && R.role) drawHero(R, t, false);
+    for (const p of players) if (!p.dead) drawHero(p, t, !S.solo);
+    // particles
+    S.parts = S.parts.filter((q) => (q.life -= dt) > 0);
+    for (const q of S.parts) {
+      q.vy += (q.g || 0) * dt; q.x += q.vx * dt; q.y += q.vy * dt;
+      ctx.globalAlpha = Math.max(0, q.life / q.max); ctx.fillStyle = q.c;
+      ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, 7); if (q.bub) { ctx.strokeStyle = q.c; ctx.lineWidth = .025; ctx.stroke(); } else ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // "you" marker at level start
+    if (S.scr === 'play' && S.introT > 0 && !S.solo) {
+      S.introT -= dt; const p = S.pl[S.role];
+      if (p) { ctx.fillStyle = '#f4ead0'; ctx.globalAlpha = Math.min(1, S.introT); const x = p.x + PH.W / 2, y = p.y - .6 + Math.sin(t * 6) * .1; ctx.beginPath(); ctx.moveTo(x - .25, y - .3); ctx.lineTo(x + .25, y - .3); ctx.lineTo(x, y); ctx.fill(); ctx.globalAlpha = 1; }
+    }
+  }
+
+  function drawDoor(x, y, role, open, t) {
+    const cx = x + .5, top = y - 1.1, bot = y + 1;
+    ctx.fillStyle = '#2a2414'; ctx.beginPath(); ctx.moveTo(cx - .78, bot); ctx.lineTo(cx - .78, top + .7); ctx.arc(cx, top + .7, .78, Math.PI, 0); ctx.lineTo(cx + .78, bot); ctx.fill();
+    ctx.fillStyle = '#c9a24c'; ctx.beginPath(); ctx.moveTo(cx - .78, bot); ctx.lineTo(cx - .78, top + .7); ctx.arc(cx, top + .7, .78, Math.PI, 0); ctx.lineTo(cx + .78, bot); ctx.lineTo(cx + .6, bot); ctx.lineTo(cx + .6, top + .7); ctx.arc(cx, top + .7, .6, 0, Math.PI, true); ctx.lineTo(cx - .6, bot); ctx.fill();
+    const c = role === 'f' ? ['#7a2410', '#ff6b2c', '#ffd04a'] : ['#0f3d6e', '#39b4ff', '#a8e6ff'];
+    const gr = ctx.createLinearGradient(0, top, 0, bot); gr.addColorStop(0, open ? c[2] : c[1]); gr.addColorStop(1, c[0]);
+    ctx.fillStyle = gr; ctx.globalAlpha = open ? .95 : .75;
+    ctx.beginPath(); ctx.moveTo(cx - .6, bot); ctx.lineTo(cx - .6, top + .7); ctx.arc(cx, top + .7, .6, Math.PI, 0); ctx.lineTo(cx + .6, bot); ctx.fill(); ctx.globalAlpha = 1;
+    // symbol
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    const sy = top + .95 + Math.sin(t * 2) * .03;
+    if (role === 'f') { ctx.beginPath(); ctx.moveTo(cx - .22, sy + .1); ctx.lineTo(cx - .2, sy - .18); ctx.lineTo(cx - .08, sy - .04); ctx.lineTo(cx, sy - .38); ctx.lineTo(cx + .1, sy - .06); ctx.lineTo(cx + .2, sy - .22); ctx.lineTo(cx + .22, sy + .1); ctx.quadraticCurveTo(cx + .2, sy + .32, cx, sy + .32); ctx.quadraticCurveTo(cx - .2, sy + .32, cx - .22, sy + .1); ctx.fill(); }
+    else { ctx.beginPath(); ctx.moveTo(cx, sy - .35); ctx.quadraticCurveTo(cx + .24, sy + .02, cx + .2, sy + .14); ctx.arc(cx, sy + .12, .2, 0, Math.PI); ctx.quadraticCurveTo(cx - .24, sy + .02, cx, sy - .35); ctx.fill(); }
+    if (open) { ctx.globalAlpha = .25 + Math.sin(t * 6) * .1; ctx.fillStyle = c[2]; ctx.fillRect(cx - .9, top, 1.8, bot - top); ctx.globalAlpha = 1; }
+  }
+
+  function drawHero(p, t, mine) {
+    const fire = p.role === 'f';
+    const cx = p.x + PH.W / 2, fy = p.y + PH.H;
+    const run = Math.abs(p.vx) > .5 && p.gr;
+    const ph = t * 14 + (fire ? 0 : 1.5);
+    const bob = run ? Math.abs(Math.sin(ph)) * .06 : Math.sin(t * 3) * .02;
+    ctx.save(); ctx.translate(cx, fy);
+    if (run) ctx.rotate(p.face * .06);
+    // glow
+    ctx.globalAlpha = .22; ctx.fillStyle = fire ? '#ff7a2c' : '#3fb6ff'; ctx.beginPath(); ctx.arc(0, -.8, .9, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+    // feet
+    const lf = run ? Math.sin(ph) * .14 : 0;
+    ctx.fillStyle = fire ? '#7a2c12' : '#123f6e';
+    ctx.beginPath(); ctx.ellipse(-.14 + lf, -.06, .12, .07, 0, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(.14 - lf, -.06, .12, .07, 0, 0, 7); ctx.fill();
+    // body
+    ctx.fillStyle = fire ? '#c4421b' : '#1e6fc4';
+    ctx.beginPath(); ctx.ellipse(0, -.32 - bob, .22, .24, 0, 0, 7); ctx.fill();
+    // head
+    const hy = -.82 - bob;
+    const g = ctx.createRadialGradient(-.08, hy - .05, .05, 0, hy, .48);
+    if (fire) { g.addColorStop(0, '#fff1a0'); g.addColorStop(.45, '#ffb02e'); g.addColorStop(1, '#ff4b1a'); }
+    else { g.addColorStop(0, '#e6f9ff'); g.addColorStop(.45, '#5cc8ff'); g.addColorStop(1, '#1576d6'); }
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    if (fire) {
+      ctx.moveTo(-.38, hy + .1);
+      const f1 = Math.sin(t * 13) * .06, f2 = Math.sin(t * 11 + 1) * .07, f3 = Math.sin(t * 15 + 2) * .05;
+      ctx.quadraticCurveTo(-.46, hy - .25, -.28 - p.face * .05, hy - .55 + f1);
+      ctx.quadraticCurveTo(-.15, hy - .3, -.05 - p.face * .08, hy - .78 + f2);
+      ctx.quadraticCurveTo(.1, hy - .35, .24 - p.face * .1, hy - .62 + f3);
+      ctx.quadraticCurveTo(.48, hy - .2, .38, hy + .1);
+      ctx.quadraticCurveTo(.3, hy + .4, 0, hy + .4); ctx.quadraticCurveTo(-.3, hy + .4, -.38, hy + .1);
+    } else {
+      ctx.arc(0, hy + .02, .38, 0, Math.PI * 2);
+    }
+    ctx.fill();
+    if (!fire) { // wave curl hair
+      ctx.fillStyle = '#9fe3ff';
+      const w = Math.sin(t * 4) * .04;
+      ctx.beginPath(); ctx.moveTo(-.3, hy - .2); ctx.quadraticCurveTo(-.05, hy - .62 + w, .12 - p.face * .1, hy - .5); ctx.quadraticCurveTo(.35, hy - .4, .3, hy - .18); ctx.quadraticCurveTo(.08, hy - .34, -.3, hy - .2); ctx.fill();
+    }
+    // eyes
+    const ex = p.face * .07;
+    for (const s of [-1, 1]) {
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(s * .13 + ex, hy + .04, .085, .11, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#1a1208'; ctx.beginPath(); ctx.arc(s * .13 + ex + p.face * .03, hy + .06, .045, 0, 7); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // ---------- menu background: show level 1 with idle heroes ----------
+  function demoLevel() {
+    if (S.scr === 'play') return;
+    if (!S.lv || S.lvDemo !== true) {
+      S.lv = buildLevel(LEVELS[0]); S.world = newWorld(S.lv); S.lvDemo = true;
+      S.pl = { f: newPlayer(S.lv, 'f'), w: newPlayer(S.lv, 'w') }; S.remote = null; S.gems = new Set(); S.lev = {};
+      renderStatic();
+    }
+  }
+  function drawAvatar(id, role) {
+    const c = $(id), g = c.getContext('2d');
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
+    g.setTransform(70, 0, 0, 70, 84, 150);
+    const keep = ctx; ctx = g;
+    try { drawHero({ role, x: -PH.W / 2, y: -PH.H, vx: 0, face: 1, gr: true }, performance.now() / 1000, false); } finally { ctx = keep; }
+  }
+  setInterval(() => { if (S.scr === 'role') { drawAvatar('avF', 'f'); drawAvatar('avW', 'w'); } }, 80);
+
+  // ---------- boot ----------
+  resize();
+  demoLevel(); resize();
+  initRoom();
+  show('title');
+  requestAnimationFrame(frame);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.scr === 'play') requestWake(); });
+  window.__fw = S;
+})();
+
+</script>
+
+</body></html>
