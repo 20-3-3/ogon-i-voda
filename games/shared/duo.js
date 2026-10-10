@@ -8,6 +8,9 @@
 //   Duo.onState(fn)              // fn(partnerState) on every partner update
 //   Duo.onLink(fn) / Duo.onLoss(fn)
 //   Duo.isHost()                 // true on the phone that created the room (use it to pick an owner for shared objects)
+//   Duo.sample({lerp:['x','y'], vel:{x:'vx',y:'vy'}})  // SMOOTH partner state for drawing: interpolated between
+//                                             // updates by their send time, drawn a few ms in the past (see below)
+//   Duo.ping() -> {via:'напрямую'|'через сервер', ms} or null; Duo.direct() -> true when the direct link is alive
 //   Duo.emit(type, data) / Duo.on(type, fn)   // best-effort one-off events (may be lost!). For anything important,
 //                                             // keep it in state instead (e.g. a list of moves / turn number).
 // Transport: every message goes over BOTH a direct WebRTC link (PeerJS) and a public MQTT relay (wss),
@@ -42,16 +45,64 @@
   }
 
   // ---------- messages ----------
-  function packet(t, extra) { return Object.assign({ t, id: myId, code, s: ++seq }, extra || {}); }
+  function packet(t, extra) { return Object.assign({ t, id: myId, code, s: ++seq, w: Date.now() }, extra || {}); }
+  // ---------- smoothing buffer for the partner's state ----------
+  // Each update is placed on our clock by its send time (offset = smallest arrival-minus-send difference seen,
+  // which cancels the clock difference between phones). Drawing happens slightly in the past so there are
+  // always two updates to interpolate between: delay = how late updates come + gap between updates.
+  let snaps = [], off = null, offT = 0, late = 0;
+  function recordSnap(d) {
+    const now = Date.now(), sent = typeof d.w === 'number' ? d.w : now, sample = now - sent, nowS = performance.now();
+    if (off == null || sample < off) off = sample; else off += Math.min(sample - off, (nowS - (offT || nowS)) * 0.002);
+    offT = nowS;
+    late = Math.max(sample - off, late * 0.995);
+    const t = sent + off;
+    if (snaps.length && t <= snaps[snaps.length - 1].t) return;
+    snaps.push({ t, p: d.p }); if (snaps.length > 60) snaps.shift();
+  }
+  function renderDelay() {
+    const gap = snaps.length > 1 ? Math.min(120, (snaps[snaps.length - 1].t - snaps[0].t) / (snaps.length - 1)) : 16;
+    return Math.max(8, Math.min(250, late + gap + 4));
+  }
+  function sample(o) {
+    o = o || {};
+    if (!snaps.length) return partner;
+    const lerp = o.lerp || [], vel = o.vel || {}, maxEx = (o.maxExtrapolate == null ? 100 : o.maxExtrapolate);
+    const rt = Date.now() - renderDelay();
+    let i = snaps.length - 1; while (i > 0 && snaps[i - 1].t > rt) i--;
+    const b = snaps[i], a = snaps[i - 1], last = snaps[snaps.length - 1];
+    if (rt >= last.t) {
+      const out = { ...last.p }, dt = Math.min(maxEx, rt - last.t) / 1000;
+      lerp.forEach(k => { if (typeof out[k] === 'number' && typeof out[vel[k]] === 'number') out[k] += out[vel[k]] * dt; });
+      return out;
+    }
+    if (!a || rt <= a.t) return { ...b.p };
+    const kf = (rt - a.t) / Math.max(1, b.t - a.t), out = { ...(kf < 0.5 ? a.p : b.p) };
+    lerp.forEach(k => { const x0 = a.p[k], x1 = b.p[k]; if (typeof x0 === 'number' && typeof x1 === 'number') out[k] = x0 + (x1 - x0) * kf; });
+    return out;
+  }
+  // ---------- ping per transport ----------
+  const rtt = { rtc: 0, mq: 0 }, lastVia = { rtc: 0, mq: 0 };
+  setInterval(() => {
+    if (!code) return;
+    const q = { t: 'q', id: myId, code, ts: performance.now() };
+    rtcSend(q); if (mq && mq.connected) { try { mq.publish(topic(), JSON.stringify(q), { qos: 0 }); } catch (e) {} }
+  }, 1000);
+  function direct() { return Date.now() - lastVia.rtc < 1500; }
   function sendState() { if (!code) return; const m = packet('p', { p: mine }); rtcSend(m); mqSend(m, false); }
   function onMsg(d, via) {
     if (!d || typeof d !== 'object' || d.id === myId || d.code !== code || typeof d.id !== 'string') return;
+    lastVia[via] = Date.now();
+    if (d.t === 'q') { const a = { t: 'a', id: myId, code, ts: d.ts, to: d.id };
+      if (via === 'rtc') rtcSend(a); else if (mq && mq.connected) { try { mq.publish(topic(), JSON.stringify(a), { qos: 0 }); } catch (e) {} }
+      return; }
+    if (d.t === 'a') { if (d.to === myId && typeof d.ts === 'number') { const v = performance.now() - d.ts; rtt[via] = rtt[via] ? rtt[via] * 0.7 + v * 0.3 : v; } return; }
     if (typeof d.s === 'number') { if (lastSeq[d.id] && d.s <= lastSeq[d.id]) return; lastSeq[d.id] = d.s; }
     partnerLast = Date.now();
     if (via === 'rtc') diag.rtc = 'работает'; if (via === 'mq') diag.mq = 'работает';
     const wasLinked = linked;
     if (!linked) { linked = true; state = 'linked'; error = ''; sendState(); }
-    if (d.t === 'p' && d.p && typeof d.p === 'object') { partner = d.p; }
+    if ((d.t === 'p' || d.t === 'e') && d.p && typeof d.p === 'object') { partner = d.p; recordSnap(d); }
     if (d.t === 'e' && typeof d.k === 'string') { call(H.ev[d.k] || [], d.v); }
     if (!wasLinked) { ui(); call(H.link); if (pairResolve) { const r = pairResolve; pairResolve = null; hideOverlay(); r(); } }
     if (d.t === 'p') call(H.state, partner);
@@ -83,7 +134,7 @@
       peer.on('connection', (c) => rtcAttach(c, ss));
     } else {
       peer = new window.Peer(undefined, ICE);
-      const tryConnect = () => { if (ss !== session || conns.length || !peer || peer.destroyed) return; rtcAttach(peer.connect(pid, { reliable: true }), ss); };
+      const tryConnect = () => { if (ss !== session || conns.length || !peer || peer.destroyed) return; rtcAttach(peer.connect(pid, { reliable: false, serialization: 'json' }), ss); };
       peer.on('open', () => { if (ss !== session) return; diag.rtc = 'соединяюсь…'; ui(); tryConnect(); });
       const iv = setInterval(() => { if (ss !== session) { clearInterval(iv); return; } if (!conns.length) tryConnect(); }, 6000);
     }
@@ -99,7 +150,8 @@
     if (!mq || !mq.connected) return;
     if (now) { try { mq.publish(topic(), JSON.stringify(m), { qos: 0 }); } catch (e) {} return; }
     mqPending = m;
-    const wait = Math.max(0, 60 - (Date.now() - mqLastSent));
+    const gap = direct() ? 400 : 40; // relay is only a backup while the direct link is alive
+    const wait = Math.max(0, gap - (Date.now() - mqLastSent));
     if (!mqTimer) mqTimer = setTimeout(() => {
       mqTimer = 0; if (!mq || !mq.connected || !mqPending) return;
       try { mq.publish(topic(), JSON.stringify(mqPending), { qos: 0 }); } catch (e) {}
@@ -128,7 +180,7 @@
   function mqStop() { try { if (mq) mq.end(true); } catch (e) {} mq = null; mqPending = null; }
 
   // ---------- sessions ----------
-  function stopAll() { session++; rtcStop(); mqStop(); const was = linked; linked = false; partner = null; lastSeq = {}; if (was) call(H.loss); }
+  function stopAll() { session++; rtcStop(); mqStop(); const was = linked; linked = false; partner = null; lastSeq = {}; snaps = []; off = null; late = 0; if (was) call(H.loss); }
   function begin() {
     const ss = session;
     rtcStart(ss); mqStart(ss);
@@ -231,5 +283,12 @@
     emit(k, v) { if (!code) return; const m = packet('e', { k, v, p: mine }); rtcSend(m); mqSend(m, true); },
     on(k, f) { (H.ev[k] = H.ev[k] || []).push(f); },
     status() { return { state, code, isHost, linked, diag: { ...diag }, error }; },
+    sample, delay: renderDelay, direct,
+    ping() {
+      const now = Date.now(), r = now - lastVia.rtc < 2500 && rtt.rtc, m = now - lastVia.mq < 4000 && rtt.mq;
+      if (r) return { via: 'напрямую', ms: Math.round(r) };
+      if (m) return { via: 'через сервер', ms: Math.round(m) };
+      return null;
+    },
   };
 })();
