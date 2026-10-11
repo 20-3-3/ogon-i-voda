@@ -30,7 +30,7 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 .tbtns{display:flex;flex-direction:column;align-items:stretch;gap:12px;width:100%}
 .logo{font-family:var(--hd);font-size:clamp(40px,11.5vw,66px);line-height:.95;color:var(--red);text-align:center;transform:rotate(-3deg);text-shadow:3px 3px 0 var(--ink),6px 6px 0 var(--mus);letter-spacing:1px;margin:0 0 6px;animation:logo 3.4s ease-in-out infinite}
 @keyframes logo{50%{transform:rotate(-1.6deg) scale(1.03)}}
-.tag{font-size:15px;letter-spacing:3px;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:4px 12px;transform:rotate(1.5deg);text-align:center}
+.tag{font-size:clamp(11px,3.7vw,15px);letter-spacing:clamp(1px,.7vw,3px);text-transform:uppercase;background:var(--ink);color:var(--paper);padding:4px 12px;transform:rotate(1.5deg);text-align:center}
 .bigbtn{width:100%;min-height:58px;font-family:var(--hd);font-size:19px;letter-spacing:.5px;text-transform:uppercase;background:var(--paper);border:3px solid var(--ink);border-radius:6px;box-shadow:5px 5px 0 var(--ink);padding:10px 14px;transition:transform .08s,box-shadow .08s;position:relative}
 .bigbtn:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ink)}
 .bigbtn.red{background:var(--red);color:#fff}
@@ -80,32 +80,32 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 .pl.p1 .row{flex-direction:row-reverse}
 #wind{flex:none;width:78px;text-align:center;font-family:var(--hd);line-height:1}
 #wind small{display:block;font-family:var(--bd);font-size:11px;letter-spacing:2px;color:#b9ac8a}
-#wind #ping{display:block;font-family:var(--bd);font-size:10px;letter-spacing:0;line-height:1;margin-top:3px;white-space:nowrap;color:var(--pc,#9a9080);opacity:.85}
+#wind #ping{display:block;font-family:var(--bd);font-size:11px;letter-spacing:0;line-height:1;margin-top:3px;white-space:nowrap;color:var(--pc,#9a9080);opacity:.85}
 #wind #ping:empty{display:none}
 #wind div{font-size:17px;color:var(--mus);margin-top:2px;white-space:nowrap}
-#stage{position:relative;flex:none;width:100%;aspect-ratio:3/2;min-height:0;overflow:hidden;background:#16120e}
+#stage{position:relative;flex:1000 1 0;width:100%;min-height:150px;max-height:104vw;overflow:hidden;background:#16120e}
 #cv{position:absolute;left:0;top:0;display:block;touch-action:none}
 #banner{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%) scale(.8);font-family:var(--hd);font-size:clamp(16px,5.6vw,30px);text-transform:uppercase;color:var(--paper);background:var(--ink);border:3px solid var(--mus);padding:6px 12px;white-space:normal;width:max-content;max-width:calc(100% - 20px);box-sizing:border-box;text-align:center;line-height:1.15;overflow-wrap:anywhere;opacity:0;pointer-events:none;transition:opacity .25s,transform .35s var(--ease);z-index:4}
 #banner.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #bMenu{position:absolute;left:10px;top:10px;width:44px;height:44px;border:3px solid var(--ink);background:var(--paper);border-radius:6px;font-weight:700;font-size:20px;z-index:5;opacity:.92;display:flex;align-items:center;justify-content:center}
-.ctl{display:flex;flex-direction:column;gap:10px;padding:8px 10px;flex:1 1 auto;justify-content:space-evenly;min-height:0}
+.ctl{display:flex;flex-direction:column;gap:8px;padding:6px 10px;flex:1 1 auto;justify-content:space-evenly;min-height:0}
 .wgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
-.wb{position:relative;min-height:clamp(54px,8.5vh,78px);border:3px solid var(--ink);background:var(--paper);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:700;line-height:1.05;color:var(--ink);transition:background .15s,transform .15s var(--ease);min-width:0;padding:0 1px;letter-spacing:-.1px}
+.wb{position:relative;min-height:clamp(50px,7.5vh,70px);border:3px solid var(--ink);background:var(--paper);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:700;line-height:1.05;color:var(--ink);transition:background .15s,transform .15s var(--ease);min-width:0;padding:0 1px;letter-spacing:-.1px}
 .wb svg{width:22px;height:22px;fill:currentColor;flex:none}
 .wb .t{font-size:10px;letter-spacing:-.3px;max-width:100%;overflow:hidden;text-overflow:clip;white-space:nowrap}
 .wb.sel{background:var(--mus);box-shadow:0 0 0 3px var(--paper);transform:translateY(-2px)}
 .wb.off{opacity:.38;filter:grayscale(1)}
 .wb .cnt{position:absolute;right:3px;top:1px;font-size:11px;font-family:var(--hd)}
-.wb .lk{position:absolute;left:3px;top:1px;font-size:9px;line-height:1.1}
+.wb .lk{position:absolute;left:2px;top:2px;font-size:9px;line-height:1.1;background:var(--ink);color:var(--paper);border-radius:3px;padding:0 2px}
 .r2{display:flex;gap:8px;align-items:stretch}
 .stp{flex:1;display:flex;align-items:stretch;gap:5px;min-width:0}
 .stp .v{flex:1;text-align:center;color:var(--paper);display:flex;flex-direction:column;justify-content:center;line-height:1;min-width:0}
 .stp .v small{font-size:11px;letter-spacing:2px;color:#b9ac8a}
 .stp .v b{font-family:var(--hd);font-size:24px;font-weight:400}
-.pb{width:50px;min-height:clamp(50px,7vh,66px);border:3px solid var(--ink);background:var(--paper);border-radius:6px;font-family:var(--hd);font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 #000;flex:none}
+.pb{width:52px;min-height:clamp(48px,6.6vh,62px);border:3px solid var(--ink);background:var(--paper);border-radius:6px;font-family:var(--hd);font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 #000;flex:none}
 .pb:active,.pb.dn{background:var(--mus)}
 .pb.off,#fire.off{opacity:.4}
-#fire{flex:1.3;min-height:clamp(56px,8.5vh,84px);border:3px solid var(--ink);background:var(--red);color:#fff;border-radius:6px;font-family:var(--hd);font-size:24px;letter-spacing:1px;text-transform:uppercase;box-shadow:4px 4px 0 #000;text-shadow:2px 2px 0 var(--red2);flex:none;width:100%}
+#fire{flex:1.3;min-height:clamp(54px,8vh,76px);border:3px solid var(--ink);background:var(--red);color:#fff;border-radius:6px;font-family:var(--hd);font-size:24px;letter-spacing:1px;text-transform:uppercase;box-shadow:4px 4px 0 #000;text-shadow:2px 2px 0 var(--red2);flex:none;width:100%}
 #fire:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
 .fuel{flex:1;height:8px;border:2px solid var(--paper);background:#000;border-radius:2px;align-self:center;overflow:hidden}
 .fuel i{display:block;height:100%;background:var(--olive);width:100%}
@@ -117,14 +117,14 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 .ov.on .card{transform:none}
 #ovHelp{z-index:30;background:rgba(20,16,12,.9)}
 .card{background:var(--paper);border:4px solid var(--ink);box-shadow:7px 7px 0 var(--red);border-radius:8px;padding:18px 16px 16px;width:min(360px,100%);margin:auto;text-align:center;display:flex;flex-direction:column;gap:10px}
-.card h3{font-family:var(--hd);font-size:30px;line-height:1;margin:0;color:var(--red);text-shadow:2px 2px 0 var(--ink);text-transform:uppercase}
+.card h3{font-family:var(--hd);font-size:clamp(22px,7.2vw,30px);line-height:1;margin:0;color:var(--red);text-shadow:2px 2px 0 var(--ink);text-transform:uppercase}
 .card p{margin:0;font-size:17px;line-height:1.25}
 .card .bigbtn{min-height:50px;font-size:16px}
 .card .btns{display:flex;flex-direction:column;gap:10px}
 .card.help{width:min(460px,100%);text-align:left;max-height:100%;padding:0;gap:0;overflow:hidden}
 .help .hh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 12px 10px 16px;border-bottom:3px solid var(--ink);flex:none}
 .help .hh h3{font-size:24px}
-.help .hb{overflow-y:auto;padding:12px 16px 16px;-webkit-overflow-scrolling:touch;min-height:0;display:flex;flex-direction:column;gap:10px}
+.help .hb{background:linear-gradient(rgba(241,228,195,0),var(--paper) 70%) bottom/100% 36px local no-repeat,radial-gradient(farthest-side at 50% 100%,rgba(31,26,20,.5),rgba(31,26,20,0)) bottom/100% 14px scroll no-repeat;overflow-y:auto;padding:12px 16px 16px;-webkit-overflow-scrolling:touch;min-height:0;display:flex;flex-direction:column;gap:10px}
 .help h4{font-family:var(--hd);font-size:15px;margin:4px 0 0;text-transform:uppercase;color:var(--red2)}
 .help p,.help li{font-size:15px;line-height:1.3;margin:0}
 .help ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
@@ -160,12 +160,14 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
  .card .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
  .card .btns .bigbtn:only-child,.card .btns .wide{grid-column:1/-1}
  .card .bigbtn{min-height:46px;font-size:15px;padding:6px}
- .lgrid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}
+ .lgrid{grid-template-columns:repeat(5,minmax(0,1fr))}
 }
 @media (orientation:landscape) and (max-height:430px){
  .lhead h2{font-size:18px}.lhead h2 small{font-size:12px}
  .lhead{padding:2px 0 4px}
 }
+.duo-ov{background:#0a0a0e!important}
+#wind #ping{font-size:11px}
 @media (prefers-reduced-motion:reduce){.logo{animation:none}.tbox>*,.tile{animation:none}}
 </style>
 </head>
@@ -254,12 +256,12 @@ const LEVELS=[
 {n:'Лунные скалы',th:'moon',seed:22,g:.06,wind:0,base:.68,amp:18,walls:[[250,230,22,250],[470,200,22,280]],tx:[70,650]},
 {n:'Парящие острова',th:'sky',seed:13,g:.12,wind:6,noground:1,isl:[[110,330,92,44],[610,330,92,44],[360,300,70,34]],tx:[110,610],ty:[250,250]},
 {n:'Небесный мост',th:'sky',seed:14,g:.12,wind:7,noground:1,isl:[[100,340,88,46],[620,340,88,46],[262,335,46,22],[458,335,46,22],[360,296,30,16]],walls:[[354,90,12,160]],tx:[100,620],ty:[250,250]},
-{n:'Вулкан',th:'volcano',seed:15,g:.12,wind:7,base:.68,amp:12,hills:[[360,230,110],[170,-130,50],[550,-130,50]],water:440,tx:[60,660]},
+{n:'Вулкан',th:'volcano',seed:15,g:.12,wind:6,base:.68,amp:12,hills:[[360,190,110],[170,-130,50],[550,-130,50]],water:440,tx:[60,660]},
 {n:'Ущелье',th:'desert',seed:16,g:.14,wind:8,base:.5,amp:16,hills:[[360,-210,80]],tx:[70,650]},
 {n:'Ледяной бастион',th:'snow',seed:17,g:.12,wind:10,base:.68,amp:12,hills:[[360,110,60],[200,50,40],[520,50,40]],walls:[[352,150,16,330]],tx:[70,650]},
 {n:'Ночной город',th:'night',seed:18,g:.12,wind:8,base:.72,amp:3,walls:[[130,350,40,130],[200,300,34,180],[300,330,30,150],[358,240,26,240],[430,320,32,160],[520,290,38,190],[590,350,36,130]],tx:[50,670]},
-{n:'Крепость',th:'dusk',seed:19,g:.12,wind:4,base:.7,amp:6,walls:[[104,264,16,216],[270,200,18,280],[432,200,18,280],[600,264,16,216]],tx:[56,664]},
-{n:'Последний рубеж',th:'volcano',seed:20,g:.10,wind:12,base:.6,amp:26,hills:[[360,-170,80]],water:404,walls:[[352,140,16,340]],isl:[[200,190,50,20],[520,190,50,20]],tx:[60,660]},
+{n:'Крепость',th:'dusk',seed:19,g:.12,wind:4,base:.7,amp:6,walls:[[104,290,16,190],[270,240,18,240],[432,240,18,240],[600,290,16,190]],tx:[56,664]},
+{n:'Последний рубеж',th:'volcano',seed:20,g:.10,wind:10,base:.6,amp:26,hills:[[360,-170,80]],water:404,walls:[[352,140,16,340]],isl:[[200,190,50,20],[520,190,50,20]],tx:[60,660]},
 // ---- 21–30: возвращение и ледяной край ----
 {n:'Два холма',th:'meadow',seed:31,g:.12,wind:8,base:.66,amp:14,hills:[[220,95,55],[500,95,55]],tx:[70,650]},
 {n:'Глубокий овраг',th:'meadow',seed:32,g:.12,wind:9,base:.56,amp:18,hills:[[360,-210,55],[180,40,60]],tx:[70,650]},
@@ -269,7 +271,7 @@ const LEVELS=[
 {n:'Метель',th:'snow',seed:36,g:.12,wind:14,base:.66,amp:30,hills:[[360,90,80]],tx:[70,650]},
 {n:'Ледник',th:'snow',seed:37,g:.12,wind:10,base:.68,amp:12,hills:[[360,70,60]],bnc:[[250,250,14,230],[456,250,14,230]],tx:[70,650]},
 {n:'Трещина',th:'snow',seed:38,g:.12,wind:12,base:.6,amp:20,hills:[[360,-120,70],[170,70,55]],water:402,tx:[70,650]},
-{n:'Ледяные зубы',th:'snow',seed:39,g:.12,wind:12,base:.6,amp:60,step:30,walls:[[355,190,10,290]],tx:[70,650]},
+{n:'Ледяные зубы',th:'snow',seed:39,g:.12,wind:10,base:.6,amp:50,step:30,walls:[[355,190,10,290]],tx:[70,650]},
 {n:'Белая ночь',th:'snow',seed:40,g:.12,wind:15,base:.7,amp:8,hills:[[360,110,50]],walls:[[216,250,18,230],[486,250,18,230]],tx:[60,660]},
 // ---- 31–40: лунный архипелаг и пекло ----
 {n:'Кратеры',th:'moon',seed:41,g:.06,wind:0,base:.64,amp:26,carve:[[150,320,32],[260,350,40],[360,330,46],[460,350,40],[570,320,32]],tx:[110,610]},
@@ -284,13 +286,13 @@ const LEVELS=[
 {n:'Пепелище',th:'volcano',seed:50,g:.12,wind:13,base:.62,amp:44,step:28,walls:[[352,215,16,265]],water:446,tx:[60,660]},
 // ---- 41–50: ночной город и высший класс ----
 {n:'Окраина',th:'night',seed:51,g:.12,wind:10,base:.72,amp:3,walls:[[170,330,34,150],[270,290,30,190],[420,300,30,180],[520,340,34,140]],tx:[60,660]},
-{n:'Небоскрёбы',th:'night',seed:52,g:.12,wind:12,base:.74,amp:3,walls:[[140,300,36,180],[234,220,30,260],[330,330,28,150],[394,200,30,280],[490,310,34,170],[580,360,34,120]],bnc:[[300,160,120,12]],tx:[50,670]},
+{n:'Небоскрёбы',th:'night',seed:52,g:.12,wind:10,base:.74,amp:3,walls:[[140,300,36,180],[234,220,30,260],[330,330,28,150],[394,200,30,280],[490,310,34,170],[580,360,34,120]],bnc:[[300,160,120,12]],tx:[50,670]},
 {n:'Подземка',th:'night',seed:53,g:.12,wind:10,base:.68,amp:10,hills:[[360,80,90]],walls:[[170,110,380,26]],tx:[60,660]},
-{n:'Крыши',th:'night',seed:54,g:.12,wind:12,base:.8,amp:3,isl:[[200,300,64,16],[520,300,64,16],[360,230,50,14]],walls:[[300,330,24,150],[430,330,24,150]],tx:[70,650]},
+{n:'Крыши',th:'night',seed:54,g:.12,wind:10,base:.8,amp:3,isl:[[200,300,64,16],[520,300,64,16],[360,230,50,14]],walls:[[300,330,24,150],[430,330,24,150]],tx:[70,650]},
 {n:'Тихий час',th:'dusk',seed:55,g:.12,wind:10,base:.66,amp:8,hills:[[360,-120,150]],water:430,walls:[[100,310,14,170],[606,310,14,170]],bnc:[[352,260,16,220]],tx:[56,664]},
 {n:'Каньон ветров',th:'desert',seed:56,g:.12,wind:13,base:.5,amp:16,hills:[[360,-220,70],[170,70,50],[550,70,50]],walls:[[330,250,10,90]],tx:[70,650]},
 {n:'Паутина',th:'sky',seed:57,g:.10,wind:12,noground:1,isl:[[100,340,80,38],[620,340,80,38],[240,270,40,16],[480,270,40,16],[360,360,56,20]],bnc:[[354,80,12,150],[200,330,12,70],[508,330,12,70]],tx:[100,620],ty:[250,250]},
-{n:'Ледяной вулкан',th:'volcano',seed:58,g:.12,wind:11,base:.66,amp:12,hills:[[360,170,100]],water:432,isl:[[360,90,40,14]],bnc:[[140,340,12,140],[568,340,12,140]],tx:[60,660]},
+{n:'Ледяной вулкан',th:'volcano',seed:58,g:.12,wind:9,base:.66,amp:12,hills:[[360,170,100]],water:432,isl:[[360,90,40,14]],bnc:[[140,340,12,140],[568,340,12,140]],tx:[60,660]},
 {n:'Лабиринт',th:'night',seed:59,g:.12,wind:11,base:.7,amp:6,walls:[[190,260,18,220],[512,260,18,220],[270,150,18,70]],bnc:[[352,270,16,210],[270,270,70,12],[380,270,70,12]],tx:[56,664]},
 {n:'Бастион',th:'volcano',seed:60,g:.1,wind:14,base:.62,amp:24,hills:[[360,-160,90]],water:408,walls:[[140,330,20,150],[560,330,20,150]],bnc:[[352,190,16,290]],isl:[[360,110,40,14]],tx:[56,664]}
 ];
@@ -524,7 +526,7 @@ function vnoise(x,y){ // сглаженный шум 0..255 по сетке 64x6
 }
 
 //==GAME-B: рисование земли, фоны, спрайты, частицы==
-let dpr=1,S=1,K=1,cwCss=0,chCss=0;      // S: css-пикселей на единицу мира; K=S*dpr: пикселей буфера на единицу мира
+let TSC=1.15,dpr=1,S=1,K=1,cwCss=0,chCss=0;      // S: css-пикселей на единицу мира; K=S*dpr: пикселей буфера на единицу мира
 const cv=$('cv'),ctx=cv.getContext('2d');
 const PAD=44;                            // запас фона по краям для параллакса
 // ---------- земля ----------
@@ -1013,6 +1015,7 @@ function showPing(){
   const p=Duo.ping(),el=$('ping');let txt,col;
   if(p){txt=p.ms+' мс · '+(p.via==='напрямую'?'напрямую':'сервер');col=p.ms<=40?'#6fd27a':p.ms<=120?'#e8c24a':'#e0634a';}
   else{txt='нет связи';col='#9a9080';}
+  const pp=Duo.partner();if(p&&pp&&pp.away){txt='партнёр свернул игру…';col='#e8c24a';}
   el.textContent=txt;el.style.setProperty('--pc',col);
 }
 function applySel(level,ep){
@@ -1057,12 +1060,18 @@ function show(n){
   if(prev==='title'&&n!=='title')titleUntil=performance.now()+450;
   if(n==='play')requestAnimationFrame(fit);
   if(n==='levels'&&prev!=='levels')setTimeout(scrollToCur,60);
+  if(n==='levels'&&thumbQ.length){const u=unl();thumbQ.sort((p,q)=>Math.abs(p.l-u)-Math.abs(q.l-u));}
 }
 const thumbQ=[];let thumbBusy=false;
 function thumbWork(){
   if(S_screen==='play'){setTimeout(thumbWork,600);return;}
   const j=thumbQ.shift();if(!j){thumbBusy=false;return;}
   paintThumb(j.l,j.cvs);setTimeout(thumbWork,12);
+}
+function placeholderThumb(l,cvs){   // мгновенная заглушка: небо темы + полоса земли (до полной отрисовки)
+  const th=TH[LEVELS[l-1].th],c=cvs.getContext('2d'),w=cvs.width,h=cvs.height;
+  const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,th.sky[0]);g.addColorStop(.6,th.sky[1]);g.addColorStop(1,th.sky[2]);c.fillStyle=g;c.fillRect(0,0,w,h);
+  c.fillStyle=css(th.soil);c.fillRect(0,h*.68,w,h*.32);c.fillStyle=css(th.top);c.fillRect(0,h*.68,w,Math.max(2,h*.04));
 }
 function paintThumb(l,cvs){
   const L=LEVELS[l-1],th=TH[L.th],c=cvs.getContext('2d'),w=cvs.width,h=cvs.height;
@@ -1084,10 +1093,10 @@ function buildLevelGrid(){
   for(let l=1;l<=NL;l++){
     while(ci<CHAPTERS.length&&CHAPTERS[ci][1]===l){const h=document.createElement('div');h.className='chap';const to=(CHAPTERS[ci+1]?CHAPTERS[ci+1][1]:NL+1)-1;h.innerHTML='<b>'+CHAPTERS[ci][0]+'</b><span>'+l+'–'+to+'</span>';grid.appendChild(h);ci++;}
     const b=document.createElement('div');b.setAttribute('role','button');b.tabIndex=0;b.className='tile';b.dataset.l=l;b.style.setProperty('--i',Math.min(idx++,16));
-    const cvs=document.createElement('canvas');cvs.width=cw;cvs.height=ch;const th=document.createElement('div');th.className='th';th.appendChild(cvs);b.appendChild(th);thumbQ.push({l,cvs});
+    const cvs=document.createElement('canvas');cvs.width=cw;cvs.height=ch;const th=document.createElement('div');th.className='th';th.appendChild(cvs);b.appendChild(th);thumbQ.push({l,cvs});placeholderThumb(l,cvs);
     b.insertAdjacentHTML('beforeend','<span class="no">'+l+'</span>'+(WU.indexOf(l)>0?'<span class="nw">+'+WNAME[WU.indexOf(l)]+'</span>':'')+'<span class="nm">'+LEVELS[l-1].n+'</span><span class="st"></span>');
     b.onclick=()=>pickLevel(l);grid.appendChild(b);}
-  if(!thumbBusy){thumbBusy=true;setTimeout(thumbWork,80);}
+  if(!thumbBusy){thumbBusy=true;setTimeout(thumbWork,40);}
 }
 function refreshLevels(){
   buildLevelGrid();
@@ -1096,7 +1105,7 @@ function refreshLevels(){
     b.classList.toggle('lock',l>u);b.classList.toggle('cur',l===u&&u<NL||(u>=NL&&l===NL));
     b.querySelector('.st').textContent=l>u?'':be?(be<=5?'★★★':be<=9?'★★☆':'★☆☆'):l<u?'✓':'';}
   const sub=G.mode==='net'?'Ты '+winsSum(SV.wins)+' : '+winsSum(PG&&PG.w)+' Партнёр':G.mode==='bot'?'Против бота':'Один телефон';
-  $('lSub').textContent=sub+' · открыто '+u+' из '+NL;
+  $('lSub').textContent=sub+' · '+u+'/'+NL;
   $('lProg').style.width=(100*u/NL)+'%';
 }
 function scrollToCur(){const t=document.querySelector('.tile.cur');if(t&&S_screen==='levels'){const g=$('lgrid'),top=t.offsetTop-g.offsetTop-g.clientHeight/2+t.offsetHeight/2;g.scrollTo({top:Math.max(0,top),behavior:'smooth'});}}
@@ -1217,6 +1226,8 @@ $('rNext').onclick=()=>{$('ovRes').classList.remove('on');const l=M.level+1;G.mo
 $('rAgain').onclick=()=>{$('ovRes').classList.remove('on');const l=M.level;G.mode==='net'?(Duo.linked()?sendSel(l):toast('Партнёр отключился')):startMatch(l,Date.now());};
 $('rLv').onclick=()=>{$('ovRes').classList.remove('on');toLevels();};
 Duo.init({game:'artilleriya',accent:'#e2552b'});
+setTimeout(()=>{try{buildLevelGrid();}catch(e){}},300);   // превью строятся заранее, пока игрок на титуле
+document.addEventListener('visibilitychange',()=>{if(G.mode==='net'){try{Duo.set({away:document.hidden?1:null});}catch(e){}}});
 Duo.onLink(()=>{if(G.mode!=='net')netEnter();});
 // ---------- бот ----------
 function botTick(){
@@ -1435,9 +1446,10 @@ function drawMatch(rt,a){
   const Z=1.025+zoomPunch+.2*intro;
   const shx=shake?(Math.sin(rt*83.1)+Math.sin(rt*51.7+1.3))*.5*shake:0,shy=shake?(Math.sin(rt*67.3+2.1)+Math.sin(rt*93.9))*.5*shake:0;
   const k=K*Z;
-  c.setTransform(k,0,0,k,cw/2-W/2*k+shx*K,ch/2-H/2*k+shy*K);
+  c.setTransform(k,0,0,k,gOX+W/2*K-W/2*k+shx*K,gOY+H/2*K-H/2*k+shy*K);
   c.globalAlpha=1;c.globalCompositeOperation='source-over';
   const th=BG.th;
+  if(gExt>0){c.fillStyle=th.sky[0];c.fillRect(-PAD-60,-gExt-120,W+2*PAD+120,gExt+121);}
   c.drawImage(BG.sky,-PAD-camX*.9,0,W+2*PAD,H);
   if(th.stars){c.globalCompositeOperation='lighter';for(let i=0;i<BG.stars.length;i++){const s=BG.stars[i];c.globalAlpha=.3+.7*Math.abs(Math.sin(rt*1.4+s.p));const r=s.s*3;c.drawImage(GL.white,s.x-r-camX*.9,s.y-r,r*2,r*2);}c.globalAlpha=1;c.globalCompositeOperation='source-over';}
   // облака (время вместо кадров)
@@ -1466,7 +1478,7 @@ function drawMatch(rt,a){
     c.globalAlpha=1;
     if(th.lava){c.globalCompositeOperation='lighter';c.globalAlpha=.35+.1*Math.sin(rt*2);c.drawImage(GL.lava,-60,y-48,W+120,90);c.globalAlpha=1;c.globalCompositeOperation='source-over';}}
   // танки
-  for(let i=0;i<2;i++)drawTank(c,M.tanks[i],i,M.phase==='aim'&&cur()===i,rt,a,1.15);
+  for(let i=0;i<2;i++)drawTank(c,M.tanks[i],i,M.phase==='aim'&&cur()===i,rt,a,TSC);
   // предпросмотр траектории
   if(PV.n>0&&canControl()){for(let i=0;i<PV.n;i++){const r=2.4-i*.05,al=(.95-i*.04)*(.55+.45*Math.sin(rt*9-i*.7));c.globalAlpha=al<0?0:al;c.fillStyle='#fff6c8';c.strokeStyle='rgba(31,26,20,.7)';c.lineWidth=.9;c.beginPath();c.arc(PV.d[i*2],PV.d[i*2+1],r,0,TAU);c.fill();c.stroke();}c.globalAlpha=1;}
   // снаряды (интерполяция по доле шага)
@@ -1554,17 +1566,19 @@ function drawTitle(rt,a){
   const sv=M;drawParticles(tx,a,0);tx.globalCompositeOperation='lighter';drawParticles(tx,a,1);tx.globalCompositeOperation='source-over';drawFx(tx,a);tx.globalAlpha=1;
 }
 // ---------- размеры, цикл ----------
+let gOX=0,gOY=0,gExt=0;   // смещение мира в буфере холста (px буфера) и добавочное небо сверху (ед. мира)
 function fit(){
   const st=$('stage'),w=st.clientWidth,h=st.clientHeight;if(!w||!h)return;
-  const d=Math.min(3,window.devicePixelRatio||1),s=Math.min(w/W,h/H),cw=W*s,ch=H*s;
-  const left=((w-cw)/2),top=((h-ch)/2);
-  cv.style.left=left+'px';cv.style.top=top+'px';
-  if(Math.abs(cw-cwCss)<.5&&Math.abs(ch-chCss)<.5&&d===dpr&&cv.width)return;
-  dpr=d;S=s;K=S*dpr;cwCss=cw;chCss=ch;
-  cv.style.width=cw+'px';cv.style.height=ch+'px';
-  cv.width=Math.round(cw*d);cv.height=Math.round(ch*d);
+  const d=Math.min(3,window.devicePixelRatio||1),s=Math.min(w/W,h/H);
+  // холст = вся сцена; мир прижат к низу и центрован по ширине, сверху добавляется небо (видны навесные траектории)
+  const ox=(w-W*s)/2,oy=h-H*s;
+  if(Math.abs(w-cwCss)<.5&&Math.abs(h-chCss)<.5&&d===dpr&&Math.abs(s-S)<1e-4&&cv.width){gOX=ox*d;gOY=oy*d;gExt=oy/s;return;}
+  dpr=d;S=s;K=S*dpr;cwCss=w;chCss=h;gOX=ox*d;gOY=oy*d;gExt=oy/s;
+  cv.style.left='0px';cv.style.top='0px';cv.style.width=w+'px';cv.style.height=h+'px';
+  cv.width=Math.round(w*d);cv.height=Math.round(h*d);
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   fontPx=Math.max(13,15/S*1.0);FONT=fontPx+'px Russo One,Impact,sans-serif';
+  TSC=Math.min(1.3,1.15*Math.max(1,.7/S));
   if(M)buildBg(M.L);
 }
 window.addEventListener('resize',()=>{fit();});window.addEventListener('orientationchange',()=>{setTimeout(fit,120);setTimeout(fit,500);});
