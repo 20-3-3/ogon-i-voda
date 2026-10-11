@@ -388,7 +388,24 @@
 .duo-qr{display:block;margin:0 auto;width:min(78vw,58vh,340px);height:auto;aspect-ratio:1;border-radius:12px;background:#fff;image-rendering:pixelated}
 .duo-vid{display:block;margin:0 auto;width:min(82vw,58vh,360px);aspect-ratio:1;object-fit:cover;border-radius:16px;background:#000;border:3px solid #7ee0a8}
 .duo-steps{margin:0;padding-left:20px;color:#c2bcaf;font-size:14px;line-height:1.5}
-.duo-ov[hidden],.duo-ov [hidden]{display:none!important}`);
+.duo-ov[hidden],.duo-ov [hidden]{display:none!important}
+@media (orientation:landscape) and (max-height:520px){
+.duo-ov{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.duo-box{gap:8px;width:min(640px,100%)}
+.duo-h{font-size:18px}
+.duo-btn{font-size:15px;padding:8px 12px;min-height:44px}.duo-btn small{font-size:12px}
+.duo-code{font-size:44px;letter-spacing:10px}
+.duo-in{font-size:22px;padding:6px}
+.duo-sub,.duo-steps{font-size:13px}
+.duo-qr{width:min(56vh,300px)}.duo-vid{width:min(58vh,320px)}
+.duo-box[data-v="main"]{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px;align-items:center}
+.duo-box[data-v="main"]>[data-r="near"]{grid-column:1;grid-row:1/span 3;height:100%}
+.duo-box[data-v="main"]>.duo-or{display:none}
+.duo-box[data-v="main"]>:not([data-r="near"]){grid-column:2}
+.duo-box[data-v="n-offer n-answer"]{display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:center}
+.duo-box[data-v="n-offer n-answer"]>.duo-qr{grid-column:1;grid-row:1/span 4}
+.duo-box[data-v="n-offer n-answer"]>:not(.duo-qr){grid-column:2}
+}`);
     document.head.appendChild(css);
     ov = el('div', 'duo-ov'); ov.hidden = true; ov.style.setProperty('--duo-accent', accent);
     ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Игра вдвоём');
@@ -460,7 +477,10 @@
   }
   let pairReject = null;
   function hideOverlay() { if (ov) { ov.hidden = true; scanStop(); } }
+  let waitSince = 0, waitTimer = 0;
   function ui() {
+    if (!linked && state !== 'idle') { if (!waitSince) { waitSince = Date.now(); clearTimeout(waitTimer); waitTimer = setTimeout(() => ui(), 8100); } }
+    else { waitSince = 0; clearTimeout(waitTimer); }
     if (!ov) return;
     const $ = (r) => ov.querySelector('[data-r="' + r + '"]');
     if (view === 'host' && !(state === 'hosting' || state === 'joining' || state === 'lost')) view = 'main';
@@ -475,7 +495,7 @@
     $('err').textContent = error; $('err').hidden = !error;
     const w = state === 'joining' ? 'Соединяюсь с комнатой ' + code + '…' : state === 'lost' ? 'Связь пропала, переподключаюсь…' : '';
     $('wait').textContent = w; $('wait').hidden = !w;
-    $('diag').hidden = state === 'idle' || view === 'main';
+    $('diag').hidden = state === 'idle' || view === 'main' || (!error && !(waitSince && Date.now() - waitSince > 8000));
     $('diag').textContent = localMode ? 'Связь: ' + diag.rtc : 'Прямая связь: ' + diag.rtc + ' · Через сервер: ' + diag.mq;
   }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && code) sendState(); });
