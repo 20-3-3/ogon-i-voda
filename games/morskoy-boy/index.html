@@ -13,7 +13,7 @@
 --sat:env(safe-area-inset-top,0px);--sar:env(safe-area-inset-right,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);
 --hf:"Russo One","Impact","Arial Narrow",system-ui,sans-serif;--bf:"PT Sans Caption",-apple-system,"Segoe UI",Roboto,sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--sea0);color:var(--ink);font-family:var(--bf);overscroll-behavior:none;position:fixed;inset:0;width:100%}
+html,body{touch-action:manipulation;margin:0;height:100%;overflow:hidden;background:var(--sea0);color:var(--ink);font-family:var(--bf);overscroll-behavior:none;position:fixed;inset:0;width:100%}
 button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 canvas{touch-action:none;display:block}
 #bg{position:fixed;left:0;top:0;width:100%;height:100%;z-index:0;pointer-events:none}
@@ -83,6 +83,9 @@ canvas{touch-action:none;display:block}
 .pbtns{display:flex;gap:10px;padding-top:4px}.pbtns>*{flex:1;min-width:0}
 #pl-hint{margin:0;text-align:center;font-size:14px;color:var(--mute);min-height:20px;line-height:1.25}
 @media (orientation:landscape) and (max-height:500px){
+ #lvgrid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}
+ .lv .nm{font-size:12.5px;overflow-wrap:break-word}
+ .lv .sz{font-size:11.5px}
  #s-place{grid-template-columns:minmax(0,1fr) minmax(200px,40%);grid-template-rows:auto minmax(0,1fr);gap:4px 14px}
  #s-place .stage{grid-row:2;grid-column:1}#s-place .side2{grid-row:2;grid-column:2;justify-content:center;gap:8px}
  .pbtns{flex-direction:column;gap:10px}
@@ -180,7 +183,7 @@ canvas{touch-action:none;display:block}
 <div class="ov" id="ov-lost"><div class="card"><h3>⚓ Партнёр отключился</h3><p>Ждём… Игра на паузе. Как только партнёр вернётся (с тем же кодом комнаты), бой продолжится с того же места.</p><button class="btn dark" id="lost-menu">В главное меню</button></div></div>
 <div class="ov" id="ov-menu"><div class="card"><h3>Пауза</h3><div class="rbtns"><button class="btn" id="m-cont">Продолжить</button><button class="btn dark" id="m-lv">К картам сражений</button><button class="btn dark" id="m-home">В главное меню</button></div></div></div>
 <div class="ov" id="ov-help"><div class="card"><h3>Как играть</h3><div class="scroll">
-<ul><li>Расставь корабли: тяни — переместить, тап — повернуть. Корабли не касаются друг друга.</li><li>Тап по клетке — прицел, ещё тап (или «Огонь!») — выстрел.</li><li>Попал — стреляешь снова. Мимо — ход соперника.</li><li>🏝 острова — суша, 💣 мина стоит ход, 📡 радар считает корабли в квадрате 3×3 (в некоторых боях его хватает на два раза), ⛈ шторм прячет часть моря (сильный шторм — больше), 🚀 залп — столько выстрелов, сколько у тебя живых кораблей.</li><li>50 сражений в пяти главах. Победа открывает следующее сражение для обоих.</li><li>Бой по сети можно играть неспешно: закрой страницу и вернись по тому же коду комнаты.</li></ul>
+<ul><li>Расставь корабли: тяни — переместить, тап — повернуть. Корабли не касаются друг друга.</li><li>Тап по клетке — прицел, ещё тап (или «Огонь!») — выстрел.</li><li>Попал — стреляешь снова. Мимо — ход соперника.</li><li>🏝 острова — суша, 💣 мина стоит ход, 📡 радар считает корабли в квадрате 3×3 (в некоторых боях его хватает на два раза), ⛈ шторм прячет часть моря (сильный шторм — больше), 🚀 залп — столько выстрелов, сколько у тебя живых кораблей (у ходящего первым первый залп короче; тап по выбранной клетке снимает прицел).</li><li>50 сражений в пяти главах. Победа открывает следующее сражение для обоих.</li><li>Бой по сети можно играть неспешно: закрой страницу и вернись по тому же коду комнаты.</li></ul>
 <div class="tip">Для 120 Гц на iPhone: Настройки → Приложения → Safari → Дополнения → Feature Flags → выключить «Prefer Page Rendering Updates near 60fps».</div></div>
 <button class="btn" id="help-ok">Понятно</button></div></div>
 
@@ -356,7 +359,12 @@ function deriveMarks(L, moves, answers) {
   return { grid, radar, sunk, pending };
 }
 function sunkCount(ans) { let c = 0; for (const a of ans) if (a && a.a) for (const r of a.a) if (r === 2) c++; return c; }
-function quota(L, S, s) { return Math.max(1, L.fleet.length - sunkCount(S[s].an)); }
+// размер залпа = число живых кораблей; ходящему первым первый залп урезан (до ~60%) — компенсация преимущества первого хода
+function quota(L, S, s, first) {
+  const q = Math.max(1, L.fleet.length - sunkCount(S[s].an));
+  if (first === s && !S[s].mv.some(m => m.c)) return Math.max(1, Math.ceil(q * .6));
+  return q;
+}
 // S[s] = {mv:[...], an:[...]} ; an — ответы стороны s на ходы соперника
 function status(L, first, S) {
   const total = L.fleet.length;
@@ -406,7 +414,7 @@ function aiShots(L, ai, S, side, count, rnd) {
     const cand = []; for (let k = 0; k < n * n; k++) if (mk.grid[k] === 0 && !temp.has(k) && !isl.has(k)) cand.push(k);
     if (!cand.length) break;
     let pick;
-    if (rnd() < (1 - ai.skill) * .6 || !dens.some(v => v > 0)) pick = cand[Math.floor(rnd() * cand.length)];
+    if (rnd() < (1 - ai.skill) * .9 || !dens.some(v => v > 0)) pick = cand[Math.floor(rnd() * cand.length)];
     else {
       let best = -1, bs = [];
       cand.forEach(k => { const v = dens[k] * (1 + rnd() * .15); if (v > best) { best = v; bs = [k]; } else if (v === best) bs.push(k); });
@@ -486,7 +494,6 @@ function setMute(m) { muted = m; LS.set('mb:mute', m); ['b-mute1', 'b-mute2', 'b
 document.addEventListener('pointerdown', () => Snd.init(), { passive: true });
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('dblclick', e => e.preventDefault());
-let lastTouch = 0; document.addEventListener('touchend', e => { const n = Date.now(); if (n - lastTouch < 320 && e.target.tagName !== 'INPUT') e.preventDefault(); lastTouch = n; }, { passive: false });
 
 // ---------- экраны ----------
 const wipeEl = $('wipe');
@@ -518,12 +525,16 @@ function renderLevels() {
     b.onclick = () => { Snd.click(); if (lock) { toast('Сначала выиграй бой ' + (l.id - 1)); return; } pickLevel(l.id); };
     g.appendChild(b); if (b.classList.contains('next') || (!nextEl && l.id === Math.min(prog.u, LEVELS.length))) nextEl = b;
   });
-  $('lv-sub').innerHTML = (mode === 'net' ? `<span class="dot ${lostFlag ? '' : 'ok'}"></span>${lostFlag ? 'партнёр не на связи' : 'вдвоём · игрок ' + (role + 1)}` : mode === 'ai' ? 'против компьютера' : 'один телефон на двоих') + ' · открыто ' + Math.min(prog.u, LEVELS.length) + '/' + LEVELS.length;
+  $('lv-sub').innerHTML = (mode === 'net' ? `<span class="dot ${lostFlag ? '' : 'ok'}"></span>${lostFlag ? 'партнёр не на связи' : 'вдвоём · игрок ' + (role + 1)}` : mode === 'ai' ? 'против компьютера' : 'один телефон на двоих') + ' · ' + Math.min(prog.u, LEVELS.length) + '/' + LEVELS.length;
   $('lv-note').textContent = mode === 'net' ? 'Выбор уровня появится сразу у обоих. Пройден бой — открыт следующий.' : 'Выиграй бой, чтобы открыть следующий.';
   if (nextEl) requestAnimationFrame(() => { const top = nextEl.offsetTop - g.offsetTop - g.clientHeight / 2 + nextEl.offsetHeight / 2; g.scrollTop = Math.max(0, top); });
 }
 function pickLevel(n) {
   if (mode === 'net') {
+    if (G && G.mode === 'net' && !G.over && G.phase === 'battle' && (S[0].mv.length || S[1].mv.length) && G.level !== n) {
+      if (pickLevel.cf !== n || Date.now() - pickLevel.ct > 3500) { pickLevel.cf = n; pickLevel.ct = Date.now(); toast('Бой идёт! Тапни ещё раз — бросить его у обоих'); return; }
+      pickLevel.cf = 0;
+    }
     if (G && G.level === n && !G.over && G.mode === 'net') { show(G.phase === 'battle' ? 'battle' : 'place'); if (G.phase === 'battle') startBattleUI(); return; }
     const pe = (Duo.partner() && Duo.partner().sel && Duo.partner().sel.ep) || (lastP && lastP.sel && lastP.sel.ep) || 0;
     mySel = { level: n, ep: Math.max(Date.now(), pe + 1, mySel.ep + 1) }; saveSel();
@@ -535,18 +546,24 @@ function pickLevel(n) {
 function resetMatchVars() { S = [{ mv: [], an: [] }, { mv: [], an: [] }]; sel = []; radarMode = false; lastOwner = -2; aiBusy = false; ansSeen = [0, 0]; }
 let ansSeen = [0, 0];
 function enterNetMatch(s) {
-  handledEp = s.ep; L = LEVELS[s.level - 1]; first = s.level % 2 ? 0 : 1; resetMatchVars();
+  handledEp = s.ep; L = LEVELS[s.level - 1]; first = s.ep % 2; resetMatchVars(); ov('ov-result', 0); ov('ov-menu', 0);
   const ships = placeFleet(L);
   G = { mode: 'net', ep: s.ep, level: s.level, ships, board: makeBoard(L, ships), phase: 'place', rdy: false, pRdy: false, over: false, rev: null };
   netSync(); persist(); openPlace();
 }
+// кто ходит первым: по чётности боя, при повторе того же боя очередь меняется
+const plays = {};
+function nextFirst(n) { const k = plays[n] = (plays[n] || 0) + 1; return ((n % 2 ? 0 : 1) + k - 1) % 2; }
+// «милость»: каждое поражение в бою против компьютера делает ИИ чуть слабее в следующей попытке (до −0.4); победа сбрасывает
+function lossN(n) { return (LS.get('mb:loss', {})[n]) | 0; }
+function setLoss(n, v) { const o = LS.get('mb:loss', {}); if (v) o[n] = v; else delete o[n]; LS.set('mb:loss', o); }
 function startAI(n) {
-  L = LEVELS[n - 1]; first = n % 2 ? 0 : 1; resetMatchVars(); const sh = placeFleet(L), sh2 = placeFleet(L);
-  G = { mode: 'ai', level: n, ships: sh, board: makeBoard(L, sh), boards: [null, makeBoard(L, sh2)], ai: newAI(L), phase: 'place', over: false };
+  L = LEVELS[n - 1]; first = nextFirst(n); resetMatchVars(); const sh = placeFleet(L), sh2 = placeFleet(L);
+  G = { mode: 'ai', level: n, ships: sh, board: makeBoard(L, sh), boards: [null, makeBoard(L, sh2)], ai: newAI({ ...L, ai: Math.max(.15, L.ai - .1 * Math.min(4, lossN(n))) }), phase: 'place', over: false };
   G.boards[0] = G.board; openPlace();
 }
 function startPass(n) {
-  L = LEVELS[n - 1]; first = n % 2 ? 0 : 1; resetMatchVars();
+  L = LEVELS[n - 1]; first = nextFirst(n); resetMatchVars();
   G = { mode: 'pass', level: n, ships: placeFleet(L), pships: [null, null], boards: [null, null], phase: 'place', over: false, view: 0, handoff: false };
   G.pships[0] = G.ships; curtain('Игрок 1', 'Расставь флот. Остальные — отвернитесь!', 'Я — игрок 1', () => openPlace());
 }
@@ -581,7 +598,7 @@ $('pl-ready').onclick = () => {
   }
 };
 function shipAt(x, y) { for (let i = 0; i < G.ships.length; i++) if (shipCells(G.ships[i]).some(c => c[0] === x && c[1] === y)) return i; return -1; }
-function geo(cv) { const n = L.n, S = cv._s, cs = (S - 6) / (n + .7); return { n, S, cs, o: .7 * cs + 3 }; }
+function geo(cv) { const n = L.n, S = cv._s, cs = (S - 12) / (n + .7); return { n, S, cs, o: .7 * cs + 6 }; }
 function cellAt(cv, e) {
   const r = cv.getBoundingClientRect(), g = geo(cv), px = (e.clientX - r.left) * g.S / r.width, py = (e.clientY - r.top) * g.S / r.height;
   return { x: Math.floor((px - g.o) / g.cs), y: Math.floor((py - g.o) / g.cs), fx: (px - g.o) / g.cs, fy: (py - g.o) / g.cs };
@@ -589,18 +606,18 @@ function cellAt(cv, e) {
 cPlace.addEventListener('pointerdown', e => {
   if (!G || (G.mode === 'net' && G.rdy)) return; e.preventDefault();
   const c = cellAt(cPlace, e), i = shipAt(c.x, c.y); if (i < 0) return;
-  cPlace.setPointerCapture(e.pointerId);
-  const s = G.ships[i]; drag = { i, ox: c.x - s.x, oy: c.y - s.y, orig: { ...s }, moved: false, sx: e.clientX, sy: e.clientY };
+  if (drag) return; cPlace.setPointerCapture(e.pointerId);
+  const s = G.ships[i]; drag = { i, ox: c.x - s.x, oy: c.y - s.y, orig: { ...s }, moved: false, sx: e.clientX, sy: e.clientY, pid: e.pointerId };
 });
 cPlace.addEventListener('pointermove', e => {
-  if (!drag) return; e.preventDefault();
+  if (!drag || e.pointerId !== drag.pid) return; e.preventDefault();
   if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 6) drag.moved = true;
   if (!drag.moved) return;
   const c = cellAt(cPlace, e), s = { ...drag.orig, x: c.x - drag.ox, y: c.y - drag.oy };
   ghost = { s, ok: okShip(L, islandsFor(L), G.ships, s, drag.i) };
 });
 function endDrag(e, cancel) {
-  if (!drag) return; const d = drag; drag = null;
+  if (!drag || e.pointerId !== drag.pid) return; const d = drag; drag = null;
   if (d.moved) { if (!cancel && ghost && ghost.ok) { G.ships[d.i] = ghost.s; Snd.click(); kick(BDp, d.i, 7); } else if (ghost) Snd.tone(150, .15, 'square', .08); }
   else if (!cancel) {
     const s = { ...d.orig, h: !d.orig.h }, isl = islandsFor(L);
@@ -671,7 +688,7 @@ function updateBattleUI() {
   else if (G.mode === 'pass') t = G.handoff ? 'Ход закончен' : 'Игрок ' + (s + 1) + ': твой ход';
   else if (st.pending && st.owner === s) t = 'Снаряд в пути…';
   else t = st.owner === s ? 'Твой ход — огонь!' : (G.mode === 'ai' ? 'Ходит компьютер…' : 'Ходит партнёр…');
-  const q = L.salvo ? quota(L, S, s) : 1;
+  const q = L.salvo ? quota(L, S, s, first) : 1;
   $('stat').textContent = t; $('stat').className = mine ? 'me' : '';
   const rLeft = radarLeft(L, S[s].mv), radarUsed = rLeft < 1, fire = $('bt-fire'), rb = $('bt-radar');
   rb.style.display = L.radar ? '' : 'none'; rb.disabled = !mine || radarUsed; rb.textContent = radarUsed ? '📡 —' : radarMode ? '📡 Отмена' : '📡 Радар' + (L.radar > 1 ? ' ×' + rLeft : '');
@@ -709,6 +726,7 @@ $('bt-fire').onclick = () => {
   if (radarMode) submitMove({ t: st.turn, r: sel[0] }); else submitMove({ t: st.turn, c: sel.slice() });
 };
 $('bt-radar').onclick = () => { if (!canAct()) return; Snd.click(); radarMode = !radarMode; sel = []; updateBattleUI(); };
+let selT = 0;
 function enemyTap(e) {
   if (!G || G.phase !== 'battle') return; e.preventDefault(); Snd.init();
   if (!canAct()) return;
@@ -716,8 +734,8 @@ function enemyTap(e) {
   const k = c.y * n + c.x, mk = enemyView();
   if (radarMode) { sel = [[c.x, c.y]]; Snd.click(); updateBattleUI(); return; }
   if (islandsFor(L).has(k) || mk.grid[k] !== 0 || mk.pending.some(p => p[0] === c.x && p[1] === c.y)) { Snd.tone(150, .1, 'square', .06); return; }
-  const q = L.salvo ? quota(L, S, me()) : 1, ix = sel.findIndex(p => p[0] === c.x && p[1] === c.y);
-  if (!L.salvo) { if (ix >= 0) { $('bt-fire').click(); return; } sel = [[c.x, c.y]]; }
+  const q = L.salvo ? quota(L, S, me(), first) : 1, ix = sel.findIndex(p => p[0] === c.x && p[1] === c.y);
+  if (!L.salvo) { if (ix >= 0) { if (Date.now() - selT > 300) $('bt-fire').click(); return; } sel = [[c.x, c.y]]; selT = Date.now(); }
   else if (ix >= 0) sel.splice(ix, 1); else { sel.push([c.x, c.y]); if (sel.length > q) sel.shift(); }
   Snd.click(); updateBattleUI();
 }
@@ -732,7 +750,7 @@ function aiLoop() {
     aiBusy = false; if (!G || G.mode !== 'ai' || G.over) return;
     const st2 = curStatus(); if (st2.over || st2.owner !== 1) return;
     const rd = aiRadar(L, G.ai, S, 1);
-    let mv; if (rd) mv = { t: st2.turn, r: rd }; else { const c = aiShots(L, G.ai, S, 1, L.salvo ? quota(L, S, 1) : 1); if (!c.length) return; mv = { t: st2.turn, c }; }
+    let mv; if (rd) mv = { t: st2.turn, r: rd }; else { const c = aiShots(L, G.ai, S, 1, L.salvo ? quota(L, S, 1, first) : 1); if (!c.length) return; mv = { t: st2.turn, c }; }
     const s0 = me(); S[1].mv.push(mv); const ans = resolveMove(G.boards[0], mv); S[0].an.push(ans); if (mv.r) aiLearnRadar(L, G.ai, mv, ans);
     scanAnnounce(); afterChange();
   }, 950 + Math.random() * 500);
@@ -744,6 +762,7 @@ function finish(st) {
   const nextLv = Math.min(LEVELS.length, G.level + 1);
   if (G.mode === 'net' || G.mode === 'pass' || (G.mode === 'ai' && won)) prog.u = Math.max(prog.u, nextLv);
   if (G.mode !== 'pass' && won) { const sh = S[s].mv.reduce((a, m) => a + (m.c ? m.c.length : 0), 0); if (!prog.b[G.level] || sh < prog.b[G.level]) prog.b[G.level] = sh; }
+  if (G.mode === 'ai') setLoss(G.level, won ? 0 : Math.min(4, lossN(G.level) + 1));
   saveProg(); if (G.mode === 'net') { netSyncBurst(); persist(); }
   setTimeout(() => {
     if (!G || !G.over) return;
@@ -751,7 +770,7 @@ function finish(st) {
     const pass = G.mode === 'pass';
     $('res-card').className = 'card ' + (pass || won ? 'win' : 'lose');
     $('res-h').textContent = pass ? 'Победил игрок ' + (st.winner + 1) + '!' : won ? 'Победа! ⚓' : 'Флот потоплен';
-    $('res-p').textContent = pass ? 'Бой ' + G.level + ' «' + L.name + '» окончен.' : `Бой ${G.level} «${L.name}». Выстрелов: ${sh}, попаданий: ${hit}.` + (won && G.level < LEVELS.length ? ' Открыт следующий бой!' : '') + (G.mode === 'net' && !won ? ' Бой всё равно засчитан — следующий открыт для вас обоих.' : '');
+    $('res-p').textContent = pass ? 'Бой ' + G.level + ' «' + L.name + '» окончен.' : `Бой ${G.level} «${L.name}». Выстрелов: ${sh}, попаданий: ${hit}.` + (won && G.level < LEVELS.length ? ' Открыт следующий бой!' : '') + (G.mode === 'net' && !won ? ' Бой всё равно засчитан — следующий открыт для вас обоих.' : '') + (G.mode === 'ai' && !won ? ' Компьютер в следующей попытке будет чуть слабее.' : '');
     $('res-next').style.display = (G.level < LEVELS.length && (G.level + 1 <= prog.u)) ? '' : 'none';
     ov('ov-result', 1); (pass || won ? Snd.win : Snd.lose).call(Snd);
   }, 800);
@@ -812,7 +831,7 @@ function onPartner(p, force) {
 }
 Duo.onState(onPartner);
 Duo.onLink(() => { lostFlag = false; ov('ov-lost', 0); onLinked(); netSync(); if (Duo.partner()) onPartner(Duo.partner(), true); updateBattleUI(); if (screen === 'levels') renderLevels(); });
-Duo.onLoss(() => { if (mode !== 'net') return; lostFlag = true; if (screen === 'battle' || screen === 'place') ov('ov-lost', 1); updateBattleUI(); if (screen === 'levels') renderLevels(); });
+Duo.onLoss(() => { if (mode !== 'net') return; lostFlag = true; if ((screen === 'battle' && !(G && G.over)) || screen === 'place') ov('ov-lost', 1); updateBattleUI(); if (screen === 'levels') renderLevels(); });
 function onLinked() {
   if (mode === 'net' && linkedOnce) return; linkedOnce = true;
   if (mode !== 'net') { mode = 'net'; role = pendingRole !== null ? pendingRole : (Duo.isHost() ? 0 : 1); show(G && G.mode === 'net' ? (G.phase === 'battle' ? 'battle' : 'place') : 'levels'); if (G && G.mode === 'net' && G.phase === 'battle') startBattleUI(); }
@@ -831,7 +850,7 @@ $('b-resume').onclick = async () => {
   if (mode === 'net' && G && G.mode === 'net' && !G.over) { show(G.phase === 'battle' ? 'battle' : 'place'); if (G.phase === 'battle') startBattleUI(); return; }
   const sv = savedNet(); if (!sv) return;
   role = sv.role; pendingRole = sv.role; mode = 'net'; mySel = LS.get('mb:sel', mySel); handledEp = sv.ep;
-  L = LEVELS[sv.level - 1]; first = sv.level % 2 ? 0 : 1; resetMatchVars();
+  L = LEVELS[sv.level - 1]; first = sv.ep % 2; resetMatchVars();
   const b = makeBoard(L, sv.ships, null, sv.mines); (sv.shot || []).forEach(k => { b.shot.add(k); if (b.sg[k] >= 0) b.ships[b.sg[k]].hits++; });
   G = { mode: 'net', ep: sv.ep, level: sv.level, ships: sv.ships, board: b, phase: sv.phase, rdy: sv.rdy, pRdy: false, over: false, rev: null };
   S[role] = { mv: sv.mv || [], an: sv.an || [] }; ansSeen = [S[0].an.length, S[1].an.length];
@@ -863,7 +882,7 @@ function layout() {
     else {
       if (body.style.getPropertyValue('--ecol')) body.style.removeProperty('--ecol');
       const br = body.getBoundingClientRect(), bh = $('s-battle').querySelector('.btns').getBoundingClientRect().height, avail = br.height - bh - 12;
-      let E = Math.floor(Math.min(br.width, avail * .66 - 22)); if (avail - E - 22 < 150) E = Math.max(120, avail - 22 - 150);
+      let E = Math.floor(Math.min(br.width, avail * .66 - 22)); if (avail - E - 22 < 190) E = Math.max(150, avail - 22 - 190);
       const v = (E + 22) + 'px'; if (body.style.getPropertyValue('--erow') !== v) body.style.setProperty('--erow', v);
     }
     const e = $('eBox').getBoundingClientRect(), m = $('mBox').getBoundingClientRect();
@@ -1030,7 +1049,8 @@ function buildOver(bd) {
   });
   // подписи
   c.fillStyle = '#e9c978'; c.font = Math.max(9, cs * .42) + 'px "Russo One",sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-  for (let i = 0; i < n; i++) { c.fillText(COLS[i], ox + (i + .5) * cs, ox * .5); c.fillText(i + 1, ox * .5, ox + (i + .5) * cs); }
+  const lst = cs < 13 ? 2 : 1; if (lst > 1) c.font = Math.max(8, cs * .62) + 'px "Russo One",sans-serif';
+  for (let i = 0; i < n; i += lst) { c.fillText(COLS[i], ox + (i + .5) * cs, ox * .5); c.fillText(i + 1, ox * .5, ox + (i + .5) * cs); }
   // виньетка и блик
   c.save(); rrp(c, ox, ox, bs, bs, 4); c.clip();
   let g1 = c.createRadialGradient(ox + bs / 2, ox + bs / 2, bs * .35, ox + bs / 2, ox + bs / 2, bs * .78); g1.addColorStop(0, 'rgba(0,10,20,0)'); g1.addColorStop(1, 'rgba(0,10,20,.45)'); c.fillStyle = g1; c.fillRect(ox, ox, bs, bs);
