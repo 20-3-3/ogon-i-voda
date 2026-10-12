@@ -48,9 +48,9 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:8px;padding:0 16px;min-he
 @media (orientation:landscape) and (min-width:800px){.grid{grid-template-columns:repeat(10,1fr);max-width:none}}
 .wh{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;text-align:left;font-weight:700;font-size:14px;padding:8px 4px 0;color:var(--moon);letter-spacing:.5px}
 .wh i{font-style:normal;font-weight:400;color:var(--mut);font-size:12px}
-.card{position:relative;border-radius:14px;padding:6px 3px 6px;min-height:76px;background:linear-gradient(#251b5c,#1b1442);border:1px solid #3b2f80;color:var(--moon);font-family:var(--txt);touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;cursor:pointer}
+.card{position:relative;border-radius:14px;padding:6px 3px 6px;min-height:76px;background:linear-gradient(#251b5c,#1b1442);border:1px solid #3b2f80;color:var(--moon);font-family:var(--txt);touch-action:manipulation;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:9px;overflow:hidden;cursor:pointer}
 .card .n{font-family:var(--disp);font-size:19px;line-height:1}
-.card .nm{font-size:9.5px;letter-spacing:-.2px;color:var(--mut);margin-top:4px;line-height:1.1;max-width:100%;overflow-wrap:break-word;hyphens:auto;-webkit-hyphens:auto}
+.card .nm{font-size:11px;letter-spacing:-.2px;color:var(--mut);margin-top:4px;line-height:1.1;max-width:100%;overflow-wrap:break-word;hyphens:auto;-webkit-hyphens:auto}
 .card .bt{font-size:11px;color:var(--gold);margin-top:2px;min-height:13px}
 .card.lock{opacity:.42}.card.lock .n:after{content:' 🔒';font-size:12px}
 .card.w0{border-color:#6a52c9}.card.w1{border-color:#4fb6cf}.card.w2{border-color:#e0704a}.card.w3{border-color:#ffd166}.card.w4{border-color:#59e6a2}.card.w5{border-color:#ff9ad0}.card.w6{border-color:#ff5a72}
@@ -72,6 +72,7 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:8px;padding:0 16px;min-he
 .hlp .btn{width:100%}
 #hud{position:fixed;left:0;right:0;top:0;padding:calc(var(--sat) + 8px) calc(var(--sar) + 10px) 0 calc(var(--sal) + 10px);display:none;z-index:4;pointer-events:none;align-items:flex-start;justify-content:space-between;gap:8px}
 #hud.on{display:flex}
+#hud{background:linear-gradient(rgba(10,8,30,.62),rgba(10,8,30,0));padding-bottom:14px!important}
 #hud .sq{pointer-events:auto;width:46px;height:46px;font-size:20px;background:rgba(36,27,82,.72)}
 #hmid{flex:1;text-align:center;font-family:var(--disp);min-width:0}
 #htime{font-size:26px;text-shadow:0 2px 0 #000a,0 0 14px rgba(0,0,0,.5)}
@@ -95,7 +96,7 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:8px;padding:0 16px;min-he
 #cd.on{display:flex}
 #cd.pop{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
 @keyframes pop{from{transform:scale(1.7);opacity:0}to{transform:none;opacity:1}}
-#ov{position:fixed;inset:0;z-index:30;background:rgba(8,6,24,.82);display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px calc(var(--sar) + 24px) 24px calc(var(--sal) + 24px);font-size:18px}
+#ov{position:fixed;inset:0;z-index:30;background:rgba(8,6,24,.97);display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px calc(var(--sar) + 24px) 24px calc(var(--sal) + 24px);font-size:18px}
 #ov.on{display:flex}
 #ov b{font-family:var(--txt);font-weight:700;font-size:21px;margin-bottom:10px;max-width:320px;line-height:1.3}
 .dots:after{content:'';animation:d 1.2s steps(4) infinite}
@@ -124,7 +125,7 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:8px;padding:0 16px;min-he
   #hud #htime{font-size:22px}
   .top h2{font-size:17px}
 }
-@media (max-width:360px){.card .nm{font-size:10px}.btn{font-size:17px}}
+@media (max-width:360px){.card .nm{font-size:10.5px}.btn{font-size:17px}}
 @media (prefers-reduced-motion:reduce){.scr.on{animation:none}}
 @media (max-height:460px){.duo-ov{padding-top:max(8px,env(safe-area-inset-top))!important;padding-bottom:max(8px,env(safe-area-inset-bottom))!important}.duo-box{gap:6px!important}.duo-h{font-size:20px!important}.duo-btn{padding:6px 12px!important;min-height:44px!important}.duo-btn small{display:none}.duo-code{font-size:44px!important}}
 </style>
@@ -154,6 +155,7 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:8px;padding:0 16px;min-he
     <button class="btn" id="t-tt">Один на телефоне<small>время и гонка с собственным призраком</small></button>
     <button class="btn d" id="t-du">Дуэль на одном телефоне<small>передайте телефон по очереди</small></button>
     <button class="btn d" id="t-help" style="min-height:48px">Как играть и настройки</button>
+    <a class="lnk" href="../#save">💾 Сохранение прогресса</a>
     <a class="lnk" href="../">← Все игры</a>
   </div>
 </div>
@@ -191,6 +193,7 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:8px;padding:0 16px;min-he
     <ul><li>◀ ▶ слева — бег, ПРЫГ справа — прыжок (можно двумя пальцами сразу).</li>
     <li>У стены прыгайте ещё раз — отскок от стены.</li>
     <li>Золотой шар — ещё один прыжок в воздухе. Флажок — точка возврата.</li>
+    <li>Серые плиты осыпаются — не стойте на них долго. Ленты сносят вбок. Шипы на потолке — прыгайте ниже (отпустите ПРЫГ раньше).</li>
     <li>Шипы и пилы — начало с последнего флажка. Клавиатура: стрелки/A D и пробел.</li></ul>
     <h3>Режимы</h3>
     <ul><li>Вдвоём по сети — оба бегут одновременно, соперник виден призраком.</li>
@@ -283,7 +286,8 @@ function cloneState(S) { const c = Object.assign({}, S); c.ct = S.ct.slice(); c.
 
 function solidAt(L, S, cx, cy) {
   if (cx < 0 || cx >= L.W) return true;
-  if (cy < 0 || cy >= L.H) return false;
+  if (cy < 0) return true; // потолок мира: за верхний край карты не вылезти
+  if (cy >= L.H) return false;
   const c = L.t[cy * L.W + cx];
   if (c === 35 || c === 62 || c === 60) return true;
   if (c === 99) return S.ct[L.ci[cy * L.W + cx]] <= CF;
@@ -528,7 +532,7 @@ const LEVEL_DEFS = [
     b.run(5); let x = b.x; b.run(9); b.saw(x + 2, b.f - 1.5, 0, 1.6, 1.8, 0); b.saw(x + 5, b.f - 1.5, 0, 1.6, 1.8, 0.5); b.saw(x + 8, b.f - 3, 0, 1.2, 1.8, 0.25);
     b.run(2); b.cp(); b.gap(4); b.run(2); x = b.x; b.run(10); b.saw(x + 2, b.f - 2, 3, 0, 2, 0); b.saw(x + 7, b.f - 3, 0, 1.5, 1.6, 0.4);
     b.run(2); b.stairs(1, 3, 3); b.gap(4); x = b.x; b.run(6); b.saw(x + 3, b.f - 2.6, 2, 0, 2.5, 0);
-    b.gap(4); b.run(3); x = b.x; b.spk(4); b.saw(x + 1, b.f - 3.6, 0, 0.9, 1.8, 0); b.saw(x + 3.5, b.f - 3.6, 0, 0.9, 1.8, 0.5); b.run(3);
+    b.gap(4); b.run(4); b.spk(3); b.run(5); // финиш без пил: безопасная площадка
   }],
   // 20 Призрачный финал
   ['Призрачный финал', 3, 32, 26, b => {
@@ -561,7 +565,7 @@ const LEVEL_DEFS = [
   }],
   // 25 Прыжки веры
   ['Прыжки веры', 4, 24, 17, b => {
-    b.run(5); for (let k = 0; k < 4; k++) { const x = b.x; b.spk(12); b.orb(x + 3, b.f - 4); b.orb(x + 8, b.f - (k % 2 ? 3 : 4)); b.run(3); if (k == 1) b.cp(); }
+    b.run(5); for (let k = 0; k < 4; k++) { const x = b.x; b.spk(12); b.orb(x + 3, b.f - 4); b.orb(x + 8, b.f - (k % 2 ? 3 : 4)); b.run(3); if (k == 1 || k == 3) b.cp(); }
     b.up(2); b.run(3); let x = b.x; b.gap(12); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(3);
     b.conv(6, 1); b.spk(2); b.conv(5, 1); b.run(3);
   }],
@@ -630,7 +634,7 @@ const LEVEL_DEFS = [
   }],
   // 37 Тающие орбы
   ['Тающие орбы', 5, 24, 17, b => {
-    b.run(5); b.crumb(4); let x = b.x; b.gap(10); b.orb(x + 5, b.f - 4); b.crumb(3); b.gap(2); b.crumb(3); b.run(2); b.cp();
+    b.run(5); b.crumb(4); let x = b.x; b.gap(9); b.orb(x + 4, b.f - 4); b.crumb(3); b.gap(2); b.crumb(3); b.run(2); b.cp();
     b.up(1); x = b.x; b.spk(10); b.orb(x + 3, b.f - 4); b.orb(x + 7, b.f - 4); b.crumb(4); b.gap(3); b.crumb(3); b.spk(3); b.run(3);
   }],
   // 38 Коридор лезвий
@@ -649,7 +653,7 @@ const LEVEL_DEFS = [
     b.run(5); b.conv(7, 1); b.spk(2); b.crumb(4); b.gap(2); b.crumb(3); let x = b.x; b.gap(8); b.orb(x + 4, b.f - 3); b.run(3); b.cp();
     x = b.x; b.shaft(8); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.2, 0); b.run(2);
     x = b.x; b.run(10); b.saw(x + 3, b.f - 2, 0, 1.6, 1.8, 0); b.saw(x + 7, b.f - 2, 0, 1.6, 1.8, 0.5); b.cp();
-    b.conv(6, -1); b.gap(3); b.conv(5, 1); b.stairs(2, 2, 3); x = b.x; b.gap(12); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(3); b.crumb(4); b.gap(2); b.crumb(4); b.spk(3); b.run(3);
+    b.conv(6, -1); b.gap(3); b.conv(5, 1); b.stairs(2, 2, 3); b.cp(); x = b.x; b.gap(12); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(3); b.crumb(4); b.gap(2); b.crumb(4); b.spk(3); b.run(3);
   }],
   // ---------- 41–50: Ядро (мир 6) ----------
   // 41 Раскалённый старт
@@ -675,12 +679,12 @@ const LEVEL_DEFS = [
   // 45 Цепочка орбов
   ['Цепочка орбов', 6, 26, 19, b => {
     b.run(5); for (let k = 0; k < 2; k++) { const x = b.x; b.gap(11); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(4); }
-    b.cp(); b.run(4); for (let k = 0; k < 2; k++) { const x = b.x; b.spk(10); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(4); }
+    b.cp(); b.run(4); for (let k = 0; k < 2; k++) { const x = b.x; b.spk(10); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(4); if (k == 0) b.cp(); }
     const x = b.x; b.spk(8); b.orb(x + 3, b.f - 3); b.orb(x + 6, b.f - 4); b.run(4);
   }],
   // 46 Сломанный мост
   ['Сломанный мост', 6, 24, 17, b => {
-    b.run(5); for (let k = 0; k < 4; k++) { b.crumb(2); b.gap(2); b.crumb(2); b.spk(1); b.crumb(2); b.gap(2); b.up(k % 2 ? 1 : -1); if (k == 1) { b.run(3); b.cp(); } }
+    b.run(5); for (let k = 0; k < 4; k++) { b.crumb(2); b.gap(2); b.crumb(2); if (k === 2) b.spk(1); else b.run(1); b.crumb(2); b.gap(2); b.up(k % 2 ? 1 : -1); if (k == 1 || k == 3) { b.run(3); b.cp(); } }
     b.run(3); const x = b.x; b.gap(9); b.orb(x + 5, b.f - 3); b.crumb(3); b.gap(2); b.crumb(3); b.spk(2); b.run(3);
   }],
   // 47 Лабиринт ядра
@@ -693,7 +697,7 @@ const LEVEL_DEFS = [
   // 48 Шахта и лента
   ['Шахта и лента', 6, 34, 28, b => {
     b.run(5); b.conv(7, 1); b.spk(2); let x = b.x; b.shaft(9); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.2, 0); b.run(2); b.cp(); b.conv(6, -1); b.gap(3); b.conv(5, 1);
-    x = b.x; b.shaft(8); b.set(x + 1, b.f + 5, 'v'); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.4, 0.4); b.run(2); b.crumb(4); b.gap(2); b.crumb(4); b.run(2); b.stairsDown(2, 3, 4); b.gap(4); b.run(3);
+    x = b.x; b.shaft(8); b.set(x + 1, b.f + 5, 'v'); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.4, 0.4); b.run(2); b.cp(); b.crumb(4); b.gap(2); b.crumb(4); b.run(2); b.stairsDown(2, 3, 4); b.gap(4); b.run(3);
   }],
   // 49 Предел
   ['Предел', 6, 28, 22, b => {
@@ -801,7 +805,7 @@ const GFX = (function () {
     g.fillStyle = gr; g.fillRect(0, 0, SKY.width, SKY.height);
     const R = rng(wi * 7919 + 13), sw = SKY.width, sh = SKY.height, big = Math.min(sw, sh);
     // небесное тело
-    const bx = sw * .84, by = sh * .1;
+    const ls = sw > sh, bx = sw * (ls ? .68 : .8), by = sh * (ls ? .26 : .2); // не под кнопкой звука и шапкой
     if (wi === 2) { // жар: красное солнце за дымом
       g.fillStyle = 'rgba(255,140,60,.18)'; g.beginPath(); g.arc(bx, by + sh * .1, big * .22, 0, TAU); g.fill();
       g.fillStyle = 'rgba(255,190,110,.55)'; g.beginPath(); g.arc(bx, by + sh * .1, big * .1, 0, TAU); g.fill();
@@ -1503,12 +1507,13 @@ Duo.init({game:'zabeg',accent:'#5ef0ff'});
 const $=id=>document.getElementById(id);
 const cv=$('cv'),cx=cv.getContext('2d');
 const NLV=LEVELS.length;
-let VW=0,VH=0,DPR=1,TCSS=30,TD=30,fitDirty=true;
+let VW=0,VH=0,DPR=1,TCSS=30,TD=30,fitDirty=true,dprCap=3,slowN=0,emaMs=16.7;
 // холст = CSS-размер × devicePixelRatio (не больше 3); любая смена размера/поворот ловится прямо в цикле кадров
 function fit(){
-  DPR=Math.min(window.devicePixelRatio||1,3);VW=innerWidth;VH=innerHeight;
+  DPR=Math.min(window.devicePixelRatio||1,dprCap);VW=innerWidth;VH=innerHeight;
   cv.width=Math.round(VW*DPR);cv.height=Math.round(VH*DPR);
-  TCSS=Math.min(VW/13,VH/12);TD=Math.max(8,Math.round(TCSS*DPR));
+  TCSS=VH>VW?Math.min(VW/9.5,VH/12):Math.min(VW/13,VH/12); /* портрет: крупно, ~9.5 тайла в ширину */
+  TD=Math.max(8,Math.round(TCSS*DPR));
   GFX.resize(VW,VH,DPR,TD);GFX.setFont(Math.round(10.5*DPR));camInit=false;fitDirty=true;
 }
 ['gesturestart','gesturechange','dblclick'].forEach(e=>document.addEventListener(e,ev=>ev.preventDefault()));
@@ -1572,7 +1577,7 @@ function zoneTouch(zone,onChange){
   zone.addEventListener('pointerup',end);zone.addEventListener('pointercancel',end);zone.addEventListener('lostpointercapture',end);
 }
 zoneTouch($('zl'),ps=>{
-  const lr=$('vl').getBoundingClientRect(),rr2=$('vr2').getBoundingClientRect();const cut=(lr.right+rr2.left)/2;let l=0,rr=0;
+  const zr0=$('zl').getBoundingClientRect(),vl=$('vl'),v2=$('vr2');const cut=zr0.left+(vl.offsetLeft+vl.offsetWidth+v2.offsetLeft)/2;let l=0,rr=0; // offsetLeft: не зависит от transform/анимаций
   for(const x of ps.values()){if(x<cut)l=1;else rr=1}
   touchL=l;touchR=rr;$('vl').classList.toggle('p',!!l);$('vr2').classList.toggle('p',!!rr);
 });
@@ -1659,6 +1664,7 @@ function gCalcDelay(now){
   gOff=mn;
   if(snaps.length>3){const n=Math.min(30,snaps.length-1);gGap=Math.min(120,(snaps[snaps.length-1].ts-snaps[snaps.length-1-n].ts)/n)}
 }
+let gDn=0;
 function ghostUpdate(dt){
   const now=Date.now(),n=snaps.length;
   if(!n){pp.on=0;return false}
@@ -1673,7 +1679,8 @@ function ghostUpdate(dt){
   else if(!a||rt<=a.ts){x=b.x;y=b.y;src=b}
   else if(Math.abs(b.x-a.x)>3||Math.abs(b.y-a.y)>3||a.dn!==b.dn){x=a.x;y=a.y;src=a} // респавн: без «пролёта»
   else{const k=(rt-a.ts)/Math.max(1,b.ts-a.ts);x=a.x+(b.x-a.x)*k;y=a.y+(b.y-a.y)*k;src=k<.5?a:b}
-  pp.on=1;pp.x=x;pp.y=y;pp.face=src.f;pp.d=src.d;pp.vx=src.vx;pp.vy=src.vy;pp.g=src.g;
+  if(pp.on&&gDn===src.dn&&!pp.d&&x<pp.x&&pp.x-x<4){x=Math.max(x,pp.x-9*dt)} // призрак не откатывается назад рывками: назад не быстрее бега
+  gDn=src.dn;pp.on=1;pp.x=x;pp.y=y;pp.face=src.f;pp.d=src.d;pp.vx=src.vx;pp.vy=src.vy;pp.g=src.g;
   return true;
 }
 const WN=['Склеп','Ледник','Жар','Бездна','Оранжерея','Небеса','Ядро'];
@@ -1840,7 +1847,9 @@ let acc=0,lastT=performance.now(),alpha=1,nFrames=0,nTicks=0;
 function frame(now){
   requestAnimationFrame(frame);
   if(innerWidth!==VW||innerHeight!==VH)fit();
-  const dtms=Math.min(100,Math.max(0,now-lastT));lastT=now;const dt=dtms/1000;animT+=dt;nFrames++;
+  const dtms=Math.min(100,Math.max(0,now-lastT));lastT=now;
+  if(screen==='race'&&phase==='run'&&!paused&&dtms>0){emaMs+=(Math.min(dtms,100)-emaMs)*.05;if(emaMs>26&&dprCap>1.5){if(++slowN>90){slowN=0;dprCap=Math.max(1.5,dprCap*.75);emaMs=16.7;fit()}}else slowN=0}
+  const dt=dtms/1000;animT+=dt;nFrames++;
   alpha=1;
   if(screen==='race'&&!paused&&me){
     if(phase==='count'){
@@ -1895,9 +1904,9 @@ function renderRace(dt){
   let mx=me.x,my=me.y,tS=me.t;
   if(phase==='run'){mx=pv.x+(me.x-pv.x)*alpha;my=pv.y+(me.y-pv.y)*alpha;tS=pv.t+(me.t-pv.t)*alpha}
   // камера (в тайлах), сглаживание привязано ко времени
-  const vwT=VW/TCSS,vhT=VH/TCSS,lookX=VW>VH?.36:.38;
-  let tx=mx-vwT*lookX,ty=(my-0.4)-vhT*(VH>VW?.55:.62);
-  const maxY=(L.H+1.2)-vhT*(VH>VW?.8:.92);if(ty>maxY)ty=maxY;
+  const vwT=VW/TCSS,vhT=VH/TCSS,lookX=VW>VH?.36:.3;
+  let tx=mx-vwT*lookX,ty=(my-0.4)-vhT*(VH>VW?.6:.62);
+  const maxY=(L.H+1.2)-vhT*(VH>VW?.74:.92);if(ty>maxY)ty=maxY;
   const maxX=Math.max(0,(L.W+2)-vwT);if(tx<-1)tx=-1;if(tx>maxX)tx=maxX;
   const pcx=camX;
   if(!camInit){camX=tx;camY=ty;camInit=true}else{camX+=(tx-camX)*(1-Math.exp(-dt*9));camY+=(ty-camY)*(1-Math.exp(-dt*5.5))}
