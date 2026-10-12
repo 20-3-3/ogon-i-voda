@@ -235,10 +235,10 @@ Bld.prototype = {
   orb(x, y) { this.set(x, y, 'o'); },
   saw(x, y, ax, ay, per, ph) { this.saws.push({ x, y, ax: ax || 0, ay: ay || 0, per: per || 2, ph: ph || 0 }); },
   cp() { this.set(this.x - 1, this.f - 1, 'K'); },
-  shaft(h) {
+  shaft(h, gap) {
     const x0 = this.x, f = this.f, H = this.H;
     this.rect(x0, f, 5, H - f, '#');
-    this.rect(x0, f - h, 1, h - 1, '#');
+    this.rect(x0, f - h, 1, h - (gap || 1), '#'); // gap: просвет под столбом (по умолчанию 1; ур.48 — 3)
     this.rect(x0 + 4, f - h, 5, H - (f - h), '#');
     this.x = x0 + 9; this.f = f - h; this.maxx = Math.max(this.maxx, this.x);
     return x0;
@@ -299,6 +299,8 @@ function approach(v, tg, d) { return v < tg ? Math.min(tg, v + d) : Math.max(tg,
 
 let MRG = 0; // запас на опасности (в проверке > 0)
 function setMargin(m) { MRG = m; }
+let PWX = PW, PHX = PH; // габарит для стен/потолка (в проверке раздут на запас)
+function setHB(dw, dh) { PWX = PW + dw / 2; PHX = PH + dh; }
 
 function respawn(L, S) {
   S.x = S.cpx; S.y = S.cpy; S.vx = S.vy = 0; S.gr = true; S.coy = S.buf = S.wcoy = S.wlock = 0; S.wd = 0; S.aj = 0; S.jmp = false; S.dead = 0;
@@ -346,13 +348,13 @@ function step(L, S, inp) {
   // движение по X
   const dx = (S.vx + (S.gr ? S.conv : 0)) * DT;
   let nx = S.x + dx;
-  const r0 = Math.floor(S.y - PH + 0.001), r1 = Math.floor(S.y - 0.001);
+  const r0 = Math.floor(S.y - PHX + 0.001), r1 = Math.floor(S.y - 0.001);
   if (dx > 0) {
-    const cx = Math.floor(nx + PW);
-    for (let r = r0; r <= r1; r++) if (solidAt(L, S, cx, r)) { nx = cx - PW - 0.0005; S.vx = 0; break; }
+    const cx = Math.floor(nx + PWX);
+    for (let r = r0; r <= r1; r++) if (solidAt(L, S, cx, r)) { nx = cx - PWX - 0.0005; S.vx = 0; break; }
   } else if (dx < 0) {
-    const cx = Math.floor(nx - PW);
-    for (let r = r0; r <= r1; r++) if (solidAt(L, S, cx, r)) { nx = cx + 1 + PW + 0.0005; S.vx = 0; break; }
+    const cx = Math.floor(nx - PWX);
+    for (let r = r0; r <= r1; r++) if (solidAt(L, S, cx, r)) { nx = cx + 1 + PWX + 0.0005; S.vx = 0; break; }
   }
   S.x = nx;
   // движение по Y
@@ -364,8 +366,8 @@ function step(L, S, inp) {
     const row = Math.floor(ny);
     for (let c = c0; c <= c1; c++) if (solidAt(L, S, c, row) && S.y <= row + 0.01) { ny = row; S.vy = 0; landed = true; break; }
   } else if (dy < 0) {
-    const row = Math.floor(ny - PH);
-    for (let c = c0; c <= c1; c++) if (solidAt(L, S, c, row)) { ny = row + 1 + PH + 0.0005; S.vy = 0; S.jmp = false; break; }
+    const row = Math.floor(ny - PHX), cc0 = Math.floor(S.x - PWX + 0.001), cc1 = Math.floor(S.x + PWX - 0.001);
+    for (let c = cc0; c <= cc1; c++) if (solidAt(L, S, c, row)) { ny = row + 1 + PHX + 0.0005; S.vy = 0; S.jmp = false; break; }
   }
   S.y = ny;
   // земля
@@ -386,7 +388,7 @@ function step(L, S, inp) {
   S.wd = 0;
   if (!gr) {
     const q0 = Math.floor(S.y - PH + 0.1), q1 = Math.floor(S.y - 0.1);
-    const lc = Math.floor(S.x - PW - 0.05), rc = Math.floor(S.x + PW + 0.05);
+    const lc = Math.floor(S.x - PWX - 0.05), rc = Math.floor(S.x + PWX + 0.05);
     for (let r = q0; r <= q1; r++) {
       if (solidAt(L, S, rc, r)) { S.wd = 1; break; }
       if (solidAt(L, S, lc, r)) { S.wd = -1; break; }
@@ -694,7 +696,7 @@ const LEVEL_DEFS = [
   }],
   // 48 Шахта и лента
   ['Шахта и лента', 6, 34, 28, b => {
-    b.run(5); b.conv(7, 1); b.spk(2); let x = b.x; b.shaft(9); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.2, 0); b.run(2); b.cp(); b.conv(6, -1); b.gap(3); b.conv(5, 1);
+    b.run(5); b.conv(7, 1); b.spk(2); b.run(3); let x = b.x; b.shaft(9, 3); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.2, 0); b.run(2); b.cp(); b.conv(6, -1); b.gap(3); b.conv(5, 1);
     x = b.x; b.shaft(8); b.set(x + 1, b.f + 5, 'v'); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.4, 0.4); b.run(2); b.cp(); b.crumb(4); b.gap(2); b.crumb(4); b.run(2); b.stairsDown(2, 3, 4); b.gap(4); b.run(3);
   }],
   // 49 Предел
@@ -716,7 +718,7 @@ const LEVEL_DEFS = [
 ];
 const LEVELS = LEVEL_DEFS.map(d => mk(d[2], d[3], d[4], d[0], d[1]));
 
-if (typeof module !== 'undefined') module.exports = { LEVELS, initState, cloneState, step, setMargin, sawPos, PW, PH, CF };
+if (typeof module !== 'undefined') module.exports = { LEVELS, initState, cloneState, step, setMargin, setHB, sawPos, PW, PH, CF };
 
 </script>
 <script>
