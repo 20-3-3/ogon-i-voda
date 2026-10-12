@@ -1,7 +1,7 @@
 // Offline cache for the games site: pages open even without internet (needed for the «Рядом» mode on a hotspot).
 // Same-origin files: network first (so updates arrive), cache as fallback. Other sites (fonts, libs): cache as fallback.
-const CACHE = 'duo-games-v1';
-const CORE = ['./', 'index.html', 'games/', 'games/index.html', 'games/shared/duo.js', 'games/shared/vendor/qrcode.js', 'games/shared/vendor/jsQR.js',
+const CACHE = 'duo-games-v2';
+const CORE = ['./', 'index.html', 'games/', 'games/index.html', 'games/shared/duo.js', 'games/shared/save.js', 'games/shared/vfix.js', 'games/shared/vendor/qrcode.js', 'games/shared/vendor/jsQR.js',
   'games/morskoy-boy/', 'games/zabeg/', 'games/artilleriya/', 'games/risuy/'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.all(CORE.map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
