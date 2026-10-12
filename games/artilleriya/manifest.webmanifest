@@ -2,7 +2,7 @@
  "name": "Артиллерия",
  "short_name": "Артиллерия",
  "start_url": "./",
- "scope": "./",
+ "scope": "../../",
  "display": "standalone",
  "orientation": "any",
  "background_color": "#2a1a0e",

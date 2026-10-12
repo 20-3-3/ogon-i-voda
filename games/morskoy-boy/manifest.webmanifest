@@ -2,7 +2,7 @@
  "name": "Морской бой",
  "short_name": "Морской бой",
  "start_url": "./",
- "scope": "./",
+ "scope": "../../",
  "display": "standalone",
  "orientation": "any",
  "background_color": "#0b1d2e",

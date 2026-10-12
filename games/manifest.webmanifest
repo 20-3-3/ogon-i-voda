@@ -2,7 +2,7 @@
  "name": "Игры на двоих",
  "short_name": "Игры вдвоём",
  "start_url": "./",
- "scope": "./",
+ "scope": "../",
  "display": "standalone",
  "orientation": "any",
  "background_color": "#121016",

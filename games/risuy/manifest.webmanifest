@@ -2,7 +2,7 @@
  "name": "Рисуй-угадай",
  "short_name": "Рисуй",
  "start_url": "./",
- "scope": "./",
+ "scope": "../../",
  "display": "standalone",
  "orientation": "any",
  "background_color": "#fff4d8",

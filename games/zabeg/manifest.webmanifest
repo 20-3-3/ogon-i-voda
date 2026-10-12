@@ -2,7 +2,7 @@
  "name": "Призрачный забег",
  "short_name": "Забег",
  "start_url": "./",
- "scope": "./",
+ "scope": "../../",
  "display": "standalone",
  "orientation": "any",
  "background_color": "#1a1030",
