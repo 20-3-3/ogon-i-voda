@@ -14,6 +14,16 @@ p.sub{text-align:center;color:var(--mut);margin:0 0 20px}
 .t{flex:1;min-width:0}.t b{display:block;font-size:17px}.t small{display:block;color:var(--mut);font-size:13px;margin-top:2px}
 .tag{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.1);white-space:nowrap}.tag.soon{background:transparent;border:1px dashed var(--line)}
 .how{color:var(--mut);font-size:14px;line-height:1.5;margin-top:18px}
+.save{margin-top:22px;padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.04)}
+.save h2{margin:0 0 4px;font-size:19px}.save p{margin:0 0 12px;color:var(--mut);font-size:14px;line-height:1.45}
+.svrow{display:flex;gap:10px;flex-wrap:wrap}.svrow>button{flex:1 1 140px}
+.svb{font:inherit;font-weight:800;font-size:16px;color:var(--fg);background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-height:48px;cursor:pointer;touch-action:manipulation}
+.svb.hot{background:#e2bd62;color:#1b160c;border-color:#e2bd62}.svb.ghost{background:transparent}
+.svb:active{transform:scale(.98)}
+#svQR{display:block;width:min(260px,70vw);height:auto;margin:6px auto 12px;border-radius:12px;background:#fff}
+textarea.svt{width:100%;min-height:90px;font:13px/1.35 ui-monospace,Menlo,monospace;color:var(--fg);background:#0b0a0e;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;word-break:break-all}
+#svToast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);background:#2a2733;border:1px solid var(--line);color:var(--fg);padding:10px 16px;border-radius:999px;font-weight:800;font-size:14px;z-index:10;max-width:90vw;text-align:center}
+[hidden]{display:none!important}
 </style></head><body><main>
 <h1>Игры на двоих</h1><p class="sub">Для двух телефонов, без регистрации</p>
 <a class="card" href="../"><span class="dot" style="background:#ff6b2c;box-shadow:0 0 18px #ff6b2c"></span><span class="t"><b>Огонь и Вода</b><small>Вместе по храму: огонь и вода, рычаги и лифты</small></span><span class="tag">20 уровней</span></a>
@@ -22,5 +32,24 @@ p.sub{text-align:center;color:var(--mut);margin:0 0 20px}
 <a class="card" href="artilleriya/"><span class="dot" style="background:#ffb347;box-shadow:0 0 18px #ffb347"></span><span class="t"><b>Артиллерия</b><small>Угол, сила, ветер — и прямое попадание</small></span><span class="tag">50 уровней</span></a>
 <a class="card" href="risuy/"><span class="dot" style="background:#ff9be0;box-shadow:0 0 18px #ff9be0"></span><span class="t"><b>Рисуй-угадай</b><small>Один рисует пальцем, второй угадывает</small></span><span class="tag">50 уровней</span></a>
 
+<section class="save" id="save">
+ <div id="svMain"><h2>💾 Сохранение прогресса</h2>
+  <p>Прогресс хранится в браузере. Чтобы перенести его в другой браузер или на другой телефон, сохрани его ссылкой и открой её там. Сохраняются сразу все игры.</p>
+  <div class="svrow"><button class="svb hot" id="svSave">Сохранить прогресс</button><button class="svb" id="svLoadBtn">Загрузить</button></div>
+  <div class="svrow" style="margin-top:10px"><button class="svb ghost" id="svUndo" hidden>Отменить последнюю загрузку</button></div></div>
+ <div id="svSaved" hidden><h2>Прогресс сохранён</h2><p id="svInfo"></p>
+  <canvas id="svQR" hidden aria-label="QR-код со ссылкой на сохранение"></canvas>
+  <p id="svQRnote" hidden>Сохранение большое, QR-код не поместился — отправь ссылку.</p>
+  <p>Открой эту ссылку в другом браузере или на другом телефоне (или наведи на QR-код камеру айфона), и прогресс загрузится. Ссылку удобно отправить себе в «Заметки» или в чат.</p>
+  <div class="svrow"><button class="svb hot" id="svShare">Отправить ссылку</button><button class="svb" id="svCopy">Скопировать</button></div>
+  <textarea class="svt" id="svOut" hidden readonly></textarea>
+  <div class="svrow" style="margin-top:10px"><button class="svb ghost" data-sv-back>Готово</button></div></div>
+ <div id="svLoad" hidden><h2>Загрузить прогресс</h2><p>Вставь ссылку или код сохранения.</p>
+  <textarea class="svt" id="svIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://…#save=…"></textarea>
+  <div class="svrow"><button class="svb hot" id="svLoadGo">Загрузить</button><button class="svb ghost" data-sv-back>Отмена</button></div></div>
+ <div id="svAsk" hidden><h2>Загрузить этот прогресс?</h2><p id="svAskInfo"></p>
+  <div class="svrow"><button class="svb hot" id="svYes">Загрузить</button><button class="svb ghost" id="svNo">Не надо</button></div></div>
+</section>
+<div id="svToast" hidden role="status"></div>
 <p class="how">Как играть вдвоём: каждый открывает игру на своём телефоне, первый создаёт комнату и получает код из 4 цифр, второй вводит его. Можно играть и на одном телефоне.</p>
-</main></body></html>
+</main><script src="shared/save.js"></script></body></html>
