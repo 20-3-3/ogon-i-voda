@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Проверка связи</title><meta name="theme-color" content="#121016">
+<link rel="stylesheet" href="shared/fonts/fonts.css">
+<style>
+:root{--bg:#121016;--fg:#f3eee4;--mut:#a69f93;--line:rgba(255,255,255,.12);--ok:#7ee0a8;--bad:#ff8f7a;--wait:#e2bd62}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Nunito,-apple-system,sans-serif}
+main{max-width:560px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+h1{font-size:26px;margin:6px 0 4px}p{color:var(--mut);line-height:1.45;margin:0 0 12px;font-size:15px}
+a{color:var(--wait)}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;background:rgba(255,255,255,.03)}
+.row b{display:block;font-size:16px}.row small{display:block;color:var(--mut);font-size:13px;margin-top:2px}
+.ic{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:900;color:#111}
+.ok .ic{background:var(--ok)}.fail .ic{background:var(--bad)}.wait .ic{background:var(--wait);animation:p 1s infinite}
+@keyframes p{50%{opacity:.4}}
+.t{flex:1;min-width:0}
+.sum{padding:14px;border-radius:14px;margin:14px 0;font-size:15px;line-height:1.5;background:rgba(255,255,255,.06)}
+button{font:inherit;font-weight:800;font-size:16px;color:#1b160c;background:#e2bd62;border:0;border-radius:14px;padding:12px 16px;min-height:48px;width:100%;margin-top:6px}
+</style></head><body><main>
+<p><a href="./">← Все игры</a></p>
+<h1>Проверка связи</h1>
+<p>Страница проверяет, до каких серверов-посредников и служб может достучаться этот телефон из текущей сети. Запусти её на обоих телефонах — с VPN и без — и пришли скриншоты, если игра не соединяется.</p>
+<div id="list"></div>
+<div class="sum" id="sum">Проверяю…</div>
+<button id="again">Проверить ещё раз</button>
+</main>
+<script src="shared/duo.js"></script>
+<script>
+const NAMES = {
+  'local': ['Прямая связь в своей сети', 'нужна для режима «Рядом, без интернета»'],
+  'ntfy': ['Посредник ntfy.sh', 'запасной канал для поиска партнёра'],
+};
+function label(k) {
+  if (NAMES[k]) return NAMES[k];
+  if (k.startsWith('mqtt:')) return ['Посредник ' + k.slice(5).replace(/:\d+$/, ''), 'передаёт ходы, если напрямую не вышло'];
+  if (k.startsWith('stun:')) return ['STUN ' + k.slice(5).replace(/:\d+$/, ''), 'помогает телефонам соединиться напрямую через интернет'];
+  return [k, ''];
+}
+function render(res) {
+  const L = document.getElementById('list'); L.innerHTML = '';
+  Object.keys(res).forEach(k => {
+    const v = res[k], [n, d] = label(k), row = document.createElement('div');
+    row.className = 'row ' + v.st;
+    row.innerHTML = '<div class="ic">' + (v.st === 'ok' ? '✓' : v.st === 'fail' ? '✕' : '…') + '</div><div class="t"><b></b><small></small></div>';
+    row.querySelector('b').textContent = n;
+    row.querySelector('small').textContent = (v.st === 'ok' ? 'доступен' + (v.ms ? ' · ' + v.ms + ' мс' : '') + (v.note ? ' · ' + v.note : '') : v.st === 'fail' ? 'недоступен' + (v.note ? ' · ' + v.note : '') : 'проверяю…') + ' — ' + d;
+    L.appendChild(row);
+  });
+}
+function summary(res) {
+  const ks = Object.keys(res), ok = (p) => ks.filter(k => k.startsWith(p) && res[k].st === 'ok').length;
+  const relays = ok('mqtt:') + (res.ntfy && res.ntfy.st === 'ok' ? 1 : 0), stun = ok('stun:'), local = res.local && res.local.st === 'ok';
+  const out = [];
+  out.push(relays ? '✅ Игра через интернет (по коду комнаты) должна работать: доступно посредников — ' + relays + '.' : '❌ Ни один сервер-посредник недоступен из этой сети — игра по коду комнаты не соединится. Попробуй другой VPN-сервер (или выключи VPN), либо играйте в режиме «Рядом, без интернета».');
+  out.push(stun ? '✅ Прямое соединение через интернет возможно (пинг будет ниже).' : '⚠️ STUN недоступен — через интернет пойдёт только через посредника (задержка выше, но играть можно).');
+  out.push(local ? '✅ Режим «Рядом, без интернета» поддерживается браузером. Для него оба телефона должны быть в одной сети Wi-Fi (или один раздаёт точку доступа), а VPN на время игры лучше выключить — многие VPN не пускают телефоны друг к другу в локальной сети.' : '❌ Браузер не даёт прямое соединение (WebRTC) — режим «Рядом» не заработает.');
+  document.getElementById('sum').innerHTML = out.map(s => '<div>' + s.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</div>').join('');
+}
+function run() { document.getElementById('sum').textContent = 'Проверяю…'; Duo.diagnose((k, v, res) => render(res)).then(res => { render(res); summary(res); }); }
+document.getElementById('again').onclick = run;
+run();
+</script></body></html>

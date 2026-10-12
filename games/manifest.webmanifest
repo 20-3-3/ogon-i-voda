@@ -1,0 +1,24 @@
+{
+ "name": "Игры на двоих",
+ "short_name": "Игры вдвоём",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#121016",
+ "theme_color": "#121016",
+ "lang": "ru",
+ "icons": [
+  {
+   "src": "../games/icons/menu-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "../games/icons/menu-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<html lang="ru"><head><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="../games/icons/menu-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Игры на двоих</title><meta name="theme-color" content="#121016">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ruslan+Display&family=Nunito:wght@600;800&display=swap">
+<link rel="stylesheet" href="shared/fonts/fonts.css">
 <style>
 :root{--bg:#121016;--fg:#f3eee4;--mut:#a69f93;--line:rgba(255,255,255,.12)}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Nunito,-apple-system,sans-serif}
@@ -51,5 +51,6 @@ textarea.svt{width:100%;min-height:90px;font:13px/1.35 ui-monospace,Menlo,monosp
   <div class="svrow"><button class="svb hot" id="svYes">Загрузить</button><button class="svb ghost" id="svNo">Не надо</button></div></div>
 </section>
 <div id="svToast" hidden role="status"></div>
+<a class="card" href="check.html"><span class="dot" style="background:#7ee0a8;box-shadow:0 0 18px #7ee0a8"></span><span class="t"><b>Проверка связи</b><small>Если телефоны не соединяются — покажет, что блокируется</small></span></a>
 <p class="how">Как играть вдвоём: каждый открывает игру на своём телефоне, первый создаёт комнату и получает код из 4 цифр, второй вводит его. Можно играть и на одном телефоне.</p>
 </main><script src="shared/save.js"></script></body></html>

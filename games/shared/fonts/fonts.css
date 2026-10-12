@@ -1,0 +1,10 @@
+/* Fonts hosted on this site (no Google servers needed). SIL Open Font License, see OFL.txt. */
+@font-face{font-family:"Ruslan Display";src:url(RuslanDisplay.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Russo One";src:url(RussoOne.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Nunito";src:url(Nunito.woff) format("woff");font-weight:200 1000;font-display:swap}
+@font-face{font-family:"Oswald";src:url(Oswald.woff) format("woff");font-weight:200 700;font-display:swap}
+@font-face{font-family:"PT Sans Caption";src:url(PTSansCaption-Regular.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"PT Sans Caption";src:url(PTSansCaption-Bold.woff) format("woff");font-weight:700;font-display:swap}
+@font-face{font-family:"Caveat";src:url(Caveat.woff) format("woff");font-weight:400 700;font-display:swap}
+@font-face{font-family:"Rubik Mono One";src:url(RubikMonoOne.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Rubik";src:url(Rubik.woff) format("woff");font-weight:300 900;font-display:swap}

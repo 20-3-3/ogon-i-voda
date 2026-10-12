@@ -47,6 +47,26 @@
   window.addEventListener('pageshow', kick);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') kick(); });
   lastW = window.innerWidth; lastH = window.innerHeight; setVars();
+
+  // ---- no zoom / magnifier while playing (iPhone Safari) ----
+  // double-tap zoom, pinch zoom, the long-press text magnifier and callout menu all distract from the game.
+  var vp = document.querySelector('meta[name=viewport]');
+  var vpc = 'width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover';
+  if (vp) vp.setAttribute('content', vpc);
+  else { vp = document.createElement('meta'); vp.name = 'viewport'; vp.content = vpc; (document.head || document.documentElement).appendChild(vp); }
+  var st = document.createElement('style');
+  st.textContent = 'html{-webkit-text-size-adjust:100%;text-size-adjust:100%}html,body{touch-action:manipulation}' +
+    'html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}' +
+    '*{-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}' +
+    'button,a,[role=button],canvas,label,select{touch-action:manipulation}' +
+    'input,textarea,[contenteditable=true]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;font-size:max(16px,1em)}';
+  (document.head || document.documentElement).appendChild(st);
+  function editable(t) { return t && t.closest && t.closest('input,textarea,select,[contenteditable=true]'); }
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (ev) { document.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false }); });
+  document.addEventListener('touchmove', function (e) { if (e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  document.addEventListener('dblclick', function (e) { if (!editable(e.target)) e.preventDefault(); }, { passive: false });
+  document.addEventListener('selectstart', function (e) { if (!editable(e.target)) e.preventDefault(); });
+  document.addEventListener('contextmenu', function (e) { if (!editable(e.target)) e.preventDefault(); });
 })();
 
 // ===== Duo: two-phone link for browser games (no accounts, no own server) =====
@@ -69,12 +89,11 @@
 // Nearby mode («Рядом, без интернета»): one WebRTC link over the local Wi-Fi / personal hotspot, set up by showing a
 // QR code (or sharing a text code) instead of any server. No internet, no VPN path, a few ms of delay.
 (function () {
-  const BROKERS = ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
-  const ICE = { config: { iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-  ] }, debug: 0 };
+  // Public relay servers used to find the partner and as a backup data path. Several independent ones run in
+  // parallel: if a provider blocks some of them, the others still work. No third-party libraries are loaded.
+  const BROKERS = Array.isArray(window.DUO_TEST_BROKERS) ? window.DUO_TEST_BROKERS : ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
+  const NTFY = 'ntfy.sh';
+  const STUN = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }, { urls: 'stun:stun.cloudflare.com:3478' }, { urls: 'stun:stun.nextcloud.com:443' }];
   const myId = Math.random().toString(36).slice(2, 12);
   const BASE = (document.currentScript && document.currentScript.src) ? new URL('.', document.currentScript.src).href : '';
   let game = 'game', accent = '#e2bd62';
@@ -143,7 +162,7 @@
   setInterval(() => {
     if (!code) return;
     const q = { t: 'q', id: myId, code, ts: performance.now() };
-    rtcSend(q); if (mq && mq.connected) { try { mq.publish(topic(), JSON.stringify(q), { qos: 0 }); } catch (e) {} }
+    rtcSend(q); relays.forEach(r => { if (r.ok && r.kind === 'mqtt') r.send(JSON.stringify(q)); });
   }, 1000);
   function direct() { return Date.now() - lastVia.rtc < 1500; }
   let localMode = false;
@@ -152,14 +171,14 @@
     if (!d || typeof d !== 'object' || d.id === myId || d.code !== code || typeof d.id !== 'string') return;
     lastVia[via] = Date.now();
     if (d.t === 'q') { const a = { t: 'a', id: myId, code, ts: d.ts, to: d.id };
-      if (via === 'rtc') rtcSend(a); else if (mq && mq.connected) { try { mq.publish(topic(), JSON.stringify(a), { qos: 0 }); } catch (e) {} }
+      if (via === 'rtc') rtcSend(a); else relays.forEach(r => { if (r.ok && r.kind === 'mqtt') r.send(JSON.stringify(a)); });
       return; }
     if (d.t === 'a') { if (d.to === myId && typeof d.ts === 'number') { const v = performance.now() - d.ts; rtt[via] = rtt[via] ? rtt[via] * 0.7 + v * 0.3 : v; } return; }
     if (typeof d.s === 'number') { if (lastSeq[d.id] && d.s <= lastSeq[d.id]) return; lastSeq[d.id] = d.s; }
     partnerLast = Date.now();
-    if (via === 'rtc') diag.rtc = 'работает'; if (via === 'mq') diag.mq = 'работает';
+    if (via === 'rtc') diag.rtc = localMode ? 'рядом: работает' : 'работает'; if (via === 'mq') diag.mq = relayStatus();
     const wasLinked = linked;
-    if (!linked) { linked = true; state = 'linked'; error = ''; sendState(); }
+    if (!linked) { linked = true; state = 'linked'; error = ''; sendState(); if (!localMode) setTimeout(rtcKick, 50); }
     if ((d.t === 'p' || d.t === 'e') && d.p && typeof d.p === 'object') { partner = d.p; recordSnap(d); }
     if (d.t === 'e' && typeof d.k === 'string') { call(H.ev[d.k] || [], d.v); }
     if (!wasLinked) { if (localMode) { diag.rtc = 'рядом: работает'; } ui(); call(H.link); if (pairResolve) { const r = pairResolve; pairResolve = null; hideOverlay(); r(); } else if (ov && !ov.hidden && localMode) hideOverlay(); }
@@ -171,75 +190,188 @@
     if (linked && Date.now() - partnerLast > (localMode ? 6000 : 9000)) { linked = false; partner = null; state = localMode ? 'nearby-lost' : (isHost ? 'hosting' : 'lost'); if (localMode) localLost(); ui(); call(H.loss); }
   }, 1500);
 
-  // ---------- transport 1: WebRTC via PeerJS ----------
-  let peer = null, conns = [];
-  function rtcSend(m) {
-    conns.forEach(c => { if (c.open) { try { c.send(m); } catch (e) {} } });
-    if (L.fast && L.fast.readyState === 'open') { try { (m.t === 'e' && L.safe && L.safe.readyState === 'open' ? L.safe : L.fast).send(JSON.stringify(m)); } catch (e) {} }
-  }
-  function rtcAttach(c, ss) {
-    c.on('open', () => { if (ss !== session) return; conns.push(c); diag.rtc = 'канал открыт'; ui(); try { c.send(packet('p', { p: mine })); } catch (e) {} });
-    c.on('data', (d) => { if (ss === session) onMsg(d, 'rtc'); });
-    const drop = () => { conns = conns.filter(x => x !== c); if (ss === session && !conns.length) { diag.rtc = 'канал закрыт'; ui(); } };
-    c.on('close', drop); c.on('error', drop);
-  }
-  async function rtcStart(ss) {
-    diag.rtc = 'загрузка…'; ui();
-    try { await loadScript('peer', 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', () => !!window.Peer); }
-    catch (e) { if (ss === session) { diag.rtc = 'не загрузилось'; ui(); } return; }
-    if (ss !== session) return;
-    const pid = 'duo-' + game + '-' + code;
-    if (isHost) {
-      peer = new window.Peer(pid, ICE);
-      peer.on('open', () => { if (ss === session) { diag.rtc = 'ждёт'; ui(); } });
-      peer.on('connection', (c) => rtcAttach(c, ss));
-    } else {
-      peer = new window.Peer(undefined, ICE);
-      const tryConnect = () => { if (ss !== session || conns.length || !peer || peer.destroyed) return; rtcAttach(peer.connect(pid, { reliable: false, serialization: 'json' }), ss); };
-      peer.on('open', () => { if (ss !== session) return; diag.rtc = 'соединяюсь…'; ui(); tryConnect(); });
-      const iv = setInterval(() => { if (ss !== session) { clearInterval(iv); return; } if (!conns.length) tryConnect(); }, 6000);
+  // ---------- minimal MQTT 3.1.1 client over WebSocket (no library needed) ----------
+  function MiniMqtt(url, clientId) {
+    const H2 = {}; let ws = null, buf = new Uint8Array(0), pid = 1, ping = 0, dead = false, retry = 0;
+    const c = { connected: false, url,
+      on(ev, f) { (H2[ev] = H2[ev] || []).push(f); return c; },
+      subscribe(t, o, cb) { c._subs = c._subs || []; if (!c._subs.includes(t)) c._subs.push(t); if (c.connected) sendSub(t); cb && cb(); },
+      publish(t, msg) { if (!c.connected) return; const tb = utf(t), pb = utf(msg); send(0x30, cat(len16(tb.length), tb, pb)); },
+      end() { dead = true; clearInterval(ping); try { if (ws && ws.readyState === 1) ws.send(new Uint8Array([0xe0, 0])); ws && ws.close(); } catch (e) {} c.connected = false; },
+    };
+    function emit(ev, ...a) { (H2[ev] || []).forEach(f => { try { f(...a); } catch (e) {} }); }
+    function utf(x) { return new TextEncoder().encode(String(x)); }
+    function len16(n) { return new Uint8Array([n >> 8, n & 255]); }
+    function cat(...a) { const n = a.reduce((x, y) => x + y.length, 0), o = new Uint8Array(n); let i = 0; a.forEach(x => { o.set(x, i); i += x.length; }); return o; }
+    function varlen(n) { const o = []; do { let b = n % 128; n = Math.floor(n / 128); if (n > 0) b |= 128; o.push(b); } while (n > 0); return new Uint8Array(o); }
+    function send(h, body) { try { if (ws && ws.readyState === 1) ws.send(cat(new Uint8Array([h]), varlen(body.length), body)); } catch (e) {} }
+    function sendSub(t) { const tb = utf(t); pid = (pid % 65000) + 1; send(0x82, cat(len16(pid), len16(tb.length), tb, new Uint8Array([0]))); }
+    function open() {
+      if (dead) return;
+      try { ws = new WebSocket(url, ['mqtt']); } catch (e) { emit('error', e); return later(); }
+      ws.binaryType = 'arraybuffer';
+      const to = setTimeout(() => { if (!c.connected) { try { ws.close(); } catch (e) {} } }, 8000);
+      ws.onopen = () => {
+        const id = utf(clientId);
+        send(0x10, cat(new Uint8Array([0, 4, 77, 81, 84, 84, 4, 2, 0, 30]), len16(id.length), id));
+      };
+      ws.onmessage = (e) => {
+        buf = cat(buf, new Uint8Array(e.data));
+        for (;;) {
+          if (buf.length < 2) return;
+          let mul = 1, n = 0, i = 1, b;
+          do { if (i >= buf.length) return; b = buf[i++]; n += (b & 127) * mul; mul *= 128; } while (b & 128);
+          if (buf.length < i + n) return;
+          const h0 = buf[0], type = h0 >> 4, body = buf.slice(i, i + n); buf = buf.slice(i + n);
+          if (type === 2) { clearTimeout(to); if (body[1] === 0) { c.connected = true; retry = 0; (c._subs || []).forEach(sendSub); clearInterval(ping); ping = setInterval(() => send(0xc0, new Uint8Array(0)), 20000); emit('connect'); } }
+          else if (type === 3) { const tl = (body[0] << 8) | body[1], t = new TextDecoder().decode(body.subarray(2, 2 + tl)); let off = 2 + tl; if ((h0 >> 1 & 3) > 0) off += 2; emit('message', t, new TextDecoder().decode(body.subarray(off))); }
+        }
+      };
+      ws.onclose = ws.onerror = () => { clearTimeout(to); clearInterval(ping); const was = c.connected; c.connected = false; buf = new Uint8Array(0); if (was) emit('close'); later(); };
     }
-    peer.on('disconnected', () => { try { if (ss === session) peer.reconnect(); } catch (e) {} });
-    peer.on('error', (e) => { if (ss !== session) return; diag.rtc = e && e.type === 'peer-unavailable' ? 'партнёр не найден' : e && e.type === 'unavailable-id' ? 'код занят' : 'ошибка'; ui(); });
+    function later() { if (dead) return; retry++; setTimeout(open, Math.min(15000, 1500 * retry)); }
+    open();
+    return c;
   }
-  function rtcStop() { conns.forEach(c => { try { c.close(); } catch (e) {} }); conns = []; try { if (peer) peer.destroy(); } catch (e) {} peer = null; }
 
-  // ---------- transport 2: MQTT relay ----------
-  let mq = null, mqPending = null, mqTimer = 0, mqLastSent = 0;
-  function topic() { return 'duo/v1/' + game + '/' + code; }
+  // ---------- relays: several MQTT brokers + ntfy.sh, all at once ----------
+  let relays = [];            // {name, kind, ok, send(str), stop()}
+  function topic() { return 'duo/v2/' + game + '/' + code; }
+  function relayStatus() { const ok = relays.filter(r => r.ok).length; return relays.length ? ok + ' из ' + relays.length : '—'; }
+  function relayUp() { return relays.some(r => r.ok); }
+  function relayPublish(m, important) {
+    const s = JSON.stringify(m);
+    relays.forEach(r => { if (r.ok && (r.kind === 'mqtt' || important)) r.send(s); });
+  }
+  let mqPending = null, mqTimer = 0, mqLastSent = 0;
   function mqSend(m, now) {
-    if (!mq || !mq.connected) return;
-    if (now) { try { mq.publish(topic(), JSON.stringify(m), { qos: 0 }); } catch (e) {} return; }
+    if (!relayUp()) return;
+    if (now) { relayPublish(m, true); return; }
     mqPending = m;
-    const gap = direct() ? 400 : 40; // relay is only a backup while the direct link is alive
+    const gap = direct() ? 400 : 40; // relays are only a backup while the direct link is alive
     const wait = Math.max(0, gap - (Date.now() - mqLastSent));
     if (!mqTimer) mqTimer = setTimeout(() => {
-      mqTimer = 0; if (!mq || !mq.connected || !mqPending) return;
-      try { mq.publish(topic(), JSON.stringify(mqPending), { qos: 0 }); } catch (e) {}
-      mqPending = null; mqLastSent = Date.now();
+      mqTimer = 0; if (!mqPending) return;
+      relayPublish(mqPending, false); mqPending = null; mqLastSent = Date.now();
     }, wait);
   }
-  async function mqStart(ss, bi) {
-    bi = bi || 0;
-    diag.mq = 'загрузка…'; ui();
-    try { await loadScript('mqtt', 'https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js', () => !!(window.mqtt && window.mqtt.connect)); }
-    catch (e) { if (ss === session) { diag.mq = 'не загрузилось'; ui(); } return; }
-    if (ss !== session) return;
-    const url = BROKERS[bi % BROKERS.length];
-    diag.mq = 'подключаюсь…'; ui();
-    let ok = false;
-    const c = window.mqtt.connect(url, { clientId: 'duo_' + myId + '_' + bi, keepalive: 20, reconnectPeriod: 3000, connectTimeout: 7000, clean: true });
-    mq = c;
-    c.on('connect', () => {
-      if (ss !== session) { try { c.end(true); } catch (e) {} return; }
-      ok = true; diag.mq = 'на связи'; ui();
-      c.subscribe(topic(), { qos: 0 }, () => sendState());
-    });
-    c.on('message', (t, buf) => { if (ss !== session) return; let d; try { d = JSON.parse(String(buf)); } catch (e) { return; } onMsg(d, 'mq'); });
-    setTimeout(() => { if (ss === session && !ok && mq === c) { try { c.end(true); } catch (e) {} if (bi + 1 < BROKERS.length * 2) mqStart(ss, bi + 1); else { diag.mq = 'сервер недоступен'; ui(); } } }, 9000);
+  function relayIn(text, name) { let d; try { d = JSON.parse(text); } catch (e) { return; } if (d && d.t === 'sig') return onSig(d); onMsg(d, 'mq'); }
+  function mqttRelay(url, ss) {
+    const name = url.replace(/^wss:\/\/|:\d+\/mqtt$/g, '').replace(/^broker\.|^test\./, '');
+    const r = { name, kind: 'mqtt', ok: false, send() {}, stop() {} };
+    const id = 'duo_' + myId + '_' + Math.random().toString(36).slice(2, 6);
+    const cl = (window.mqtt && window.mqtt.connect) ? window.mqtt.connect(url, { clientId: id, keepalive: 20, reconnectPeriod: 3000, connectTimeout: 7000, clean: true }) : MiniMqtt(url, id);
+    cl.on('connect', () => { if (ss !== session) return; r.ok = true; cl.subscribe(topic(), { qos: 0 }, () => {}); diag.mq = relayStatus(); ui(); sendState(); rtcKick(); });
+    cl.on('close', () => { r.ok = false; diag.mq = relayStatus(); ui(); });
+    cl.on('message', (t, buf) => { if (ss === session) relayIn(String(buf), name); });
+    r.send = (s) => { try { cl.publish(topic(), s, { qos: 0 }); } catch (e) {} };
+    r.stop = () => { try { cl.end(true); } catch (e) {} };
+    return r;
   }
-  function mqStop() { try { if (mq) mq.end(true); } catch (e) {} mq = null; mqPending = null; }
+  function ntfyRelay(ss) {
+    // ntfy.sh: slow but very common; only signalling, important events and a heartbeat go through it
+    const r = { name: 'ntfy', kind: 'ntfy', ok: false, send() {}, stop() {} };
+    if (window.mqtt || window.DUO_TEST_BROKERS) return r; // test harness
+    const tp = ('duo2' + game + code + 'x').replace(/[^a-zA-Z0-9_-]/g, '');
+    let ws = null, dead = false, retry = 0, lastHb = 0;
+    function open() {
+      if (dead || ss !== session) return;
+      try { ws = new WebSocket('wss://' + NTFY + '/' + tp + '/ws'); } catch (e) { return later(); }
+      ws.onopen = () => { r.ok = true; retry = 0; diag.mq = relayStatus(); ui(); rtcKick(); };
+      ws.onmessage = (e) => { let d; try { d = JSON.parse(e.data); } catch (er) { return; } if (d.event === 'message' && typeof d.message === 'string') relayIn(d.message, 'ntfy'); };
+      ws.onclose = ws.onerror = () => { const was = r.ok; r.ok = false; if (was) { diag.mq = relayStatus(); ui(); } later(); };
+    }
+    function later() { if (dead) return; retry++; setTimeout(open, Math.min(20000, 2000 * retry)); }
+    r.send = (s) => {
+      // keep well under the free rate limit: signalling and events immediately, state at most every 5 s
+      let d = null; try { d = JSON.parse(s); } catch (e) {}
+      if (d && d.t === 'p') { if (Date.now() - lastHb < 5000) return; lastHb = Date.now(); }
+      fetch('https://' + NTFY + '/' + tp, { method: 'POST', body: s, mode: 'cors', keepalive: true }).catch(() => {});
+    };
+    r.stop = () => { dead = true; try { ws && ws.close(); } catch (e) {} };
+    open();
+    return r;
+  }
+  function relaysStart(ss) {
+    relays = BROKERS.map(u => mqttRelay(u, ss)); relays.push(ntfyRelay(ss));
+    diag.mq = 'подключаюсь…'; ui();
+  }
+  function mqStop() { relays.forEach(r => r.stop()); relays = []; mqPending = null; }
 
+  // ---------- direct WebRTC link (signalling goes through the relays; no PeerJS server) ----------
+  const R = { pc: null, fast: null, safe: null, sid: '', peer: '', answered: false, resend: 0, made: 0 };
+  function rtcSend(m) {
+    const fast = L.fast && L.fast.readyState === 'open' ? L : (R.fast && R.fast.readyState === 'open' ? R : null);
+    if (!fast) return;
+    try { (m.t === 'e' && fast.safe && fast.safe.readyState === 'open' ? fast.safe : fast.fast).send(JSON.stringify(m)); } catch (e) {}
+  }
+  function rtcWire(ch, pc) {
+    ch.onmessage = (e) => { let d; try { d = JSON.parse(e.data); } catch (er) { return; } onMsg(d, 'rtc'); };
+    ch.onopen = () => { if (pc !== R.pc) return; if (ch.label === 'duo') { R.fast = ch; diag.rtc = 'работает'; ui(); sendState(); } else R.safe = ch; };
+    ch.onclose = () => { if (pc === R.pc && ch === R.fast) { R.fast = null; diag.rtc = 'нет'; ui(); } };
+  }
+  function rtcNewPc() {
+    try { if (R.pc) R.pc.close(); } catch (e) {}
+    R.fast = R.safe = null; R.answered = false;
+    const pc = R.pc = new RTCPeerConnection({ iceServers: STUN });
+    pc.onconnectionstatechange = () => {
+      if (pc !== R.pc) return;
+      if (pc.connectionState === 'failed' || pc.connectionState === 'closed') { diag.rtc = 'напрямую не вышло'; ui(); R.made = 0; setTimeout(rtcKick, 4000); }
+    };
+    return pc;
+  }
+  function sigSend(k, extra) { relayPublish(Object.assign({ t: 'sig', id: myId, code, k, sid: R.sid }, extra || {}), true); }
+  async function rtcOffer() {
+    // the room creator makes the offer; full SDP after gathering (no trickle) so one message is enough
+    R.sid = Math.random().toString(36).slice(2, 10); R.made = Date.now();
+    const pc = rtcNewPc(), sid = R.sid;
+    rtcWire(pc.createDataChannel('duo', { ordered: false, maxRetransmits: 0 }), pc);
+    rtcWire(pc.createDataChannel('duo-safe', { ordered: true }), pc);
+    await pc.setLocalDescription(await pc.createOffer());
+    await gatherDone(pc, 2500);
+    if (pc !== R.pc) return;
+    diag.rtc = 'соединяюсь…'; ui();
+    const sdp = pc.localDescription.sdp;
+    let n = 0; clearInterval(R.resend);
+    R.resend = setInterval(() => { if (pc !== R.pc || R.answered || ++n > 8) { clearInterval(R.resend); return; } sigSend('offer', { sdp, sid }); }, 2500);
+    sigSend('offer', { sdp, sid });
+  }
+  function rtcKick() {
+    // called whenever a relay comes up or the partner shows up: (re)start the direct link if it is not working
+    if (!code || localMode) return;
+    if (R.fast && R.fast.readyState === 'open') return;
+    if (isHost) { if (!R.made || Date.now() - R.made > 15000) rtcOffer().catch(() => {}); }
+    else sigSend('hi');
+  }
+  async function onSig(d) {
+    if (!d || d.id === myId || d.code !== code || localMode) return;
+    if (d.k === 'hi' && isHost) { if (!(R.fast && R.fast.readyState === 'open') && (!R.made || Date.now() - R.made > 6000)) rtcOffer().catch(() => {}); return; }
+    if (d.k === 'offer' && !isHost && typeof d.sdp === 'string') {
+      if (d.sid === R.sid && R.pc) return; // already answering this offer
+      R.sid = d.sid; R.peer = d.id;
+      const pc = rtcNewPc();
+      pc.ondatachannel = (e) => rtcWire(e.channel, pc);
+      try {
+        await pc.setRemoteDescription({ type: 'offer', sdp: d.sdp });
+        await pc.setLocalDescription(await pc.createAnswer());
+        await gatherDone(pc, 2500);
+        if (pc !== R.pc) return;
+        diag.rtc = 'соединяюсь…'; ui();
+        const sdp = pc.localDescription.sdp; let n = 0;
+        const t = setInterval(() => { if (pc !== R.pc || (R.fast && R.fast.readyState === 'open') || ++n > 4) { clearInterval(t); return; } sigSend('answer', { sdp, sid: d.sid }); }, 2500);
+        sigSend('answer', { sdp, sid: d.sid });
+      } catch (e) { diag.rtc = 'ошибка'; ui(); }
+      return;
+    }
+    if (d.k === 'answer' && isHost && d.sid === R.sid && R.pc && !R.answered && typeof d.sdp === 'string') {
+      R.answered = true;
+      try { await R.pc.setRemoteDescription({ type: 'answer', sdp: d.sdp }); } catch (e) { R.answered = false; }
+    }
+  }
+  function rtcStart(ss) { diag.rtc = '—'; R.made = 0; }
+  function rtcStop() { clearInterval(R.resend); try { if (R.pc) R.pc.close(); } catch (e) {} R.pc = R.fast = R.safe = null; R.sid = ''; R.made = 0; }
+  // guest keeps saying "hi" until the direct link works (covers lost signalling messages)
+  setInterval(() => { if (code && !localMode && relayUp() && !(R.fast && R.fast.readyState === 'open')) rtcKick(); }, 7000);
 
   // ---------- transport 3: NEARBY (local Wi-Fi / hotspot, QR pairing, no server) ----------
   const L = { pc: null, fast: null, safe: null, offer: '', role: '', scan: null };
@@ -397,12 +529,12 @@
   function stopAll() { session++; rtcStop(); mqStop(); localStop(); localMode = false; const was = linked; linked = false; partner = null; lastSeq = {}; snaps = []; off = null; late = 0; lateS = []; if (was) call(H.loss); }
   function begin() {
     const ss = session;
-    rtcStart(ss); mqStart(ss);
+    rtcStart(ss); relaysStart(ss);
     setTimeout(() => {
       if (ss !== session || linked || isHost) return;
-      const any = diag.mq === 'на связи' || diag.rtc === 'соединяюсь…' || diag.rtc === 'партнёр не найден';
+      const any = relayUp();
       error = any ? 'Комната ' + code + ' пока не отвечает. Проверь код: на первом телефоне должен быть открыт экран с этим кодом. Продолжаю пытаться…'
-        : 'Не получается выйти в интернет. Проверь Wi-Fi или мобильный интернет. Продолжаю пытаться…';
+        : 'Не удаётся связаться ни с одним сервером-посредником. Возможно, их блокирует провайдер или VPN. Открой «Проверка связи» в меню игр — она покажет, что именно недоступно. На одной сети Wi-Fi можно играть через «Рядом, без интернета». Продолжаю пытаться…';
       ui();
     }, 12000);
   }
@@ -584,6 +716,45 @@
     on(k, f) { (H.ev[k] = H.ev[k] || []).push(f); },
     status() { return { state, code, isHost, linked, nearby: localMode, view, diag: { ...diag }, error }; },
     sample, delay: renderDelay, direct,
+    // connection self-test for the «Проверка связи» page: every relay server, STUN, local network
+    diagnose(cb) {
+      const res = {}, done = [];
+      const put = (k, v) => { res[k] = v; try { cb && cb(k, v, res); } catch (e) {} };
+      const tp = 'duo/v2/diag/' + myId;
+      BROKERS.forEach((u) => {
+        const k = 'mqtt:' + u.replace(/^wss?:\/\/|\/mqtt$/g, ''); put(k, { st: 'wait' });
+        done.push(new Promise((ok) => {
+          const t0 = performance.now(); let fin = false;
+          const cl = MiniMqtt(u, 'diag_' + myId + Math.random().toString(36).slice(2, 5));
+          const end = (v) => { if (fin) return; fin = true; put(k, v); try { cl.end(); } catch (e) {} ok(); };
+          cl.on('connect', () => { const tc = performance.now() - t0; cl.subscribe(tp, {}, () => {}); setTimeout(() => cl.publish(tp, 'ping'), 150);
+            setTimeout(() => end({ st: 'ok', ms: Math.round(tc), note: 'подключился, но эхо не пришло' }), 4000);
+            cl.on('message', () => end({ st: 'ok', ms: Math.round(tc) })); });
+          setTimeout(() => end({ st: 'fail' }), 9000);
+        }));
+      });
+      put('ntfy', { st: 'wait' });
+      done.push(new Promise((ok) => {
+        const t0 = performance.now(); let fin = false, ws;
+        const end = (v) => { if (fin) return; fin = true; put('ntfy', v); try { ws.close(); } catch (e) {} ok(); };
+        try { ws = new WebSocket('wss://' + NTFY + '/duo2diag' + myId + '/ws'); ws.onopen = () => end({ st: 'ok', ms: Math.round(performance.now() - t0) }); ws.onerror = () => end({ st: 'fail' }); } catch (e) { end({ st: 'fail' }); }
+        setTimeout(() => end({ st: 'fail' }), 9000);
+      }));
+      const ice = (servers, key, want) => { put(key, { st: 'wait' }); done.push(new Promise((ok) => {
+        let fin = false, pc;
+        const end = (v) => { if (fin) return; fin = true; put(key, v); try { pc.close(); } catch (e) {} ok(); };
+        try {
+          pc = new RTCPeerConnection({ iceServers: servers }); pc.createDataChannel('x');
+          pc.onicecandidate = (e) => { const c = e.candidate && e.candidate.candidate || ''; if (c.indexOf(' typ ' + want) >= 0) end({ st: 'ok', note: want === 'host' ? (c.indexOf('.local') >= 0 ? 'адрес скрыт (норма для Safari)' : 'есть') : 'внешний адрес получен' }); };
+          pc.onicegatheringstatechange = () => { if (pc.iceGatheringState === 'complete') end({ st: 'fail' }); };
+          pc.createOffer().then(o => pc.setLocalDescription(o)).catch(() => end({ st: 'fail' }));
+        } catch (e) { end({ st: 'fail', note: 'WebRTC недоступен' }); }
+        setTimeout(() => end({ st: 'fail' }), 8000);
+      })); };
+      ice([], 'local', 'host');
+      STUN.forEach((s0) => { const u = [].concat(s0.urls)[0]; ice([s0], 'stun:' + u.replace(/^stun:/, ''), 'srflx'); });
+      return Promise.all(done).then(() => res);
+    },
     ping() {
       const now = Date.now(), r = now - lastVia.rtc < 2500 && rtt.rtc, m = now - lastVia.mq < 4000 && rtt.mq;
       if (r) return { via: localMode ? 'рядом' : 'напрямую', ms: Math.round(r) };

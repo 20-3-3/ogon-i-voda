@@ -1,0 +1,24 @@
+{
+ "name": "Морской бой",
+ "short_name": "Морской бой",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#0b1d2e",
+ "theme_color": "#0b1d2e",
+ "lang": "ru",
+ "icons": [
+  {
+   "src": "../../games/icons/morskoy-boy-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "../../games/icons/morskoy-boy-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  }
+ ]
+}
