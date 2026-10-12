@@ -516,7 +516,7 @@ function botAim(base,sh,wind,err,rnd){
 
 //==GAME-A: ядро, темы, сохранение, звук==
 const $=id=>document.getElementById(id);
-const FUEL=60,WNAME=['Ядро','Тройной','Бур','Кассета','Мина','Щит'],DT=1000/60,TS=2,NL=LEVELS.length;
+const FUEL=240,WNAME=['Ядро','Тройной','Бур','Кассета','Мина','Щит'],DT=1000/60,TS=2,NL=LEVELS.length;
 const WSVG=['<circle cx="12" cy="12" r="5.5"/>','<circle cx="5.5" cy="16" r="3.6"/><circle cx="12" cy="8" r="3.6"/><circle cx="18.5" cy="16" r="3.6"/>','<path d="M12 22 6.5 7h11z"/><path d="M8 11l8 2M8.8 15l6.4 1.6" stroke="#f1e4c3" stroke-width="1.4" fill="none"/><rect x="10" y="2" width="4" height="4"/>','<circle cx="12" cy="12" r="4.2"/><circle cx="4.5" cy="5" r="2.2"/><circle cx="19.5" cy="5" r="2.2"/><circle cx="4.5" cy="19" r="2.2"/><circle cx="19.5" cy="19" r="2.2"/>','<circle cx="12" cy="12" r="6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3" stroke="currentColor" stroke-width="2.2" fill="none"/>','<path d="M12 2.5 20 6v6c0 5-3.5 8-8 9.8C7.5 20 4 17 4 12V6z"/>'];
 // темы: sky — градиент неба (верх, низ, горизонт); far/mid — цвета дальних гряд; top/top2/soil/soil2 — слои земли;
 // cap — толщина «дёрна», tex — тип текстуры, hl — подсветка, amb — тон ночного/дневного освещения
@@ -1549,7 +1549,7 @@ function drawMatch(rt,a){
   // танки
   for(let i=0;i<2;i++)drawTank(c,M.tanks[i],i,M.phase==='aim'&&cur()===i,rt,a,TSC);
   // предпросмотр траектории
-  if(PV.n>0&&canControl()){for(let i=0;i<PV.n;i++){const r=2.4-i*.05,al=(.95-i*.04)*(.55+.45*Math.sin(rt*9-i*.7));c.globalAlpha=al<0?0:al;c.fillStyle='#fff6c8';c.strokeStyle='rgba(31,26,20,.7)';c.lineWidth=.9;c.beginPath();c.arc(PV.d[i*2],PV.d[i*2+1],r,0,TAU);c.fill();c.stroke();}c.globalAlpha=1;}
+  if(PV.n>0&&canControl()){const ac=(M.L.th==='desert'||M.L.th==='volcano')?'#2ff3ff':'#ffe600',pu=.5+.5*Math.sin(rt*6);c.lineJoin='round';for(let i=0;i<PV.n;i++){const f=1-i/PV.n,r=(5.2-i*.1)*(1+.12*pu*f),al=.4+.6*f,x=PV.d[i*2],y=PV.d[i*2+1];c.globalAlpha=al;c.fillStyle='rgba(12,9,6,.9)';c.beginPath();c.arc(x,y,r+2.2,0,TAU);c.fill();c.fillStyle=ac;c.beginPath();c.arc(x,y,r,0,TAU);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(x,y,r*.38,0,TAU);c.fill();}c.globalAlpha=1;}
   // снаряды (интерполяция по доле шага)
   if(M.pb&&M.pb.sf<0){const ff=Math.max(0,M.pb.f-1+a),rec=M.pb.rec;
     for(let i=0;i<rec.tr.length;i++){const q=rec.tr[i];if(ff<q.s||ff>=q.e)continue;
