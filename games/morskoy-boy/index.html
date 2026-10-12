@@ -135,20 +135,19 @@ canvas{touch-action:none;display:block}
  #ov-menu .card{width:min(420px,100%)}
 }
 @media (prefers-reduced-motion:reduce){.scr.on,.ov.on .card,.logo{animation:none}#wipe{display:none}}
-.allg-row{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;margin-top:4px;flex-wrap:wrap}a.allg{font-family:'Oswald','Arial Narrow',sans-serif;font-size:16px;font-weight:700;color:#1f1a14;text-decoration:none;background:rgba(241,228,195,.94);border:2px solid #1f1a14;border-radius:5px;padding:6px 14px;margin:0;min-height:44px;min-width:44px;width:auto;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;letter-spacing:0;line-height:1;text-transform:none;text-shadow:none;box-shadow:none;opacity:1;flex:none;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}a.allg:active{background:#e2bd62}
+a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(env(safe-area-inset-left,0px) + 12px);right:auto;bottom:auto;z-index:30;height:44px;min-height:44px;min-width:44px;width:auto;margin:0;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;font-size:16px;line-height:1;letter-spacing:0;text-transform:none;box-sizing:border-box;flex:none;opacity:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}a.allg{font-family:inherit;font-weight:700;color:#d9b25f;background:rgba(4,26,38,.72);border:2px solid #d9b25f;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.4);padding:0 16px}a.allg:active{background:rgba(217,178,95,.25)}
 </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
 <div id="wipe"></div>
 <section id="s-title" class="scr on">
- <div class="toprow"><span></span><div class="rt"><button class="icn" id="b-help" aria-label="Правила">?</button><button class="icn" id="b-mute1" aria-label="Звук">🔊</button></div></div>
+ <div class="toprow"><a class="allg" href="../">← Все игры</a><span></span><div class="rt"><button class="icn" id="b-help" aria-label="Правила">?</button><button class="icn" id="b-mute1" aria-label="Звук">🔊</button></div></div>
  <div class="logo"><small>ФЛОТ · ТУМАН · ОГОНЬ</small><b>МОРСКОЙ</b><b>БОЙ</b></div>
  <div class="menu">
   <button class="btn" id="b-net">Играть вдвоём по сети</button>
   <button class="btn red" id="b-resume" style="display:none">Продолжить бой</button>
   <div class="row"><button class="btn dark sm" id="b-ai">Против компьютера</button><button class="btn dark sm" id="b-pass">Один телефон на двоих</button></div>
-  <div class="allg-row"><a class="allg" href="../">← Все игры</a></div>
  </div>
 </section>
 

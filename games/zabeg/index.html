@@ -126,7 +126,7 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:8px;padding:0 16px;min-he
 @media (max-width:360px){.card .nm{font-size:10.5px}.btn{font-size:17px}}
 @media (prefers-reduced-motion:reduce){.scr.on{animation:none}}
 @media (max-height:460px){.duo-ov{padding-top:max(8px,env(safe-area-inset-top))!important;padding-bottom:max(8px,env(safe-area-inset-bottom))!important}.duo-box{gap:6px!important}.duo-h{font-size:20px!important}.duo-btn{padding:6px 12px!important;min-height:44px!important}.duo-btn small{display:none}.duo-code{font-size:44px!important}}
-.allg-row{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;margin-top:4px;flex-wrap:wrap}a.allg{font-family:'Oswald','Arial Narrow',sans-serif;font-size:16px;font-weight:700;color:#1f1a14;text-decoration:none;background:rgba(241,228,195,.94);border:2px solid #1f1a14;border-radius:5px;padding:6px 14px;margin:0;min-height:44px;min-width:44px;width:auto;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;letter-spacing:0;line-height:1;text-transform:none;text-shadow:none;box-shadow:none;opacity:1;flex:none;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}a.allg:active{background:#e2bd62}
+a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(env(safe-area-inset-left,0px) + 12px);right:auto;bottom:auto;z-index:30;height:44px;min-height:44px;min-width:44px;width:auto;margin:0;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;font-size:16px;line-height:1;letter-spacing:0;text-transform:none;box-sizing:border-box;flex:none;opacity:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}a.allg{font-family:'Rubik',system-ui,sans-serif;font-weight:700;color:#efe9ff;background:linear-gradient(#2d2263,#241b52);border:1px solid #4a3d93;border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 4px 0 #130d33}a.allg:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 0 #130d33}
 </style>
 </head>
 <body>
@@ -154,7 +154,8 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:8px;padding:0 16px;min-he
     <button class="btn" id="t-tt">Один на телефоне<small>время и гонка с собственным призраком</small></button>
     <button class="btn d" id="t-du">Дуэль на одном телефоне<small>передайте телефон по очереди</small></button>
     <button class="btn d" id="t-help" style="min-height:48px">Как играть и настройки</button>
-    <div class="allg-row"><a class="allg" href="../">← Все игры</a><a class="lnk" href="../#save" style="margin:0;padding:0 6px">💾 Сохранение прогресса</a></div>
+    <a class="lnk" href="../#save">💾 Сохранение прогресса</a>
+    <a class="allg" href="../">← Все игры</a>
   </div>
 </div>
 

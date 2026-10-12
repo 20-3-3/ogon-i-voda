@@ -162,7 +162,7 @@ h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin
 @keyframes bn { 0% { opacity: 0; transform: scale(.9); } 14% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; transform: scale(1.04) translateY(-8px); } }
 @media (orientation: landscape) { #banner { top: 30%; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01s !important; animation-duration: .01s !important; } }
-.allg-row{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;margin-top:4px;flex-wrap:wrap}a.allg{font-family:'Oswald','Arial Narrow',sans-serif;font-size:16px;font-weight:700;color:#1f1a14;text-decoration:none;background:rgba(241,228,195,.94);border:2px solid #1f1a14;border-radius:5px;padding:6px 14px;margin:0;min-height:44px;min-width:44px;width:auto;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;letter-spacing:0;line-height:1;text-transform:none;text-shadow:none;box-shadow:none;opacity:1;flex:none;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}a.allg:active{background:#e2bd62}
+a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(env(safe-area-inset-left,0px) + 12px);right:auto;bottom:auto;z-index:30;height:44px;min-height:44px;min-width:44px;width:auto;margin:0;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;font-size:16px;line-height:1;letter-spacing:0;text-transform:none;box-sizing:border-box;flex:none;opacity:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}a.allg{font-family:'Nunito',-apple-system,sans-serif;font-weight:900;color:#f4ead0;background:linear-gradient(180deg,#65573a,#3c3322);border:2px solid #e2bd62;border-radius:14px;box-shadow:0 3px 10px rgba(0,0,0,.45)}a.allg:active{filter:brightness(1.2);transform:translateY(1px)}
 </style>
 
 <div id="app">
@@ -190,7 +190,7 @@ h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin
         <button class="btn" id="btnSolo">Вдвоём на одном телефоне<small>Слева огонь, справа вода</small></button>
         <button class="btn ghost" id="btnSet">Настройки и помощь</button>
         <a class="btn ghost" id="btnSave" href="games/#save">💾 Сохранение прогресса</a>
-        <div class="allg-row"><a class="allg" id="btnAll" href="games/">← Все игры</a></div>
+        <a class="allg" id="btnAll" href="games/">← Все игры</a>
       </div>
     </div>
   </section>
