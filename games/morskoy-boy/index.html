@@ -40,16 +40,16 @@ canvas{touch-action:none;display:block}
 .logo{text-align:center;font-family:var(--hf);line-height:.95;text-shadow:0 3px 0 #000a,0 0 30px rgba(217,178,95,.4);animation:logoIn .9s cubic-bezier(.2,.9,.2,1) both}
 @keyframes logoIn{from{opacity:0;transform:translateY(-20px) scale(.92)}to{opacity:1;transform:none}}
 .logo small{display:block;font-size:13px;letter-spacing:6px;color:var(--brass);margin-bottom:8px}
-.logo b{display:block;font-size:min(15vw,13vh,76px);color:var(--paper);font-weight:400;-webkit-text-stroke:1px #000a}
+.logo b{display:block;font-size:min(15vw,calc(var(--app-h,100vh)*.13),76px);color:var(--paper);font-weight:400;-webkit-text-stroke:1px #000a}
 .logo b+b{color:var(--brass)}
-.menu{display:flex;flex-direction:column;gap:12px;width:min(340px,100%);margin-bottom:1vh}
+.menu{display:flex;flex-direction:column;gap:12px;width:min(340px,100%);margin-bottom:calc(var(--app-h,100vh)*.01)}
 .menu .row{display:flex;gap:10px}.menu .row>*{flex:1;min-width:0}
 .toprow{position:absolute;top:calc(var(--sat) + 8px);left:calc(var(--sal) + 12px);right:calc(var(--sar) + 12px);display:flex;justify-content:space-between;align-items:center;z-index:3}
 .toprow .rt{display:flex;gap:8px}
 .back{color:var(--paper);text-decoration:none;font-size:15px;min-height:46px;display:inline-flex;align-items:center;padding:0 6px;opacity:.9}
 @media (orientation:landscape) and (max-height:500px){
  #s-title{flex-direction:row;justify-content:space-around;align-items:center;padding-top:calc(var(--sat) + 56px)}
- .logo b{font-size:min(12vh,10vw)}.logo small{margin-bottom:4px}.menu{width:min(330px,46%);gap:8px;margin:0}.menu .btn{min-height:48px;padding:8px}.menu .btn.sm{min-height:46px}
+ .logo b{font-size:min(calc(var(--app-h,100vh)*.12),10vw)}.logo small{margin-bottom:4px}.menu{width:min(330px,46%);gap:8px;margin:0}.menu .btn{min-height:48px;padding:8px}.menu .btn.sm{min-height:46px}
 }
 /* levels */
 .hdr{display:flex;align-items:center;gap:10px;min-height:48px;flex:0 0 auto}
@@ -873,26 +873,35 @@ function fitCanvas(cv, size) {
 }
 function shipIdxAtCell(x, y) { const b = !G ? null : G.mode === 'pass' ? G.boards[G.view] : G.board; return b ? b.sg[y * b.n + x] : -1; }
 const mqLand = window.matchMedia('(orientation:landscape) and (max-height:500px)');
+// раскладка считается до устойчивого состояния: размеры холстов зависят от размеров соседних блоков, которые сами меняются после первого прохода
 function layout() {
+  const sig = () => [cPlace._s, cEn._s, cMy._s, (document.querySelector('#s-battle .body').getAttribute('style') || '')].join('|');
+  for (let i = 0, p = ''; i < 5; i++) { layoutOnce(); const q = sig(); if (q === p) break; p = q; }
+}
+// размеры берём из раскладки (offsetWidth/Height): getBoundingClientRect учитывает transform анимации появления экрана и даёт заниженные значения
+const box = e => ({ width: e.offsetWidth, height: e.offsetHeight });
+function layoutOnce() {
   if (screen === 'place') {
-    const r = $('cPlace').parentElement.getBoundingClientRect(); fitCanvas(cPlace, Math.min(r.width, r.height) - 2);
+    const r = box($('cPlace').parentElement); fitCanvas(cPlace, Math.min(r.width, r.height) - 2);
   } else if (screen === 'battle') {
     const body = document.querySelector('#s-battle .body');
-    if (mqLand.matches) { if (body.style.getPropertyValue('--erow')) body.style.removeProperty('--erow'); const br = body.getBoundingClientRect(), E = Math.floor(Math.min(br.height - 22, br.width * .6)); if (body.style.getPropertyValue('--ecol') !== E + 'px') body.style.setProperty('--ecol', E + 'px'); }
+    if (mqLand.matches) { if (body.style.getPropertyValue('--erow')) body.style.removeProperty('--erow'); const br = box(body), E = Math.floor(Math.min(br.height - 22, br.width * .6)); if (body.style.getPropertyValue('--ecol') !== E + 'px') body.style.setProperty('--ecol', E + 'px'); }
     else {
       if (body.style.getPropertyValue('--ecol')) body.style.removeProperty('--ecol');
-      const br = body.getBoundingClientRect(), bh = $('s-battle').querySelector('.btns').getBoundingClientRect().height, avail = br.height - bh - 12;
+      const br = box(body), bh = box($('s-battle').querySelector('.btns')).height, avail = br.height - bh - 12;
       let E = Math.floor(Math.min(br.width, avail * .66 - 22)); if (avail - E - 22 < 190) E = Math.max(150, avail - 22 - 190);
       const v = (E + 22) + 'px'; if (body.style.getPropertyValue('--erow') !== v) body.style.setProperty('--erow', v);
     }
-    const e = $('eBox').getBoundingClientRect(), m = $('mBox').getBoundingClientRect();
+    const e = box($('eBox')), m = box($('mBox'));
     fitCanvas(cEn, Math.min(e.width, e.height) - 2); fitCanvas(cMy, Math.min(m.width, m.height) - 2);
   }
 }
 let layoutQ = 0;
 function layoutSoon() { if (layoutQ) return; layoutQ = requestAnimationFrame(() => { layoutQ = 0; layout(); }); }
+if (window.visualViewport) window.visualViewport.addEventListener('resize', layoutSoon);
+document.addEventListener('pointerdown', () => { if (screen === 'place' || screen === 'battle') layout(); }, true);  // размеры актуальны в момент касания (после поворота resize на iPhone приходит рано)
 window.addEventListener('resize', layoutSoon); window.addEventListener('orientationchange', () => { layoutSoon(); setTimeout(layout, 250); });
-if (window.ResizeObserver) { const ro = new ResizeObserver(layoutSoon); ['eBox', 'mBox'].forEach(i => ro.observe($(i))); ro.observe($('cPlace').parentElement); ro.observe(document.querySelector('#s-battle .body')); }
+if (window.ResizeObserver) { const ro = new ResizeObserver(layoutSoon); ['eBox', 'mBox'].forEach(i => ro.observe($(i))); ro.observe($('cPlace').parentElement); ro.observe(document.querySelector('#s-battle .body')); ro.observe(document.body); ['.btns', '.hdr', '.lower'].forEach(q => { const e = document.querySelector('#s-battle ' + q); if (e) ro.observe(e); }); }
 // пинг связи: мелко, раз в секунду, только в сетевой игре
 function updPing() {
   const on = mode === 'net' && G && G.mode === 'net' && (screen === 'battle' || screen === 'place'), p = on ? Duo.ping() : null;
@@ -1269,8 +1278,11 @@ const DASH = [4, 3], NODASH = [];
 // ---------- фон: параллакс (заставка и море) ----------
 const BG = { cv: null, c: null, W: 0, H: 0, d: 1, sky: null, ship: null, wg: null, pool: mkPool(70), ftx: 0, fty: 0, key: '' };
 const WAVEC = ['#0d3a52', '#0b3248', '#0a2a3f', '#08222f', '#061a26'];
+// размер фона берём из раскладки (fixed 100%), а не из innerWidth/innerHeight, которые на iPhone после поворота бывают устаревшими
+function bgW() { return BG.cv && BG.cv.clientWidth || document.documentElement.clientWidth || innerWidth; }
+function bgH() { return BG.cv && BG.cv.clientHeight || document.documentElement.clientHeight || innerHeight; }
 function bgBuild() {
-  const W = innerWidth, H = innerHeight, d = Math.min(devicePixelRatio || 1, 2), land = W > H;
+  const W = bgW(), H = bgH(), d = Math.min(devicePixelRatio || 1, 2), land = W > H;
   BG.W = W; BG.H = H; BG.d = d; BG.cv.width = Math.round(W * d); BG.cv.height = Math.round(H * d);
   BG.hor = H * (land ? .58 : .6);
   const c0 = cv2(W * d, H * d), c = c0.getContext('2d'); c.scale(d, d); const r = rngf(77);
@@ -1304,7 +1316,7 @@ function bgWave(c, i, amp, len, spd, ph) {
 }
 function drawBG(title) {
   if (!BG.cv) return;
-  if (BG.W !== innerWidth || BG.H !== innerHeight || BG.d !== Math.min(devicePixelRatio || 1, 2)) bgBuild();
+  if (BG.W !== bgW() || BG.H !== bgH() || BG.d !== Math.min(devicePixelRatio || 1, 2)) bgBuild();
   const c = BG.c, d = BG.d, W = BG.W, H = BG.H, hor = BG.hor;
   c.setTransform(d, 0, 0, d, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
   c.drawImage(BG.sky, 0, 0, W, H);

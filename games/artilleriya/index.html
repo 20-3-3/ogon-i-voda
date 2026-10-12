@@ -14,8 +14,9 @@
 --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px);
 --ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-html,body{margin:0;height:100%;background:var(--ink);overflow:hidden;overscroll-behavior:none;font-family:var(--bd);color:var(--ink);touch-action:manipulation}
+html,body{margin:0;height:100%;background:var(--ink);overflow:hidden;overflow:clip;overscroll-behavior:none;font-family:var(--bd);color:var(--ink);touch-action:manipulation}
 button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer;touch-action:manipulation}
+body{position:fixed;inset:0;width:100%}
 #app{position:fixed;inset:0;overflow:hidden}
 /* ---------- плавные переходы между экранами ---------- */
 .scr{position:absolute;inset:0;display:flex;opacity:0;visibility:hidden;pointer-events:none;transform:scale(1.035);transition:opacity .3s ease,transform .38s var(--ease),visibility 0s .3s}
@@ -83,14 +84,14 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 #wind #ping{display:block;font-family:var(--bd);font-size:11px;letter-spacing:0;line-height:1;margin-top:3px;white-space:nowrap;color:var(--pc,#9a9080);opacity:.85}
 #wind #ping:empty{display:none}
 #wind div{font-size:17px;color:var(--mus);margin-top:2px;white-space:nowrap}
-#stage{position:relative;flex:1000 1 0;width:100%;min-height:150px;max-height:104vw;overflow:hidden;background:#16120e}
+#stage{position:relative;flex:1000 1 0;width:100%;min-height:150px;max-height:calc(var(--app-w,100vw)*1.04);overflow:hidden;background:#16120e}
 #cv{position:absolute;left:0;top:0;display:block;touch-action:none}
 #banner{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%) scale(.8);font-family:var(--hd);font-size:clamp(16px,5.6vw,30px);text-transform:uppercase;color:var(--paper);background:var(--ink);border:3px solid var(--mus);padding:6px 12px;white-space:normal;width:max-content;max-width:calc(100% - 20px);box-sizing:border-box;text-align:center;line-height:1.15;overflow-wrap:anywhere;opacity:0;pointer-events:none;transition:opacity .25s,transform .35s var(--ease);z-index:4}
 #banner.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #bMenu{position:absolute;left:10px;top:10px;width:44px;height:44px;border:3px solid var(--ink);background:var(--paper);border-radius:6px;font-weight:700;font-size:20px;z-index:5;opacity:.92;display:flex;align-items:center;justify-content:center}
 .ctl{display:flex;flex-direction:column;gap:8px;padding:6px 10px;flex:1 1 auto;justify-content:space-evenly;min-height:0}
 .wgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
-.wb{position:relative;min-height:clamp(50px,7.5vh,70px);border:3px solid var(--ink);background:var(--paper);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:700;line-height:1.05;color:var(--ink);transition:background .15s,transform .15s var(--ease);min-width:0;padding:0 1px;letter-spacing:-.1px}
+.wb{position:relative;min-height:clamp(50px,calc(var(--app-h,100vh)*.075),70px);border:3px solid var(--ink);background:var(--paper);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:700;line-height:1.05;color:var(--ink);transition:background .15s,transform .15s var(--ease);min-width:0;padding:0 1px;letter-spacing:-.1px}
 .wb svg{width:22px;height:22px;fill:currentColor;flex:none}
 .wb .t{font-size:10px;letter-spacing:-.3px;max-width:100%;overflow:hidden;text-overflow:clip;white-space:nowrap}
 .wb.sel{background:var(--mus);box-shadow:0 0 0 3px var(--paper);transform:translateY(-2px)}
@@ -102,10 +103,10 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 .stp .v{flex:1;text-align:center;color:var(--paper);display:flex;flex-direction:column;justify-content:center;line-height:1;min-width:0}
 .stp .v small{font-size:11px;letter-spacing:2px;color:#b9ac8a}
 .stp .v b{font-family:var(--hd);font-size:24px;font-weight:400}
-.pb{width:52px;min-height:clamp(48px,6.6vh,62px);border:3px solid var(--ink);background:var(--paper);border-radius:6px;font-family:var(--hd);font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 #000;flex:none}
+.pb{width:52px;min-height:clamp(48px,calc(var(--app-h,100vh)*.066),62px);border:3px solid var(--ink);background:var(--paper);border-radius:6px;font-family:var(--hd);font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 #000;flex:none}
 .pb:active,.pb.dn{background:var(--mus)}
 .pb.off,#fire.off{opacity:.4}
-#fire{flex:1.3;min-height:clamp(54px,8vh,76px);border:3px solid var(--ink);background:var(--red);color:#fff;border-radius:6px;font-family:var(--hd);font-size:24px;letter-spacing:1px;text-transform:uppercase;box-shadow:4px 4px 0 #000;text-shadow:2px 2px 0 var(--red2);flex:none;width:100%}
+#fire{flex:1.3;min-height:clamp(54px,calc(var(--app-h,100vh)*.08),76px);border:3px solid var(--ink);background:var(--red);color:#fff;border-radius:6px;font-family:var(--hd);font-size:24px;letter-spacing:1px;text-transform:uppercase;box-shadow:4px 4px 0 #000;text-shadow:2px 2px 0 var(--red2);flex:none;width:100%}
 #fire:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
 .fuel{flex:1;height:8px;border:2px solid var(--paper);background:#000;border-radius:2px;align-self:center;overflow:hidden}
 .fuel i{display:block;height:100%;background:var(--olive);width:100%}
@@ -136,7 +137,7 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 @media (orientation:landscape) and (max-height:600px){
  #play{display:grid;grid-template-columns:minmax(120px,1fr) auto minmax(120px,1fr);grid-template-rows:auto minmax(0,1fr);grid-template-areas:"hud hud hud" "cl st cr"}
  #hud{grid-area:hud;padding:8px 10px 3px}
- #stage{grid-area:st;width:auto;height:100%;aspect-ratio:3/2;align-self:center;max-width:calc(100vw - 2*120px - var(--sal) - var(--sar))}
+ #stage{grid-area:st;width:auto;height:100%;aspect-ratio:3/2;align-self:center;max-width:calc(var(--app-w,100vw) - 2*120px - var(--sal) - var(--sar))}
  #ctlL{grid-area:cl;padding:4px 6px}#ctlR{grid-area:cr;padding:4px 6px}
  .wgrid{grid-template-columns:repeat(2,1fr)}
  .wb{min-height:44px;font-size:9px;gap:0}.pb{min-height:44px}.wb svg{width:17px;height:17px}.wb .cnt{font-size:10px}
@@ -221,6 +222,7 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
    <ul><li>Тяните палец по полю назад от танка: угол и сила выставятся сами. Кнопки − и + — точная подстройка.</li>
    <li>◀ ▶ — проехать (топлива хватает на недолгий путь). «Огонь!» — выстрел.</li>
    <li>Ветер сносит снаряд: смотрите на стрелку вверху. Серебристые зеркальные стены отражают снаряды.</li>
+   <li><b>Бур</b> — летит сквозь стены, острова, отражатели, щиты и воду. Достигнув земли, поворачивает вниз и пробуривает узкую шахту через все слои до самого дна карты, разрезая и землю, и стены под собой. Танк, через который пролетел бур или который стоит над шахтой, получает урон, а танк, у которого выбило опору, падает вниз. Если бур улетел за край поля — ничего не происходит.</li>
    <li>Победа открывает следующее поле у обоих игроков. Всего полей: <b id="hN">50</b>.</li></ul>
    <h4>Звук</h4>
    <button class="bigbtn" id="hSnd">Звук: вкл</button>
@@ -361,6 +363,56 @@ function advance(S,P){
   }
   return null;
 }
+// ---- Бур: пролетает сквозь всё, на земле поворачивает вниз и бурит шахту до дна карты ----
+const DV=6,DHW=12,DDMG=44;           // скорость бура px/кадр, полуширина шахты, урон
+function isGroundAt(T,x,y){for(let yy=y+1;yy<H;yy++)if(!T[yy*W+x])return false;return true;}   // сплошной столбец до дна (не остров)
+function hasGround(T){for(let x=0;x<W;x++)if(T[(H-1)*W+x])return true;return false;}         // есть настоящая земля (иначе на карте только острова — они и есть «земля»)
+function advanceDrill(S,P){
+  if(S.hg===undefined)S.hg=hasGround(S.T);
+  P.vx+=S.wind*WIND_K;P.vy+=S.g;P.f++;
+  const n=Math.ceil(Math.max(Math.abs(P.vx),Math.abs(P.vy))/2)||1,dx=P.vx/n,dy=P.vy/n;let ins=0;
+  for(let i=0;i<n;i++){
+    P.x+=dx;P.y+=dy;
+    if(P.x<-40||P.x>W+40||P.y>H+40)return{t:'out',x:P.x,y:P.y};
+    if(P.y>=0&&P.x>=0&&P.x<W&&P.y<H){const xi=P.x|0,yi=P.y|0,c=S.T[yi*W+xi];
+      if(c){if(c===1&&(!S.hg||isGroundAt(S.T,xi,yi)))return{t:'ground',x:P.x,y:P.y};ins=c;}}
+    for(let k=0;k<2;k++){const t=S.tanks[k];if(t.hp<=0||(k===S.sh&&P.f<12)||((P.th|0)>>k&1))continue;
+      if(Math.hypot(P.x-t.x,P.y-(t.y-7))<11){P.th=(P.th|0)|(1<<k);S.hurt(k,S.fr,DDMG);}}
+  }
+  if(ins&&S.ev&&P.f%2===0)S.ev.push([S.fr,Math.round(P.x),Math.round(P.y),0,5,ins]);
+  return null;
+}
+// верхняя точка шахты по каждому столбцу. Есть земля: вершина сплошного столбца от дна (земля + стены на ней).
+// Только острова: вершина сплошного куска, в который попал бур (рядом с точкой y0). Дальше шахта идёт до дна сквозь всё.
+function shaftStarts(T,x,hw,y0){
+  const s=new Int16Array(hw*2+1).fill(H),hg=hasGround(T);
+  for(let i=0;i<s.length;i++){const xx=x-hw+i;if(xx<0||xx>=W)continue;let y;
+    if(hg){y=H;while(y>0&&T[(y-1)*W+xx])y--;}
+    else{y=Math.max(0,Math.min(H-1,y0|0));let d=0;while(!T[y*W+xx]&&d<26){d++;if(y+d<H&&T[(y+d)*W+xx]){y+=d;break;}if(y-d>=0&&T[(y-d)*W+xx]){y-=d;break;}}
+      if(!T[y*W+xx])continue;while(y>0&&T[(y-1)*W+xx])y--;}
+    s[i]=y;}
+  return s;
+}
+function carveShaftRows(T,x,hw,s,ya,yb){
+  for(let i=0;i<s.length;i++){const xx=x-hw+i;if(xx<0||xx>=W)continue;
+    for(let y=Math.max(ya,s[i]);y<yb&&y<H;y++)T[y*W+xx]=0;}
+}
+function carveShaft(T,x,hw,y0){const s=shaftStarts(T,x,hw,y0);carveShaftRows(T,x,hw,s,0,H);return s;}
+function dLanding(base,sh,a,p,wind){
+  const S={T:base.T,water:0,g:base.g,wind,sh,tanks:base.tanks,fr:0,hurt(){}},P=muzzle(base.tanks[sh],a,p);
+  for(let i=0;i<1600;i++){const e=advanceDrill(S,P);if(e)return e;}
+  return{t:'out',x:P.x,y:P.y};
+}
+function botDrill(base,sh,wind,err,rnd){
+  const me=base.tanks[sh],tg=base.tanks[1-sh];let best=null;
+  const score=(a,p)=>{const e=dLanding(base,sh,a,p,wind);if(e.t!=='ground')return 9999;
+    let d=Math.abs(e.x-tg.x);if(Math.abs(e.x-me.x)<DHW+16)d+=300;return d;};
+  for(let a=8;a<=172;a+=3)for(let p=14;p<=100;p+=3){const d=score(a,p);if(!best||d<best.d)best={a,p,d};}
+  const b0=best;
+  for(let a=b0.a-3;a<=b0.a+3;a++)for(let p=b0.p-3;p<=b0.p+3;p++){if(a<0||a>180||p<5||p>100)continue;const d=score(a,p);if(d<best.d)best={a,p,d};}
+  const a=best.a+gauss(rnd)*err,p=best.p+gauss(rnd)*err*1.2;
+  return{a:Math.max(2,Math.min(178,Math.round(a))),p:Math.max(8,Math.min(100,Math.round(p))),d:best.d};
+}
 function muzzle(t,a,p){const r=a*Math.PI/180,v=p*.1;return{x:t.x+Math.cos(r)*16,y:t.y-9-Math.sin(r)*16,vx:Math.cos(r)*v,vy:-Math.sin(r)*v,f:0};}
 function landing(base,sh,a,p,wind){
   const S={T:base.T,water:base.water,g:base.g,wind,sh,tanks:base.tanks},P=muzzle(base.tanks[sh],a,p);
@@ -369,7 +421,8 @@ function landing(base,sh,a,p,wind){
 }
 // base: {T,water,g,tanks:[{x,y,hp,sh}]}. Возвращает запись выстрела (авторитетную).
 function simShot(base,sh,a,p,wp,wind){
-  const S={T:base.T.slice(),water:base.water,g:base.g,wind,sh,tanks:base.tanks.map(t=>({x:t.x,y:t.y,hp:t.hp,sh:t.sh})),ev:[],dm:[]};
+  const S={T:base.T.slice(),water:base.water,g:base.g,wind,sh,tanks:base.tanks.map(t=>({x:t.x,y:t.y,hp:t.hp,sh:t.sh})),ev:[],dm:[],fr:0};
+  S.hurt=(k,f,dmg)=>{const t=S.tanks[k];if(t.hp<=0)return;if(t.sh){S.dm.push([f,k,0]);return;}t.hp=Math.max(0,t.hp-dmg);S.dm.push([f,k,dmg]);};
   const tr=[],me=S.tanks[sh];let projs=[];
   const rd=Math.round;
   const newR=(P,f)=>{const R={s:f,e:0,k:P.k,p:[rd(P.x),rd(P.y)],c:0};tr.push(R);P.R=R;};
@@ -390,12 +443,12 @@ function simShot(base,sh,a,p,wp,wind){
     else launch(a,wp===0?'n':wp===2?'d':wp===3?'c':'m');}
   let f=0;
   while(projs.length&&f<1600){
-    f++;
+    f++;S.fr=f;
     for(const P of projs.slice()){
       const R=P.R;
       if(P.land){R.c++;if(R.c%3===0)R.p.push(R.p[R.p.length-2],R.p[R.p.length-1]);
         if(--P.fuse<=0){fin(P,f,P.x,P.y);explode(P.x,P.y,44,62,f);}continue;}
-      const pv=P.vy,r=advance(S,P);
+      const pv=P.vy,r=P.k==='d'?advanceDrill(S,P):advance(S,P);
       if(!r){
         R.c++;
         if(P.bnc){P.bnc=0;S.ev.push([f,rd(P.x),rd(P.y),0,3]);
@@ -411,6 +464,13 @@ function simShot(base,sh,a,p,wp,wind){
       if(r.t==='out'){fin(P,f,r.x,r.y);continue;}
       if(r.t==='water'){fin(P,f,r.x,r.y);S.ev.push([f,rd(r.x),rd(r.y),0,2]);continue;}
       const k=P.k;
+      if(k==='d'){ // бур: бурит шахту вниз до дна
+        fin(P,f,r.x,r.y);const bx=rd(r.x),by=rd(r.y),st=shaftStarts(S.T,bx,DHW,by);let ym=H;for(const v of st)if(v<ym)ym=v;
+        for(let q=0;q<2;q++){const t=S.tanks[q];if(t.hp<=0||((P.th|0)>>q&1))continue;
+          let hit=false;for(let xx=Math.max(bx-DHW,t.x-10);xx<=Math.min(bx+DHW,t.x+10);xx++)if(st[xx-(bx-DHW)]<=t.y+3){hit=true;break;}
+          if(hit){P.th=(P.th|0)|(1<<q);S.hurt(q,f+Math.ceil((Math.max(ym,t.y-16)-ym)/DV),DDMG);}}
+        carveShaftRows(S.T,bx,DHW,st,0,H);S.ev.push([f,bx,by,DHW,4]);continue;
+      }
       if(k==='m'&&r.t==='ground'){P.land=true;P.fuse=70;P.x=r.x;P.y=r.y;if(R.c%3===0)R.p.push(rd(r.x),rd(r.y));continue;}
       fin(P,f,r.x,r.y);
       if(k==='n')explode(r.x,r.y,30,40,f);
@@ -418,15 +478,6 @@ function simShot(base,sh,a,p,wp,wind){
       else if(k==='b')explode(r.x,r.y,17,20,f);
       else if(k==='c')explode(r.x,r.y,24,30,f);
       else if(k==='m')explode(r.x,r.y,44,62,f);
-      else if(k==='d'){
-        if(r.t==='tank')explode(r.x,r.y,24,44,f);
-        else{const sp=Math.hypot(P.vx,P.vy)||1,ux=P.vx/sp,uy=P.vy/sp;let ex=r.x,ey=r.y;
-          for(let i=1;i<=34;i++){const nx=r.x+ux*i,ny=r.y+uy*i,px=rd(nx),py=rd(ny);
-            if(px<0||px>=W||py<0||py>=H||S.T[py*W+px]>=2)break;ex=nx;ey=ny;}
-          const x1=rd(r.x),y1=rd(r.y),x2=rd(ex),y2=rd(ey);
-          carve(S.T,x1,y1,6,x2,y2);S.ev.push([f,x1,y1,6,1,x2,y2]);
-          explode(ex,ey,24,44,f);}
-      }
     }
     projs=projs.filter(P=>!P.done);
   }
@@ -444,7 +495,7 @@ function simShot(base,sh,a,p,wp,wind){
   return rec;
 }
 function applyRecord(base,rec){
-  for(const e of rec.ev){if(e[4]>=2)continue;carve(base.T,e[1],e[2],e[3],e[4]===1?e[5]:undefined,e[6]);}
+  for(const e of rec.ev){if(e[4]===4){carveShaft(base.T,e[1],e[3],e[2]);continue;}if(e[4]>=2)continue;carve(base.T,e[1],e[2],e[3],e[4]===1?e[5]:undefined,e[6]);}
   base.tanks.forEach((t,i)=>{t.x=rec.tx[i][0];t.y=rec.tx[i][1];t.hp=rec.hp[i];t.sh=rec.sd[i];});
 }
 function gauss(r){return Math.sqrt(-2*Math.log(r()||1e-9))*Math.cos(6.283185*r());}
@@ -904,7 +955,7 @@ function beginPlayback(rec){
   if(rec.w>0&&t.am[rec.w]>0)t.am[rec.w]--;
   M.shots[rec.s]++;M.phase='fly';M.bot=null;
   let end=0;for(const q of rec.tr)if(q.e>end)end=q.e;for(const e of rec.ev)if(e[0]>end)end=e[0];
-  M.pb={rec,f:0,ei:0,di:0,end:end+(rec.w===5?18:6),sf:-1,from:M.tanks.map(q=>[q.x,q.y])};
+  M.pb={rec,f:0,ei:0,di:0,dr:[],end:end+(rec.w===5?18:6),sf:-1,from:M.tanks.map(q=>[q.x,q.y])};
   t.rec=6;t.sqv+=1.5;
   if(rec.w===5){SFX.shield();floatTxt(t.x,t.y-26,'ЩИТ','#8fe3ff');for(let i=0;i<14;i++){const a=i/14*TAU;spawn(K_GLOW,t.x+Math.cos(a)*14,t.y-8+Math.sin(a)*14,Math.cos(a)*.5,Math.sin(a)*.5,28,3,3,0,.96);}}
   else{SFX.shot();
@@ -942,6 +993,11 @@ function doEvent(e){
   const[f,x,y,r,kind,x2,y2]=e;
   if(kind===0){const b=carve(M.T,x,y,r);scorch(x,y,r);repaint(b[0]-10,b[1]-10,b[2]+10,b[3]+10);boom(x,y,r);}
   else if(kind===1){const b=carve(M.T,x,y,r,x2,y2);scorch(x,y,r);scorch(x2,y2,r);repaint(b[0]-10,b[1]-10,b[2]+10,b[3]+10);SFX.drill();for(let i=0;i<16;i++){const k=Math.random();spawn(K_DEB,x+(x2-x)*k,y+(y2-y)*k,(Math.random()-.5)*2.4,-Math.random()*2.2,34,1.5+Math.random()*1.4,(Math.random()*3)|0,.12,.995,.3);spawn(K_SPARK,x+(x2-x)*k,y+(y2-y)*k,(Math.random()-.5)*3,-Math.random()*2,12,1,0,.1,.97);}}
+  else if(kind===4){const st=shaftStarts(M.T,x,r,y);let ym=H;for(const v of st)if(v<ym)ym=v;
+    if(ym<H)M.pb.dr.push({x,hw:r,st,y:ym,n:0});
+    addFlash(x,y,34,10,1);addRing(x,y,r,18,1);SFX.drill();shake=Math.max(shake,3);zoomPunch=Math.max(zoomPunch,.008);}
+  else if(kind===5){const c=x2|0;for(let i=0;i<3;i++){const a=Math.random()*TAU,s=1+Math.random()*2.4;spawn(K_SPARK,x,y,Math.cos(a)*s,Math.sin(a)*s,10+Math.random()*8,.9,c===3?3:0,.08,.95);}
+    spawn(K_DEB,x,y,(Math.random()-.5)*2.4,-Math.random()*2,36,1.4+Math.random()*1.4,c===2?2:(Math.random()*3)|0,.12,.995,.3);if(!(x&1))SFX.bounce();}
   else if(kind===2){SFX.splash();addRing(x,y,12,26,1);addFlash(x,y,22,8,3);const lava=TH[M.L.th].lava;
     for(let i=0;i<18;i++)spawn(K_DROP,x+(Math.random()-.5)*6,y,(Math.random()-.5)*3,-2-Math.random()*3.2,40,1.6+Math.random()*1.2,lava?1:0,.14,.998);
     if(lava)for(let i=0;i<6;i++)spawn(K_EMBER,x,y,(Math.random()-.5)*2,-1-Math.random()*2.5,40,2,0,.05,.99);
@@ -964,7 +1020,18 @@ function pbStep(){
         const sm=q.k==='b'?1.3:q.k==='c'?2.3:q.k==='d'?1.9:1.8;
         spawn(K_TRAIL,TP[0],TP[1],(Math.random()-.5)*.1,-.04-Math.random()*.06,34+Math.random()*10,sm,0,0,.99);}
       if(f%2===0){trPos(q,f);spawn(K_SPARK,TP[0],TP[1],(Math.random()-.5)*.8,(Math.random()-.5)*.8,9,.7,0,.02,.95);}}}
-    if(f>=pb.end)pb.sf=0;
+    for(let i=pb.dr.length-1;i>=0;i--){const d=pb.dr[i],y1=Math.min(H,d.y+DV);
+      carveShaftRows(M.T,d.x,d.hw,d.st,d.y,y1);
+      repaint(d.x-d.hw-8,d.y-8,d.x+d.hw+8,y1+8);
+      d.n++;const lq=LQ?.5:1;
+      for(let k=0;k<Math.round(4*lq);k++){const sx=d.x+(Math.random()*2-1)*d.hw;
+        spawn(K_DEB,sx,y1,(Math.random()-.5)*3,-1-Math.random()*2.6,30+Math.random()*16,1.3+Math.random()*1.5,(Math.random()*3)|0,.14,.995,.3);}
+      spawn(K_SPARK,d.x+(Math.random()*2-1)*d.hw,y1,(Math.random()-.5)*4,-1-Math.random()*3,12,1,0,.1,.97);
+      if(d.n%3===0)spawn(K_SMOKE,d.x+(Math.random()*2-1)*d.hw,Math.max(0,d.y-2),(Math.random()-.5)*.5,-.4-Math.random()*.5,40,3,0,0,.98);
+      if(d.n%8===0)SFX.drill();
+      shake=Math.max(shake,1.6);
+      d.y=y1;if(y1>=H){pb.dr.splice(i,1);boom(d.x,H-4,16);}}
+    if(f>=pb.end&&!pb.dr.length)pb.sf=0;
   }else{
     pb.sf++;const k=Math.min(1,pb.sf/18),e=k*k*(3-2*k);
     M.tanks.forEach((t,i)=>{if(t.dead)return;t.x=pb.from[i][0]+(rec.tx[i][0]-pb.from[i][0])*e;t.y=pb.from[i][1]+(rec.tx[i][1]-pb.from[i][1])*e;});
@@ -1235,9 +1302,13 @@ function botTick(){
   const b=M.bot||(M.bot={t:0,st:0}),t=M.tanks[1];b.t++;
   if(b.st===0&&b.t>75){
     const pl=botAim(baseOf(),1,M.wind,M.L.bot,Math.random);
-    const av=[1,2,3,4].filter(w=>weaponOK(w)&&t.am[w]>0);
+    const av=[1,3,4].filter(w=>weaponOK(w)&&t.am[w]>0);
     let w=0;if(M.L.i>=15&&t.am[5]>0&&t.hp<40&&Math.random()<.5)w=5;else if(av.length&&Math.random()<.55)w=av[Math.floor(Math.random()*av.length)];
-    t.w=w;b.a=pl.a;b.p=pl.p;b.st=1;b.t=0;syncUI();
+    let aim=pl;
+    if(weaponOK(2)&&t.am[2]>0&&w!==5&&!M.tanks[0].dead){ // бур: летит сквозь всё и бурит шахту под целью
+      const dl=botDrill(baseOf(),1,M.wind,M.L.bot,Math.random);
+      if(dl.d<16&&(pl.d>14||Math.random()<.45)){w=2;aim=dl;}}
+    t.w=w;b.a=aim.a;b.p=aim.p;b.st=1;b.t=0;syncUI();
   }else if(b.st===1){
     t.a+=Math.sign(b.a-t.a)*Math.min(2,Math.abs(b.a-t.a));t.p+=Math.sign(b.p-t.p)*Math.min(1.5,Math.abs(b.p-t.p));
     if(b.t%4===0)syncUI();
@@ -1487,6 +1558,10 @@ function drawMatch(rt,a){
       trPos(q,ff);const x=TP[0],y=TP[1];
       if(q.k==='m')drawMine(c,x,y,rt,ff);
       else{trPos(q,ff+.4);const nx=TP[0],ny=TP[1];drawShell(c,q.k,x,y,nx-x||.01,ny-y,rt);}}}
+  if(M.pb&&M.pb.sf<0)for(const d of M.pb.dr){c.save();c.translate(d.x,d.y);c.scale(1.7,1.7);c.rotate(1.5708+Math.sin(d.n*1.3)*.25);
+    c.fillStyle='#b8bec6';c.strokeStyle='#1f1a14';c.lineWidth=1.1;c.beginPath();c.moveTo(5.5,0);c.lineTo(-3.5,-3.4);c.lineTo(-3.5,3.4);c.closePath();c.fill();c.stroke();
+    c.strokeStyle='#4a5058';c.beginPath();for(let i=0;i<3;i++){const u=-2.4+((d.n*.7+i*1.7)%4.8);c.moveTo(u*.3-2.4,-3.2*(1-(u+2.4)/4.8)+.2);c.lineTo(u*.3-2.4,3.2*(1-(u+2.4)/4.8)-.2);}c.stroke();
+    c.globalCompositeOperation='lighter';c.globalAlpha=.7;c.drawImage(GL.orange,-9,-9,18,18);c.restore();}
   drawParticles(c,a,0);
   c.globalCompositeOperation='lighter';drawParticles(c,a,1);c.globalCompositeOperation='source-over';
   drawFx(c,a);
@@ -1582,6 +1657,10 @@ function fit(){
   if(M)buildBg(M.L);
 }
 window.addEventListener('resize',()=>{fit();});window.addEventListener('orientationchange',()=>{setTimeout(fit,120);setTimeout(fit,500);});
+// пересчёт размеров сцены при любом изменении (поворот на iPhone: события resize приходят до окончательной раскладки)
+if(window.ResizeObserver)new ResizeObserver(()=>fit()).observe($('stage'));
+if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>{fit();});
+$('app').addEventListener('pointerdown',()=>{if(S_screen==='play')fit();},true);   // и в момент касания: размеры всегда актуальны
 if(window.ResizeObserver)new ResizeObserver(fit).observe($('stage'));
 let lastT=0,acc=0,frameN=0;
 function loop(ts){
