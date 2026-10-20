@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="ru">
-<head><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="../../games/icons/zabeg-180.png"><link rel="stylesheet" href="../../games/shared/fonts/fonts.css">
+<head><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="../../games/icons/zabeg-180.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0b1f">
 <title>Призрачный забег</title>
+<link rel="stylesheet" href="../shared/fonts/fonts.css">
 <style>
 :root{--ink:#0d0b1f;--vio:#2a1f5c;--moon:#efe9ff;--p1:#ff6a4d;--p2:#5ef0ff;--gold:#ffd166;--mut:#a79fd6;--panel:rgba(24,17,64,.78);--line:#4a3d93;
 --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px);
@@ -126,6 +127,50 @@ a.lnk{color:var(--mut);text-decoration:none;margin-top:8px;padding:0 16px;min-he
 @media (max-width:360px){.card .nm{font-size:10.5px}.btn{font-size:17px}}
 @media (prefers-reduced-motion:reduce){.scr.on{animation:none}}
 @media (max-height:460px){.duo-ov{padding-top:max(8px,env(safe-area-inset-top))!important;padding-bottom:max(8px,env(safe-area-inset-bottom))!important}.duo-box{gap:6px!important}.duo-h{font-size:20px!important}.duo-btn{padding:6px 12px!important;min-height:44px!important}.duo-btn small{display:none}.duo-code{font-size:44px!important}}
+
+.hrow{display:flex;gap:10px;width:min(330px,100%);margin:6px 0}.hrow .btn{flex:1;width:auto;min-width:0;margin:0;padding:8px 6px;min-height:52px;font-size:16px}
+.skwrap{width:100%;max-width:640px;display:flex;flex-direction:column;align-items:center;gap:4px}
+#sk-prev{width:100%;height:clamp(150px,26vh,230px);flex:none;pointer-events:none}
+.skopts{width:100%;text-align:left}
+.skopts h3{margin:10px 0 6px;font-size:14px;color:var(--p2);letter-spacing:.5px;font-weight:700}
+.skrow{display:flex;flex-wrap:wrap;gap:8px}
+.skb{min-width:64px;min-height:64px;border-radius:14px;background:linear-gradient(#251b5c,#1b1442);border:2px solid #3b2f80;color:var(--moon);font:500 11px var(--txt);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:2px 2px 4px;touch-action:manipulation;cursor:pointer;position:relative}
+.skb canvas{width:48px;height:48px;display:block}
+.skb.on{border-color:var(--p2);box-shadow:0 0 14px rgba(94,240,255,.5)}
+.skc{width:46px;height:46px;border-radius:50%;border:3px solid rgba(255,255,255,.25);touch-action:manipulation;cursor:pointer;padding:0}
+.skc.on{border-color:#fff;box-shadow:0 0 0 3px var(--p2),0 0 14px rgba(255,255,255,.5)}
+.skt{min-height:46px;padding:0 14px;border-radius:23px;background:#241b52;border:2px solid #3b2f80;color:var(--moon);font:500 14px var(--txt);display:inline-flex;align-items:center;gap:8px;touch-action:manipulation;cursor:pointer}
+.skt i{width:14px;height:14px;border-radius:50%;display:inline-block}
+.skt.on{border-color:var(--p2);box-shadow:0 0 12px rgba(94,240,255,.45)}
+@media (orientation:landscape) and (max-height:520px){
+  .skwrap{flex-direction:row;align-items:center;gap:14px;max-width:760px}
+  #sk-prev{width:34%;height:min(70vh,260px);flex:none}
+  .skopts{flex:1;min-width:0}.skopts h3{margin:4px 0 4px}
+  .skb{min-width:56px;min-height:58px}.skb canvas{width:40px;height:40px}.skc{width:44px;height:44px}.skt{min-height:44px}
+  .hrow .btn{min-height:46px}
+}
+
+.hcount{display:flex;gap:10px;margin:0 0 10px}
+.hcount button{width:56px;height:56px;border-radius:16px;font:700 22px var(--disp);background:linear-gradient(#2d2263,#241b52);border:2px solid var(--line);color:var(--moon);touch-action:manipulation;cursor:pointer}
+.hcount button.on{border-color:var(--p2);color:var(--p2);box-shadow:0 0 14px rgba(94,240,255,.5)}
+.hplist{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px;margin:0 0 6px}
+.hp{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid #3b2f80;border-radius:16px;padding:6px 10px}
+.hp b{font:700 16px var(--disp);color:var(--mut);width:20px}
+.hp .hpc{width:50px;height:50px;border-radius:12px;border:2px solid #3b2f80;background:#1b1442;padding:0;touch-action:manipulation;flex:none}
+.hp .hpc canvas{width:44px;height:44px;display:block;margin:0 auto}
+.hp input{flex:1;min-width:0;height:46px;border-radius:12px;border:1px solid #3b2f80;background:#150f38;color:var(--moon);font:500 17px var(--txt);padding:0 12px;-webkit-user-select:text;user-select:text}
+#pass-prev{width:100%;height:clamp(130px,24vh,220px);pointer-events:none}
+.rtab{width:100%;max-width:440px;margin:6px 0 10px;display:flex;flex-direction:column;gap:6px}
+.rtab .rw{display:grid;grid-template-columns:30px 30px 1fr auto;align-items:center;gap:8px;background:var(--panel);border:1px solid #3b2f80;border-radius:14px;padding:8px 12px;text-align:left;min-height:46px}
+.rtab .rw.me{border-color:var(--p2);box-shadow:0 0 12px rgba(94,240,255,.35)}
+.rtab .rw.w{border-color:var(--gold)}
+.rtab .pl{font:700 17px var(--disp);color:var(--gold);text-align:center}
+.rtab .dt{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,.6)}
+.rtab .nm{font:500 16px var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rtab .tm{font:700 18px var(--disp);text-align:right}.rtab .tm small{display:block;font:400 11px var(--txt);color:var(--mut)}
+.rtab .rw.off{opacity:.55}
+@media (orientation:landscape) and (max-height:520px){.rtab{max-width:560px;display:grid;grid-template-columns:1fr 1fr;gap:5px 8px}.rtab .rw{padding:4px 10px;min-height:44px}.hplist{display:grid;grid-template-columns:1fr 1fr;max-width:560px}#pass-prev{height:clamp(90px,30vh,160px)}}
+#track i.xd{width:11px;height:11px;top:-1.5px;margin-left:-5.5px;border:2px solid #fff}
 a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(env(safe-area-inset-left,0px) + 12px);right:auto;bottom:auto;z-index:30;height:44px;min-height:44px;min-width:44px;width:auto;margin:0;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;font-size:16px;line-height:1;letter-spacing:0;text-transform:none;box-sizing:border-box;flex:none;opacity:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}a.allg{font-family:'Rubik',system-ui,sans-serif;font-weight:700;color:#efe9ff;background:linear-gradient(#2d2263,#241b52);border:1px solid #4a3d93;border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 4px 0 #130d33}a.allg:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 0 #130d33}
 </style>
 </head>
@@ -150,10 +195,11 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
     <p class="sub">Два бегуна — одна трасса. Соперник виден лишь призраком: всё решает скорость.</p>
   </div>
   <div class="tr">
-    <button class="btn g" id="t-on">Играть вдвоём по сети<small>два телефона, 50 трасс</small></button>
+    <button class="btn g" id="t-on">Играть вдвоём по сети<small>два телефона, 50 трасс с развилками</small></button>
     <button class="btn" id="t-tt">Один на телефоне<small>время и гонка с собственным призраком</small></button>
     <button class="btn d" id="t-du">Дуэль на одном телефоне<small>передайте телефон по очереди</small></button>
-    <button class="btn d" id="t-help" style="min-height:48px">Как играть и настройки</button>
+    <button class="btn d" id="t-co">Компания 3–6 игроков<small>по сети или передавая телефон</small></button>
+    <div class="hrow"><button class="btn d" id="t-sk">🎨 Скины</button><button class="btn d" id="t-help">Как играть</button></div>
     <a class="lnk" href="../#save">💾 Сохранение прогресса</a>
     <a class="allg" href="../">← Все игры</a>
   </div>
@@ -179,10 +225,48 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
   <div class="sub" id="r-n" style="margin:0"></div>
   <div class="big" id="r-h"></div>
   <div class="res" id="r-t"></div>
+  <div class="rtab" id="r-tab" style="display:none"></div>
   <p class="sub" id="r-s" style="margin:0 0 10px"></p>
   <div class="btns row"><button class="btn" id="r-again">Ещё раз</button>
   <button class="btn g" id="r-next">Следующая трасса</button>
   <button class="btn d" id="r-lv">К трассам</button></div>
+</div>
+
+<div class="scr scroll" id="s-co">
+  <div class="top"><button class="sq" id="co-back" aria-label="Назад">←</button><h2>Компания 3–6</h2><span class="sq" style="visibility:hidden"></span></div>
+  <p class="sub">Три–шесть бегунов на одной трассе. Каждый виден остальным призраком со своим скином и именем.</p>
+  <div class="btns"><button class="btn g" id="co-net">По сети<small>каждый на своём телефоне · комната по коду</small></button>
+  <button class="btn" id="co-hot">На одном телефоне<small>бегут по очереди, каждый — против призраков всех предыдущих</small></button></div>
+</div>
+
+<div class="scr scroll" id="s-hot">
+  <div class="top"><button class="sq" id="hot-back" aria-label="Назад">←</button><h2>Игроки</h2><span class="sq" style="visibility:hidden"></span></div>
+  <p class="sub" style="margin:8px 0">Сколько человек играет?</p>
+  <div class="hcount" id="hot-n"></div>
+  <div class="hplist" id="hot-list"></div>
+  <p class="sub" style="margin:4px 0 8px;font-size:13px">Нажмите на значок, чтобы сменить цвет. Порядок бега — сверху вниз.</p>
+  <button class="btn g" id="hot-go">Выбрать трассу</button>
+</div>
+
+<div class="scr" id="s-pass">
+  <div class="sub" id="pass-t" style="margin:0 0 2px"></div>
+  <div id="pass-prev"></div>
+  <div class="big" id="pass-n" style="margin:0"></div>
+  <p class="sub" id="pass-h" style="margin:8px 0 12px"></p>
+  <button class="btn g" id="pass-go">Готов — старт!</button>
+  <button class="btn d" id="pass-back" style="min-height:48px">К трассам</button>
+</div>
+
+<div class="scr scroll" id="s-skin">
+  <div class="top"><button class="sq" id="sk-back" aria-label="Назад">←</button><h2>Скины</h2><span class="sq" style="visibility:hidden"></span></div>
+  <div class="skwrap">
+    <div id="sk-prev"></div>
+    <div class="skopts">
+      <h3>Силуэт</h3><div class="skrow" id="sk-sh"></div>
+      <h3>Цвет</h3><div class="skrow" id="sk-col"></div>
+      <h3>Шлейф</h3><div class="skrow" id="sk-tr"></div>
+    </div>
+  </div>
 </div>
 
 <div class="scr scroll" id="s-help">
@@ -210,15 +294,17 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
 <div id="curtain"></div>
 
 <script src="../shared/duo.js"></script>
+<script src="../shared/party.js"></script>
 <script>
 // ===== ЯДРО: физика, строитель трасс, 20 уровней (используется и игрой, и проверкой) =====
 const DT = 1 / 60;
 const PW = 0.3, PH = 0.85;
 const RUN = 8, ACC_G = 110, ACC_A = 60, FRIC = 130, GRAV = 55, MAXF = 20, JV = 19, WJV = 17.5, WJX = 8, AJV = 17.5, SLIDE = 4.5, CONV = 4;
 const CF = 24, CR = 150, ORB_CD = 110, DEAD_F = 32;
+const SPV = 27, ICE_A = 30, ICE_F = 12, LIFTCAP = 7; // пружина, лёд, потолок скорости подъёма в потоке
 
 function Bld(H, f0) {
-  this.H = H; this.f = f0; this.x = 0; this.cells = []; this.saws = []; this.maxx = 0;
+  this.H = H; this.f = f0; this.x = 0; this.cells = []; this.saws = []; this.pl = []; this.winds = []; this.hzs = []; this.maxx = 0;
   for (let y = 0; y < H; y++) this.cells.push(new Array(500).fill('.'));
 }
 Bld.prototype = {
@@ -236,6 +322,14 @@ Bld.prototype = {
   orb(x, y) { this.set(x, y, 'o'); },
   saw(x, y, ax, ay, per, ph) { this.saws.push({ x, y, ax: ax || 0, ay: ay || 0, per: per || 2, ph: ph || 0 }); },
   cp() { this.set(this.x - 1, this.f - 1, 'K'); },
+  // движущаяся платформа: левый край x, верх y (центр хода), ширина w, размах ax/ay (тайлы), период per (кадры)
+  mover(x, y, w, ax, ay, per, ph) { this.pl.push({ x, y, w, ax: ax || 0, ay: ay || 0, per: per || 240, ph: ph || 0 }); },
+  // поток: прямоугольник (x,y,w,h), wx — снос по горизонтали (тайл/с), wy<0 — подъём (вентилятор снизу)
+  wind(x, y, w, h, wx, wy) { this.winds.push({ x, y, w, h, wx: wx || 0, wy: wy || 0 }); },
+  // k: 'laser' | 'flame' | 'crush'. laser/flame: прямоугольник x,y,w,h, вкл. on кадров из per (в конце цикла), warn кадров предупреждения.
+  // crush: блок w×bh, верх в покое y, ход dy вниз, цикл per.
+  haz(k, x, y, w, h, per, on, ph, warn, dy) { this.hzs.push({ k, x, y, w, h, per, on: on || 0, ph: ph || 0, warn: warn == null ? 30 : warn, dy: dy || 0 }); },
+  rotor(cx, cy, r, n, per, dir, ph) { for (let i = 0; i < n; i++) this.saws.push({ x: cx, y: cy, ax: 0, ay: 0, per, ph: (ph || 0) + i / n, r, dir: dir || 1 }); },
   shaft(h, gap) {
     const x0 = this.x, f = this.f, H = this.H;
     this.rect(x0, f, 5, H - f, '#');
@@ -250,14 +344,16 @@ Bld.prototype = {
     for (let i = 0; i < 3; i++) this.set(s, this.f - 1 - i, 'F');
     this.run(5);
   },
+  finishLevel(name, world) { this.finish(); return this.build(name, world); },
   build(name, world) {
     const W = this.maxx, H = this.H, rows = [];
     for (let y = 0; y < H; y++) rows.push(this.cells[y].slice(0, W).join(''));
-    return makeLevel(rows, this.saws, name, world);
+    return makeLevel(rows, this.saws, name, world, { pl: this.pl, winds: this.winds, haz: this.hzs });
   },
 };
 
-function makeLevel(rows, saws, name, world) {
+function makeLevel(rows, saws, name, world, ex) {
+  ex = ex || {};
   const H = rows.length, W = rows[0].length;
   const t = new Uint8Array(W * H), ci = new Int16Array(W * H).fill(-1);
   const crumbs = [], orbs = [], cps = [];
@@ -271,14 +367,14 @@ function makeLevel(rows, saws, name, world) {
   }
   // старт: колонка 2, ставим на пол
   for (let y = 0; y < H; y++) if (rows[y][2] === '#') { start = { x: 2.5, y }; break; }
-  return { name, world, W, H, rows, t, ci, crumbs, orbs, cps, saws, start, finX };
+  return { name, world, W, H, rows, t, ci, crumbs, orbs, cps, saws, start, finX, pl: ex.pl || [], winds: ex.winds || [], haz: ex.haz || [], timed: !!(saws.length || (ex.pl && ex.pl.length) || (ex.haz && ex.haz.length)) };
 }
 
 function initState(L, fx) {
   return {
     x: L.start.x, y: L.start.y, vx: 0, vy: 0, gr: true, coy: 0, buf: 0, wd: 0, wdl: 1, wcoy: 0, wlock: 0, aj: 0, jmp: false, jh: false,
     face: 1, conv: 0, ct: new Array(L.crumbs.length).fill(0), oc: new Array(L.orbs.length).fill(0),
-    cpx: L.start.x, cpy: L.start.y, t: 0, dead: 0, deaths: 0, won: 0, fx: !!fx, ev: [],
+    cpx: L.start.x, cpy: L.start.y, pl: -1, ice: 0, t: 0, dead: 0, deaths: 0, won: 0, fx: !!fx, ev: [],
   };
 }
 function cloneState(S) { const c = Object.assign({}, S); c.ct = S.ct.slice(); c.oc = S.oc.slice(); c.ev = []; return c; }
@@ -288,13 +384,34 @@ function solidAt(L, S, cx, cy) {
   if (cy < 0) return true; // потолок мира: за верхний край карты не вылезти
   if (cy >= L.H) return false;
   const c = L.t[cy * L.W + cx];
-  if (c === 35 || c === 62 || c === 60) return true;
+  if (c === 35 || c === 62 || c === 60 || c === 83 || c === 73) return true;
   if (c === 99) return S.ct[L.ci[cy * L.W + cx]] <= CF;
   return false;
 }
 function sawPos(s, t) {
+  if (s.r) { const g = ((s.ph || 0) + t / (s.per * 60)) * 2 * Math.PI * (s.dir || 1); return [s.x + s.r * Math.cos(g), s.y + s.r * Math.sin(g)]; }
   const a = Math.sin(((s.ph || 0) + t / (s.per * 60)) * 2 * Math.PI);
   return [s.x + s.ax * a, s.y + s.ay * a];
+}
+// платформа в момент t -> PXX, PYY (левый край, верх)
+let PXX = 0, PYY = 0;
+function platXY(p, t) { const a = Math.sin((p.ph + t / p.per) * 2 * Math.PI); PXX = p.x + p.ax * a; PYY = p.y + p.ay * a; }
+function oneAt(L, cx, cy) { return cx >= 0 && cx < L.W && cy >= 0 && cy < L.H && L.t[cy * L.W + cx] === 45; }
+// опасная зона: заполняет HZ[0..3] = x0,y0,x1,y1; возвращает false, если сейчас безопасно. Для пресса блок всегда «есть».
+const HZ = [0, 0, 0, 0];
+function crushY(h, t) { // смещение пресса вниз (тайлы) в момент t
+  const u = (t + h.ph) % h.per, hold = h.on, rise = 30, slam = 6, warn = h.warn, st = h.per - warn - slam - hold - rise;
+  if (u < st + warn) return 0;
+  if (u < st + warn + slam) { const k = (u - st - warn + 1) / slam; return h.dy * k * k; }
+  if (u < st + warn + slam + hold) return h.dy;
+  return h.dy * (1 - (u - st - warn - slam - hold) / rise);
+}
+function hazOn(h, t) { return ((t + h.ph) % h.per) >= h.per - h.on; }
+function hazWarn(h, t) { const u = (t + h.ph) % h.per; return u >= h.per - h.on - h.warn && u < h.per - h.on; }
+function hazRect(h, t) {
+  if (h.k === 'crush') { const y = h.y + crushY(h, t); HZ[0] = h.x; HZ[1] = y; HZ[2] = h.x + h.w; HZ[3] = y + h.h; return true; }
+  if (!hazOn(h, t)) return false;
+  HZ[0] = h.x; HZ[1] = h.y; HZ[2] = h.x + h.w; HZ[3] = h.y + h.h; return true;
 }
 function approach(v, tg, d) { return v < tg ? Math.min(tg, v + d) : Math.max(tg, v - d); }
 
@@ -304,7 +421,7 @@ let PWX = PW, PHX = PH; // габарит для стен/потолка (в п�
 function setHB(dw, dh) { PWX = PW + dw / 2; PHX = PH + dh; }
 
 function respawn(L, S) {
-  S.x = S.cpx; S.y = S.cpy; S.vx = S.vy = 0; S.gr = true; S.coy = S.buf = S.wcoy = S.wlock = 0; S.wd = 0; S.aj = 0; S.jmp = false; S.dead = 0;
+  S.x = S.cpx; S.y = S.cpy; S.vx = S.vy = 0; S.gr = true; S.pl = -1; S.ice = 0; S.coy = S.buf = S.wcoy = S.wlock = 0; S.wd = 0; S.aj = 0; S.jmp = false; S.dead = 0;
 }
 
 // inp: бит1 влево, бит2 вправо, бит4 прыжок (удержание)
@@ -326,13 +443,18 @@ function step(L, S, inp) {
     }
   }
   for (let i = 0; i < S.oc.length; i++) if (S.oc[i] > 0) S.oc[i]--;
+  // платформа несёт стоящего на ней
+  if (S.pl >= 0) { const p = L.pl[S.pl]; platXY(p, t - 1); const ox_ = PXX; platXY(p, t); S.x += PXX - ox_; S.y = PYY; }
+  // потоки: wx — снос, wy — подъём
+  let wsx = 0, wsy = 0;
+  for (let i = 0; i < L.winds.length; i++) { const z = L.winds[i], cxp = S.x, cyp = S.y - PH / 2; if (cxp > z.x && cxp < z.x + z.w && cyp > z.y && cyp < z.y + z.h) { wsx += z.wx; wsy += z.wy; } }
   const press = jd && !S.jh; S.jh = jd;
   S.buf = press ? 6 : Math.max(0, S.buf - 1);
   S.coy = S.gr ? 6 : Math.max(0, S.coy - 1);
   if (S.wd) { S.wcoy = 6; S.wdl = S.wd; } else S.wcoy = Math.max(0, S.wcoy - 1);
   if (S.wlock > 0) S.wlock--;
   if (S.wlock === 0) {
-    let a = dir === 0 ? FRIC : (S.gr ? ACC_G : ACC_A);
+    let a = dir === 0 ? (S.gr && S.ice ? ICE_F : FRIC) : (S.gr ? (S.ice ? ICE_A : ACC_G) : ACC_A);
     S.vx = approach(S.vx, dir * RUN, a * DT);
   }
   if (dir) S.face = dir;
@@ -345,9 +467,10 @@ function step(L, S, inp) {
   if (S.jmp && !jd) { if (S.vy < -6) S.vy = -6; S.jmp = false; }
   if (S.vy >= 0) S.jmp = false;
   S.vy = Math.min(MAXF, S.vy + GRAV * DT);
+  if (wsy < 0 && S.vy > -LIFTCAP) S.vy = Math.max(-LIFTCAP, S.vy + wsy * DT);
   if (S.wd && !S.gr && S.vy > SLIDE && dir !== -S.wd) S.vy = SLIDE;
   // движение по X
-  const dx = (S.vx + (S.gr ? S.conv : 0)) * DT;
+  const dx = (S.vx + (S.gr ? S.conv : 0) + wsx) * DT;
   let nx = S.x + dx;
   const r0 = Math.floor(S.y - PHX + 0.001), r1 = Math.floor(S.y - 0.001);
   if (dx > 0) {
@@ -365,7 +488,11 @@ function step(L, S, inp) {
   let landed = false;
   if (dy > 0) {
     const row = Math.floor(ny);
-    for (let c = c0; c <= c1; c++) if (solidAt(L, S, c, row) && S.y <= row + 0.01) { ny = row; S.vy = 0; landed = true; break; }
+    for (let c = c0; c <= c1; c++) if ((solidAt(L, S, c, row) || oneAt(L, c, row)) && S.y <= row + 0.01) { ny = row; S.vy = 0; landed = true; break; }
+    if (!landed) for (let i = 0; i < L.pl.length; i++) {
+      const p = L.pl[i]; platXY(p, t - 1); const yp = PYY; platXY(p, t);
+      if (S.x + PW - 0.001 > PXX && S.x - PW + 0.001 < PXX + p.w && S.y <= Math.max(yp, PYY) + 0.02 && ny >= PYY) { ny = PYY; S.vy = 0; landed = true; break; }
+    }
   } else if (dy < 0) {
     const row = Math.floor(ny - PHX), cc0 = Math.floor(S.x - PWX + 0.001), cc1 = Math.floor(S.x + PWX - 0.001);
     for (let c = cc0; c <= cc1; c++) if (solidAt(L, S, c, row)) { ny = row + 1 + PHX + 0.0005; S.vy = 0; S.jmp = false; break; }
@@ -373,16 +500,22 @@ function step(L, S, inp) {
   S.y = ny;
   // земля
   const was = S.gr;
-  let gr = false, cv = 0;
+  let gr = false, cv = 0, ice = 0, spr = false, pl = -1;
   if (S.vy >= 0) {
     const row = Math.floor(S.y + 0.02);
-    for (let c = c0; c <= c1; c++) if (solidAt(L, S, c, row)) {
+    for (let c = c0; c <= c1; c++) if (solidAt(L, S, c, row) || (S.y <= row + 0.03 && oneAt(L, c, row))) {
       gr = true;
       const ch = L.t[row * L.W + c];
-      if (ch === 62) cv = CONV; else if (ch === 60) cv = -CONV;
+      if (ch === 62) cv = CONV; else if (ch === 60) cv = -CONV; else if (ch === 73) ice = 1; else if (ch === 83) spr = true;
       if (ch === 99) { const i = L.ci[row * L.W + c]; if (S.ct[i] === 0) S.ct[i] = 1; }
     }
+    if (!gr) for (let i = 0; i < L.pl.length; i++) {
+      const p = L.pl[i]; platXY(p, t);
+      if (S.x + PW - 0.001 > PXX && S.x - PW + 0.001 < PXX + p.w && Math.abs(S.y - PYY) < 0.03) { gr = true; pl = i; break; }
+    }
   }
+  S.pl = pl; S.ice = ice;
+  if (spr) { S.vy = -SPV; gr = false; S.jmp = false; S.pl = -1; if (S.fx) S.ev.push('spring'); }
   S.gr = gr; S.conv = gr ? cv : 0;
   if (gr && !was) { S.aj = 0; if (S.fx) S.ev.push('land'); }
   // стена
@@ -412,6 +545,10 @@ function step(L, S, inp) {
     const qx = Math.max(bx0, Math.min(p[0], bx1)), qy = Math.max(by0, Math.min(p[1], by1));
     if ((qx - p[0]) * (qx - p[0]) + (qy - p[1]) * (qy - p[1]) < rr * rr) { die = true; break; }
   }
+  if (!die) for (let i = 0; i < L.haz.length; i++) {
+    if (!hazRect(L.haz[i], t)) continue;
+    if (bx1 > HZ[0] - MRG && bx0 < HZ[2] + MRG && by1 > HZ[1] - MRG && by0 < HZ[3] + MRG) { die = true; break; }
+  }
   if (!die) for (let i = 0; i < L.orbs.length; i++) if (S.oc[i] === 0) {
     const o = L.orbs[i], ddx = S.x - (o[0] + 0.5), ddy = S.y - PH / 2 - (o[1] + 0.5);
     if (ddx * ddx + ddy * ddy < 0.7 * 0.7) { S.aj = 1; S.oc[i] = ORB_CD; if (S.fx) S.ev.push('orb'); }
@@ -419,307 +556,217 @@ function step(L, S, inp) {
   if (die) { S.dead = DEAD_F; S.deaths++; S.vx = S.vy = 0; if (S.fx) S.ev.push('die'); }
 }
 
-// ---------- 50 трасс ----------
-function mk(H, f0, fn, name, world) { const b = new Bld(H, f0); b.run(2); fn(b); b.finish(); return b.build(name, world); }
-const LEVEL_DEFS = [
-  // 1 Разминка
-  ['Разминка', 0, 22, 16, b => {
-    b.run(8); b.gap(2); b.run(6); b.gap(3); b.run(5); b.stairs(2, 1, 5); b.gap(3); b.run(6); b.stairsDown(2, 1, 4); b.gap(3); b.run(6); b.cp(); b.gap(3); b.run(5);
-  }],
-  // 2 Колючки
-  ['Колючки', 0, 22, 16, b => {
-    b.run(6); b.spk(2); b.run(4); b.spk(3); b.run(4); b.gap(4); b.run(4); b.spk(2); b.run(2); b.spk(2); b.run(5); b.cp(); b.gap(4); b.run(3); b.spk(3); b.run(4); b.stairs(1, 2, 5); b.spk(3); b.run(4);
-  }],
-  // 3 Лесенка
-  ['Лесенка', 0, 24, 18, b => {
-    b.run(6); b.stairs(4, 2, 4); b.gap(4); b.run(3); b.spk(3); b.run(3); b.stairsDown(2, 2, 4); b.gap(4); b.run(3); b.cp(); b.gap(3); b.run(3); b.gap(4); b.run(3);
-    b.stairs(3, 2, 3); b.spk(4); b.run(3); b.stairsDown(3, 2, 3); b.run(3);
-  }],
-  // 4 Стена
-  ['Стена', 0, 28, 24, b => {
-    b.run(8); b.gap(3); b.run(5); b.shaft(7); b.run(5); b.gap(4); b.run(4); b.cp(); b.spk(2); b.run(4); b.shaft(6); b.run(3); b.gap(3); b.run(4); b.stairsDown(2, 2, 4); b.run(4);
-  }],
-  // 5 Тающий мост
-  ['Тающий мост', 0, 22, 15, b => {
-    b.run(6); b.crumb(8); b.run(3); b.spk(3); b.run(3); b.crumb(6); b.gap(3); b.crumb(3); b.run(3); b.cp(); b.stairs(1, 2, 4); b.crumb(10); b.run(3); b.crumb(4); b.gap(2); b.crumb(4); b.spk(2); b.run(4);
-  }],
-  // 6 Двойной прыжок
-  ['Двойной прыжок', 1, 24, 17, b => {
-    b.run(6); let x = b.x; b.gap(9); b.orb(x + 4, b.f - 4); b.run(4);
-    x = b.x; b.gap(11); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(4); b.cp();
-    b.up(3); x = b.x; b.gap(8); b.orb(x + 4, b.f - 3); b.run(3);
-    b.spk(3); b.run(2); x = b.x; b.gap(12); b.orb(x + 4, b.f - 3); b.orb(x + 9, b.f - 4); b.run(4);
-  }],
-  // 7 Конвейер
-  ['Конвейер', 1, 22, 16, b => {
-    b.run(5); b.conv(8, 1); b.gap(3); b.conv(6, 1); b.run(3); b.conv(8, -1); b.run(3); b.cp(); b.conv(5, -1); b.spk(2); b.conv(6, 1); b.gap(4); b.conv(5, -1); b.run(2);
-    b.stairs(1, 2, 3); b.conv(10, -1); b.run(3); b.gap(4); b.conv(6, 1); b.run(3);
-  }],
-  // 8 Пила
-  ['Пила', 1, 22, 16, b => {
-    b.run(6); let x = b.x; b.run(8); b.saw(x + 4, b.f - 2, 0, 1.2, 2.2, 0);
-    b.run(3); x = b.x; b.run(10); b.saw(x + 3, b.f - 1.5, 0, 1.4, 2, 0); b.saw(x + 7, b.f - 1.5, 0, 1.4, 2, 0.5);
-    b.cp(); b.gap(3); b.run(4); x = b.x; b.run(8); b.saw(x + 4, b.f - 3, 3, 0, 3, 0);
-    b.run(3); b.gap(4); x = b.x; b.run(10); b.saw(x + 3, b.f - 1.2, 0, 1.6, 1.6, 0); b.saw(x + 7, b.f - 1.2, 0, 1.6, 1.6, 0.5);
-  }],
-  // 9 Шорткат
-  ['Шорткат', 1, 24, 14, b => {
-    b.run(6); b.cp();
-    // низ: долина; верх: узкие площадки
-    const s = b.x, f = b.f;
-    // верхний путь
-    b.plat(s + 1, f, 3); b.plat(s + 7, f, 2); b.plat(s + 12, f, 2); b.plat(s + 17, f, 3);
-    b.saw(s + 9.5, f - 2.5, 0, 1.5, 2, 0);
-    // долина
-    b.rect(s, f + 5, 22, 10, '#');
-    for (let i = 3; i < 8; i++) b.set(s + i + 3, f + 4, '^');
-    b.set(s + 12, f + 4, '^'); b.set(s + 13, f + 4, '^');
-    b.x = s + 22; b.f = f; b.run(4); b.saw(b.x - 2, b.f - 2, 0, 1.2, 2, 0.25); b.run(5); b.spk(3); b.run(4); b.gap(4); b.run(4);
-  }],
-  // 10 Ледяной зигзаг
-  ['Ледяной зигзаг', 1, 30, 26, b => {
-    b.run(6); b.shaft(8); b.run(2); b.spk(2); b.run(3); b.cp(); b.gap(4); b.run(2); b.shaft(7); b.run(2);
-    const x0 = b.x; b.run(8); b.set(x0 + 3, b.f - 3, 'v'); b.set(x0 + 4, b.f - 3, 'v'); b.set(x0 + 5, b.f - 3, 'v');
-    b.stairsDown(3, 3, 3); b.gap(4); b.run(4);
-  }],
-  // 11 Встречный
-  ['Встречный ветер', 2, 22, 16, b => {
-    b.run(5); b.conv(10, -1); b.spk(2); b.conv(8, -1); b.crumb(4); b.crumb(4); b.run(3); b.cp(); b.conv(6, 1); b.gap(4); b.conv(6, -1); b.spk(3); b.conv(6, -1); b.run(3);
-    b.stairs(2, 2, 4); b.crumb(6); b.gap(3); b.conv(8, -1); b.run(3);
-  }],
-  // 12 Шахта
-  ['Шахта', 2, 30, 26, b => {
-    b.run(5); let x = b.x; b.shaft(9); b.saw(x + 2.5, b.f + 5, 0, 3, 3, 0); b.run(3); b.cp(); b.gap(4); b.run(2);
-    x = b.x; b.shaft(8); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.4, 0.3); b.set(x + 1, b.f + 6, 'v'); b.run(3); b.stairsDown(2, 3, 4); b.gap(3); b.run(4);
-  }],
-  // 13 Орбы и шипы
-  ['Орбы и шипы', 2, 24, 17, b => {
-    b.run(5); for (let k = 0; k < 3; k++) { const x = b.x; b.spk(12); b.orb(x + 3, b.f - 4); b.orb(x + 8, b.f - 4); b.run(3); }
-    b.cp(); b.up(2); b.run(3); for (let k = 0; k < 2; k++) { const x = b.x; b.gap(12); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(3); }
-    const x = b.x; b.spk(8); b.orb(x + 3, b.f - 3); b.orb(x + 6, b.f - 4); b.run(4);
-  }],
-  // 14 Маятник
-  ['Маятник', 2, 22, 16, b => {
-    b.run(5);
-    for (let k = 0; k < 3; k++) { const x = b.x; b.run(12); b.saw(x + 3, b.f - 2.2, 0, 1.8, 2, k * 0.2); b.saw(x + 6, b.f - 2.2, 0, 1.8, 2, 0.5 + k * 0.2); b.saw(x + 9, b.f - 2.2, 0, 1.8, 2, k * 0.2); b.run(2); if (k == 1) b.cp(); }
-    b.gap(4); b.run(3); const x = b.x; b.run(10); b.saw(x + 2, b.f - 1.5, 4, 0, 2.5, 0); b.saw(x + 7, b.f - 3, 0, 1.5, 2, 0.5); b.run(3);
-  }],
-  // 15 Разлом
-  ['Разлом', 2, 24, 17, b => {
-    b.run(5);
-    for (let k = 0; k < 4; k++) { b.crumb(2); b.gap(2); b.crumb(2); b.gap(1); b.up(k % 2 ? 1 : -1); b.crumb(2); b.gap(2); if (k == 1) { b.run(3); b.cp(); } }
-    b.run(4); const x = b.x; b.gap(8); b.orb(x + 4, b.f - 3); b.crumb(2); b.crumb(3); b.gap(3); b.run(4); b.spk(3); b.run(4);
-  }],
-  // 16 Двойная шахта
-  ['Двойная шахта', 3, 32, 28, b => {
-    b.run(5); let x = b.x; b.shaft(10); for (let i = 0; i < 3; i++) b.set(x + 2 + (i == 0 ? -1 : i), b.f + 7 - i * 2, i % 2 ? '.' : '.');
-    b.set(x + 2, b.f + 4, 'v'); b.run(3); b.spk(2); b.run(3); b.cp(); b.gap(3);
-    b.run(2); x = b.x; b.shaft(8); b.set(x + 3, b.f + 3, 'v'); b.saw(x + 2.5, b.f + 5, 0, 2, 2.4, 0.2); b.run(3); b.gap(4); b.run(3); b.stairsDown(2, 4, 4); b.gap(4); b.run(4);
-  }],
-  // 17 Фабрика
-  ['Фабрика', 3, 24, 17, b => {
-    b.run(5); b.conv(8, 1); b.saw(b.x - 4, b.f - 2, 0, 1.4, 2, 0); b.gap(3); b.conv(5, -1); b.spk(2); b.conv(8, -1); b.saw(b.x - 4, b.f - 2.3, 0, 1.6, 2, 0.5);
-    b.run(2); b.cp(); b.conv(6, 1); b.gap(4); b.conv(4, 1); b.crumb(4); b.gap(2); b.crumb(4); b.run(3);
-    b.stairs(2, 2, 4); b.conv(10, -1); b.saw(b.x - 5, b.f - 1.5, 3, 0, 2.5, 0); b.gap(3); b.conv(6, 1); b.run(3);
-  }],
-  // 18 Лавовый коридор
-  ['Лавовый коридор', 3, 22, 16, b => {
-    b.run(5);
-    for (let k = 0; k < 3; k++) { const x = b.x; b.run(14); for (let i = 3 + k; i < 12; i += 4) b.set(x + i, b.f - 3, 'v'); b.set(x + 5, b.f - 1, '^'); b.set(x + 9 + (k % 2), b.f - 1, '^'); b.run(2); if (k == 1) b.cp(); }
-    b.gap(4); b.run(3); const x = b.x; b.run(12); for (let i = 1; i < 11; i += 2) b.set(x + i, b.f - 3, 'v'); b.set(x + 4, b.f - 1, '^'); b.set(x + 8, b.f - 1, '^'); b.run(3);
-  }],
-  // 19 Лабиринт пил
-  ['Лабиринт пил', 3, 24, 17, b => {
-    b.run(5); let x = b.x; b.run(9); b.saw(x + 2, b.f - 1.5, 0, 1.6, 1.8, 0); b.saw(x + 5, b.f - 1.5, 0, 1.6, 1.8, 0.5); b.saw(x + 8, b.f - 3, 0, 1.2, 1.8, 0.25);
-    b.run(2); b.cp(); b.gap(4); b.run(2); x = b.x; b.run(10); b.saw(x + 2, b.f - 2, 3, 0, 2, 0); b.saw(x + 7, b.f - 3, 0, 1.5, 1.6, 0.4);
-    b.run(2); b.stairs(1, 3, 3); b.gap(4); x = b.x; b.run(6); b.saw(x + 3, b.f - 2.6, 2, 0, 2.5, 0);
-    b.gap(4); b.run(4); b.spk(3); b.run(5); // финиш без пил: безопасная площадка
-  }],
-  // 20 Призрачный финал
-  ['Призрачный финал', 3, 32, 26, b => {
-    b.run(5); b.conv(8, 1); b.spk(2); b.crumb(5); b.run(2); let x = b.x; b.gap(8); b.orb(x + 4, b.f - 3); b.run(3); b.cp();
-    x = b.x; b.shaft(9); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.2, 0); b.run(2);
-    x = b.x; b.run(10); b.saw(x + 2, b.f - 2, 0, 1.6, 1.8, 0); b.saw(x + 5, b.f - 2, 0, 1.6, 1.8, 0.5); b.saw(x + 8, b.f - 2, 0, 1.6, 1.8, 0); b.cp();
-    b.conv(6, -1); b.gap(3); b.conv(5, 1); b.stairs(2, 2, 3); x = b.x; b.gap(12); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(3);
-    b.crumb(4); b.gap(2); b.crumb(4); b.spk(3); b.run(3);
-  }],
 
-  // ---------- 21–30: Оранжерея (мир 4) ----------
-  // 21 Зелёный старт
-  ['Зелёный старт', 4, 22, 16, b => {
-    b.run(6); b.spk(2); b.run(3); b.gap(4); b.run(3); b.spk(2); b.run(2); b.spk(2); b.run(4); b.cp(); b.stairs(2, 1, 4); b.gap(4); b.run(3); b.crumb(5); b.run(3); b.spk(3); b.run(4); b.stairsDown(2, 1, 4); b.gap(4); b.run(4);
-  }],
-  // 22 Лианы
-  ['Лианы', 4, 24, 17, b => {
-    b.run(5); b.crumb(6); b.gap(3); b.crumb(4); b.up(1); b.crumb(5); b.gap(2); b.crumb(3); b.run(3); b.cp();
-    let x = b.x; b.gap(8); b.orb(x + 4, b.f - 3); b.run(3); b.crumb(4); b.gap(3); b.crumb(4); b.spk(3); b.run(3);
-  }],
-  // 23 Двойной удар
-  ['Двойной удар', 4, 28, 24, b => {
-    b.run(5); let x = b.x; b.shaft(8); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.2, 0); b.run(3); b.spk(2); b.run(3); b.cp(); b.gap(3); b.run(3);
-    x = b.x; b.shaft(7); b.saw(x + 2.5, b.f + 3, 0, 2, 2, 0.5); b.run(3); b.gap(4); b.run(3);
-  }],
-  // 24 Лента над шипами
-  ['Лента над шипами', 4, 22, 16, b => {
-    b.run(5); b.conv(7, 1); b.spk(2); b.conv(6, 1); b.gap(3); b.conv(7, -1); b.spk(2); b.conv(5, -1); b.run(2); b.cp();
-    b.conv(8, 1); b.gap(4); b.conv(4, 1); b.spk(3); b.conv(6, -1); b.run(3);
-  }],
-  // 25 Прыжки веры
-  ['Прыжки веры', 4, 24, 17, b => {
-    b.run(5); for (let k = 0; k < 4; k++) { const x = b.x; b.spk(12); b.orb(x + 3, b.f - 4); b.orb(x + 8, b.f - (k % 2 ? 3 : 4)); b.run(3); if (k == 1 || k == 3) b.cp(); }
-    b.up(2); b.run(3); let x = b.x; b.gap(12); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(3);
-    b.conv(6, 1); b.spk(2); b.conv(5, 1); b.run(3);
-  }],
-  // 26 Ритм пил
-  ['Ритм пил', 4, 22, 16, b => {
-    b.run(5); for (let k = 0; k < 4; k++) { const x = b.x; b.run(8); b.saw(x + 3, b.f - 2, 0, 1.6, 1.8, (k % 2) * 0.5); b.saw(x + 6, b.f - 2, 0, 1.6, 1.8, 0.5 - (k % 2) * 0.5); b.run(1); if (k == 1) b.cp(); }
-    b.gap(4); b.run(3); b.conv(7, 1); b.saw(b.x - 3, b.f - 2, 0, 1.4, 1.6, 0); b.run(3);
-  }],
-  // 27 Под потолком
-  ['Под потолком', 4, 24, 18, b => {
-    b.run(5); let x = b.x; b.run(12); for (let i = 2; i < 11; i++) b.set(x + i, b.f - 3, 'v'); b.set(x + 5, b.f - 1, '^'); b.set(x + 9, b.f - 1, '^');
-    b.cp(); b.stairs(2, 2, 4); x = b.x; b.run(10); for (let i = 1; i < 9; i += 2) b.set(x + i, b.f - 3, 'v'); b.set(x + 4, b.f - 1, '^'); b.set(x + 7, b.f - 1, '^');
-    b.gap(4); b.run(3); b.stairsDown(2, 2, 4); b.run(3);
-  }],
-  // 28 Рассыпной туннель
-  ['Рассыпной туннель', 4, 24, 17, b => {
-    b.run(5); let x = b.x; for (let k = 0; k < 3; k++) { b.crumb(5); b.gap(2); }
-    for (let i = 1; i < 18; i += 3) b.set(x + i, b.f - 3, 'v');
-    b.run(3); b.cp(); b.up(1); x = b.x; b.crumb(4); b.gap(3); b.crumb(4); b.gap(3); b.crumb(4); b.spk(2); b.run(3);
-  }],
-  // 29 Колодцы
-  ['Колодцы', 4, 32, 28, b => {
-    b.run(5); let x = b.x; b.shaft(9); b.saw(x + 2.5, b.f + 5, 0, 3, 3, 0); b.run(3); b.cp(); b.gap(3); b.run(2);
-    x = b.x; b.shaft(8); b.set(x + 1, b.f + 5, 'v'); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.4, 0.3); b.run(3); b.spk(2); b.run(2);
-    x = b.x; b.shaft(7); b.saw(x + 2.5, b.f + 3, 0, 2, 2, 0.6); b.run(3); b.stairsDown(2, 3, 4); b.gap(3); b.run(4);
-  }],
-  // 30 Финал теплицы
-  ['Финал теплицы', 4, 28, 22, b => {
-    b.run(5); b.conv(6, 1); b.spk(2); b.crumb(4); b.run(2); let x = b.x; b.gap(9); b.orb(x + 4, b.f - 4); b.run(3); b.cp();
-    x = b.x; b.shaft(7); b.saw(x + 2.5, b.f + 3, 0, 2, 2, 0); b.run(2);
-    x = b.x; b.run(9); b.saw(x + 2.5, b.f - 2, 0, 1.6, 1.8, 0); b.saw(x + 6, b.f - 2, 0, 1.6, 1.8, 0.5); b.cp();
-    b.conv(6, -1); b.gap(3); b.crumb(4); b.gap(2); b.crumb(4); b.spk(3); b.run(3);
-  }],
-  // ---------- 31–40: Небеса (мир 5) ----------
-  // 31 Облачная тропа
-  ['Облачная тропа', 5, 24, 17, b => {
-    b.run(5); b.crumb(3); b.gap(3); b.crumb(3); b.up(1); b.gap(3); b.crumb(3); b.up(1); b.gap(3); b.crumb(3); b.run(2); b.cp();
-    b.down(1); b.gap(3); b.crumb(3); b.gap(3); b.crumb(3); b.down(1); b.gap(4); b.run(3);
-  }],
-  // 32 Две пилы, один путь
-  ['Сквозь пилы', 5, 22, 16, b => {
-    b.run(5); let x = b.x; b.run(11); b.saw(x + 3, b.f - 2, 0, 1.8, 1.6, 0); b.saw(x + 5.5, b.f - 2, 0, 1.8, 1.6, 0.33); b.saw(x + 8, b.f - 2, 0, 1.8, 1.6, 0.66);
-    b.run(2); b.cp(); b.spk(3); b.run(2); x = b.x; b.run(10); b.saw(x + 3, b.f - 1.5, 3, 0, 2, 0); b.saw(x + 6, b.f - 3, 0, 1.2, 1.6, 0.5); b.run(3);
-  }],
-  // 33 Ветер и шипы
-  ['Ветер и шипы', 5, 22, 16, b => {
-    b.run(5); b.conv(8, -1); b.spk(2); b.conv(6, -1); b.gap(3); b.conv(8, -1); b.spk(2); b.conv(6, -1); b.run(2); b.cp();
-    b.stairs(1, 2, 3); b.conv(10, -1); b.spk(2); b.conv(5, 1); b.gap(4); b.conv(6, -1); b.run(3);
-  }],
-  // 34 Лестница орбов
-  ['Лестница орбов', 5, 24, 18, b => {
-    b.run(5); let x = b.x; b.gap(10); b.orb(x + 3, b.f - 3); b.orb(x + 7, b.f - 5); b.up(4); b.run(3);
-    x = b.x; b.gap(10); b.orb(x + 3, b.f - 3); b.orb(x + 7, b.f - 5); b.up(4); b.run(3); b.cp();
-    x = b.x; b.spk(10); b.orb(x + 2, b.f - 4); b.orb(x + 7, b.f - 4); b.down(3); b.run(3);
-    x = b.x; b.gap(12); b.orb(x + 4, b.f - 3); b.orb(x + 9, b.f - 3); b.run(3);
-  }],
-  // 35 Ледяная фабрика
-  ['Фабрика высоко', 5, 24, 17, b => {
-    b.run(5); b.conv(7, 1); b.saw(b.x - 3.5, b.f - 2, 0, 1.4, 1.8, 0); b.gap(3); b.conv(5, -1); b.spk(2); b.conv(7, -1); b.saw(b.x - 3.5, b.f - 2.2, 0, 1.6, 1.8, 0.5);
-    b.run(2); b.cp(); b.crumb(4); b.gap(2); b.crumb(4); b.stairs(2, 2, 4); b.conv(9, -1); b.saw(b.x - 4.5, b.f - 2, 2.5, 0, 2.4, 0); b.gap(3); b.conv(6, 1); b.run(3);
-  }],
-  // 36 Крутая шахта
-  ['Крутая шахта', 5, 34, 30, b => {
-    b.run(5); let x = b.x; b.shaft(11); b.saw(x + 2.5, b.f + 6, 0, 3.5, 3, 0); b.run(2); b.spk(2); b.run(2); b.cp(); b.gap(4); b.run(2);
-    x = b.x; b.shaft(10); b.set(x + 1, b.f + 6, 'v'); b.saw(x + 2.5, b.f + 5, 0, 3, 2.6, 0.4); b.run(3); b.stairsDown(3, 3, 3); b.gap(4); b.run(4);
-  }],
-  // 37 Тающие орбы
-  ['Тающие орбы', 5, 24, 17, b => {
-    b.run(5); b.crumb(4); let x = b.x; b.gap(9); b.orb(x + 4, b.f - 4); b.crumb(3); b.gap(2); b.crumb(3); b.run(2); b.cp();
-    b.up(1); x = b.x; b.spk(10); b.orb(x + 3, b.f - 4); b.orb(x + 7, b.f - 4); b.crumb(4); b.gap(3); b.crumb(3); b.spk(3); b.run(3);
-  }],
-  // 38 Коридор лезвий
-  ['Коридор лезвий', 5, 22, 16, b => {
-    b.run(5); for (let k = 0; k < 3; k++) { const x = b.x; b.run(13); for (let i = 3 + k; i < 12; i += 4) b.set(x + i, b.f - 3, 'v'); b.saw(x + 4 + k, b.f - 1.6, 0, 1.2, 1.8, 0.2 * k); b.saw(x + 9, b.f - 1.6, 0, 1.2, 1.8, 0.5 + 0.2 * k); b.run(2); if (k == 1) b.cp(); }
-    b.gap(4); b.run(3);
-  }],
-  // 39 Пила-маятник
-  ['Пила-маятник', 5, 24, 17, b => {
-    b.run(5); let x = b.x; b.run(10); b.saw(x + 2, b.f - 1.5, 4, 0, 2.5, 0); b.saw(x + 7, b.f - 3.5, 0, 1.5, 2, 0.5);
-    b.cp(); b.run(3); b.gap(4); x = b.x; b.run(9); b.saw(x + 4, b.f - 2, 3.5, 0, 2.2, 0); b.set(x + 2, b.f - 1, '^'); b.set(x + 6, b.f - 1, '^');
-    b.run(2); b.stairs(1, 3, 3); b.gap(4); x = b.x; b.run(8); b.saw(x + 3, b.f - 2.6, 2.5, 0, 2.4, 0); b.run(3);
-  }],
-  // 40 Небесный рубеж
-  ['Небесный рубеж', 5, 30, 24, b => {
-    b.run(5); b.conv(7, 1); b.spk(2); b.crumb(4); b.gap(2); b.crumb(3); let x = b.x; b.gap(8); b.orb(x + 4, b.f - 3); b.run(3); b.cp();
-    x = b.x; b.shaft(8); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.2, 0); b.run(2);
-    x = b.x; b.run(10); b.saw(x + 3, b.f - 2, 0, 1.6, 1.8, 0); b.saw(x + 7, b.f - 2, 0, 1.6, 1.8, 0.5); b.cp();
-    b.conv(6, -1); b.gap(3); b.conv(5, 1); b.stairs(2, 2, 3); b.cp(); x = b.x; b.gap(12); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(3); b.crumb(4); b.gap(2); b.crumb(4); b.spk(3); b.run(3);
-  }],
-  // ---------- 41–50: Ядро (мир 6) ----------
-  // 41 Раскалённый старт
-  ['Раскалённый старт', 6, 24, 17, b => {
-    b.run(5); b.spk(2); b.run(2); b.spk(2); b.run(2); b.gap(4); b.crumb(4); b.gap(3); b.conv(6, 1); b.spk(2); b.run(2); b.cp(); let x = b.x; b.run(10); b.saw(x + 3, b.f - 2, 0, 1.6, 1.8, 0); b.saw(x + 7, b.f - 2, 0, 1.6, 1.8, 0.5); b.gap(4); b.run(3);
-  }],
-  // 42 Вертикаль
-  ['Вертикаль', 6, 38, 34, b => {
-    b.run(5); let x = b.x; b.shaft(10); b.saw(x + 2.5, b.f + 5, 0, 3, 2.6, 0); b.run(2); b.cp(); b.gap(3); b.run(2);
-    x = b.x; b.shaft(9); b.set(x + 1, b.f + 5, 'v'); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.4, 0.3); b.run(2); b.gap(4); b.run(2);
-    x = b.x; b.shaft(9); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.2, 0.6); b.run(3); b.stairsDown(3, 3, 3); b.run(3);
-  }],
-  // 43 Чёрная лента
-  ['Чёрная лента', 6, 24, 17, b => {
-    b.run(5); b.conv(8, 1); b.saw(b.x - 4, b.f - 2, 0, 1.4, 1.8, 0); b.spk(2); b.conv(6, -1); b.gap(3); b.conv(6, -1); b.saw(b.x - 3, b.f - 2.2, 0, 1.6, 1.8, 0.5); b.run(2); b.cp();
-    b.conv(7, 1); b.spk(2); b.conv(5, 1); b.gap(4); b.conv(4, -1); b.crumb(4); b.gap(2); b.crumb(4); b.run(3);
-  }],
-  // 44 Огненный дождь
-  ['Огненный дождь', 6, 22, 16, b => {
-    b.run(5); for (let k = 0; k < 3; k++) { const x = b.x; b.run(15); for (let i = 2 + k; i < 14; i += 3) b.set(x + i, b.f - 3, 'v'); b.set(x + 4, b.f - 1, '^'); b.set(x + 8 + (k % 2), b.f - 1, '^'); b.set(x + 12, b.f - 1, '^'); b.run(2); if (k == 1) b.cp(); }
-    b.gap(4); b.run(3);
-  }],
-  // 45 Цепочка орбов
-  ['Цепочка орбов', 6, 26, 19, b => {
-    b.run(5); for (let k = 0; k < 2; k++) { const x = b.x; b.gap(11); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(4); }
-    b.cp(); b.run(4); for (let k = 0; k < 2; k++) { const x = b.x; b.spk(10); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(4); if (k == 0) b.cp(); }
-    const x = b.x; b.spk(8); b.orb(x + 3, b.f - 3); b.orb(x + 6, b.f - 4); b.run(4);
-  }],
-  // 46 Сломанный мост
-  ['Сломанный мост', 6, 24, 17, b => {
-    b.run(5); for (let k = 0; k < 4; k++) { b.crumb(2); b.gap(2); b.crumb(2); if (k === 2) b.spk(1); else b.run(1); b.crumb(2); b.gap(2); b.up(k % 2 ? 1 : -1); if (k == 1 || k == 3) { b.run(3); b.cp(); } }
-    b.run(3); const x = b.x; b.gap(9); b.orb(x + 5, b.f - 3); b.crumb(3); b.gap(2); b.crumb(3); b.spk(2); b.run(3);
-  }],
-  // 47 Лабиринт ядра
-  ['Лабиринт ядра', 6, 26, 19, b => {
-    b.run(5); let x = b.x; b.run(10); b.saw(x + 2, b.f - 1.5, 0, 1.6, 1.8, 0); b.saw(x + 5, b.f - 1.5, 0, 1.6, 1.8, 0.5); b.saw(x + 8, b.f - 3, 0, 1.2, 1.8, 0.25); b.set(x + 5, b.f - 1, '^');
-    b.run(2); b.cp(); b.gap(4); b.run(2); x = b.x; b.run(10); b.saw(x + 3, b.f - 2, 0, 1.6, 1.8, 0); b.saw(x + 7, b.f - 2, 0, 1.6, 1.8, 0.5);
-    b.run(2); b.cp(); b.stairs(1, 3, 3); b.gap(4); x = b.x; b.run(7); b.saw(x + 3, b.f - 2.6, 2.5, 0, 2.4, 0);
-    b.gap(4); b.run(5); b.cp(); b.spk(3); b.run(3);
-  }],
-  // 48 Шахта и лента
-  ['Шахта и лента', 6, 34, 28, b => {
-    b.run(5); b.conv(7, 1); b.spk(2); b.run(3); let x = b.x; b.shaft(9, 3); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.2, 0); b.run(2); b.cp(); b.conv(6, -1); b.gap(3); b.conv(5, 1);
-    x = b.x; b.shaft(8); b.set(x + 1, b.f + 5, 'v'); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.4, 0.4); b.run(2); b.cp(); b.crumb(4); b.gap(2); b.crumb(4); b.run(2); b.stairsDown(2, 3, 4); b.gap(4); b.run(3);
-  }],
-  // 49 Предел
-  ['Предел', 6, 28, 22, b => {
-    b.run(5); b.conv(8, 1); b.spk(2); b.crumb(4); b.gap(2); b.crumb(3); let x = b.x; b.gap(8); b.orb(x + 4, b.f - 3); b.run(3); b.cp();
-    x = b.x; b.run(10); b.saw(x + 3, b.f - 2, 0, 1.6, 1.8, 0); b.saw(x + 7, b.f - 2, 0, 1.6, 1.8, 0.5);
-    b.run(2); b.cp(); x = b.x; b.shaft(7); b.saw(x + 2.5, b.f + 3, 0, 2, 2, 0); b.run(3); b.cp();
-    b.conv(6, -1); b.gap(3); b.conv(5, 1); b.spk(2); b.run(3); x = b.x; b.gap(11); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); b.run(3);
-  }],
-  // 50 Ядро призрака
-  ['Ядро призрака', 6, 36, 30, b => {
-    b.run(5); b.conv(8, 1); b.spk(2); b.crumb(5); b.run(2); let x = b.x; b.gap(8); b.orb(x + 4, b.f - 3); b.run(3); b.cp();
-    x = b.x; b.shaft(10); b.saw(x + 2.5, b.f + 5, 0, 3, 2.4, 0); b.run(2);
-    x = b.x; b.run(10); b.saw(x + 3, b.f - 2, 0, 1.6, 1.8, 0); b.saw(x + 7, b.f - 2, 0, 1.6, 1.8, 0.5); b.cp();
-    b.conv(6, -1); b.gap(3); b.conv(5, 1); b.stairs(2, 2, 3); b.run(4); b.set(b.x - 4, b.f - 1, 'K'); x = b.x; b.gap(10); b.orb(x + 3, b.f - 3); b.orb(x + 7, b.f - 3); b.run(3); b.cp();
-    b.crumb(4); b.gap(2); b.crumb(4); b.spk(3); b.run(3); b.cp(); x = b.x; b.shaft(9); b.set(x + 1, b.f + 5, 'v'); b.saw(x + 2.5, b.f + 4, 0, 2.5, 2.2, 0.5); b.run(7); b.set(b.x - 6, b.f - 1, 'K');
-    x = b.x; b.spk(9); b.orb(x + 3, b.f - 3); b.orb(x + 6, b.f - 3); b.run(4); b.gap(3); b.run(3);
-  }],
+if (typeof module !== 'undefined') module.exports = { Bld, makeLevel, initState, cloneState, step, setMargin, setHB, sawPos, platXY, hazRect, hazOn, hazWarn, crushY, PW, PH, CF, get PXX() { return PXX; }, get PYY() { return PYY; }, HZ };
+
+// ===== УРОВНИ: библиотека сегментов + 50 трасс =====
+// Каждый сегмент начинается и заканчивается на плоском полу одного уровня f; между сегментами — плоский стык ≥3 тайла.
+// Трасса = цепочка сегментов, поэтому проходима по построению; каждый сегмент проверен отдельно (segcheck.js) на самых трудных параметрах d=3.
+if (typeof module !== 'undefined') { var _C = require('./core.js'); var Bld = _C.Bld, makeLevel = _C.makeLevel; }
+const SEGH = 36, SEGF = 22;
+const SEG = {}, DEEP = {};
+function spring(b) { b.rect(b.x, b.f, 1, b.H - b.f, '#'); b.set(b.x, b.f, 'S'); b.x++; }
+function ice(b, n) { b.rect(b.x, b.f, n, 1, 'I'); b.rect(b.x, b.f + 1, n, b.H - b.f - 1, '#'); b.x += n; }
+function ow(b, x, r, w) { b.rect(x, r, w, 1, '-'); }
+function P(b, x, r, w, c) { b.rect(x, r, w, 1, c || '#'); b.maxx = Math.max(b.maxx, x + w); }
+const pick = (d, a) => a[Math.min(a.length, d) - 1];
+
+// ---------- обычные участки по земле ----------
+SEG.gaps = (b, d) => { const G = pick(d, [[3, 3], [4, 3, 4], [4, 4, 4, 4]]), Ln = pick(d, [3, 3, 2]); for (const g of G) { b.gap(g); b.run(Ln); } };
+SEG.stairs = (b, d) => { const K = pick(d, [2, 3, 3]), Hh = pick(d, [1, 2, 2]), W = pick(d, [4, 3, 2]); b.stairs(K, Hh, W); b.run(3); b.stairsDown(K, Hh, W); };
+SEG.spikes = (b, d) => { if (d === 1) { b.spk(2); b.run(3); } else if (d === 2) { b.spk(3); b.run(3); b.spk(3); b.run(2); } else { b.spk(3); b.run(2); b.spk(3); b.run(2); b.spk(3); b.run(2); } };
+SEG.crumb = (b, d) => { if (d === 1) b.crumb(8); else if (d === 2) { b.crumb(5); b.gap(2); b.crumb(5); } else { b.crumb(4); b.gap(3); b.crumb(4); b.gap(2); b.crumb(4); } b.run(2); };
+SEG.conv = (b, d) => { if (d === 1) { b.conv(8, 1); b.run(2); } else if (d === 2) { b.conv(6, -1); b.spk(2); b.conv(6, -1); b.run(2); } else { b.conv(8, -1); b.gap(3); b.conv(5, -1); b.spk(2); b.conv(5, -1); b.run(2); } };
+SEG.saws = (b, d) => {
+  const x = b.x;
+  if (d === 1) { b.run(10); b.saw(x + 5, b.f - 2.2, 0, 1.2, 2.4, 0); }
+  else if (d === 2) { b.run(12); b.saw(x + 4, b.f - 2, 0, 1.4, 2, 0); b.saw(x + 8, b.f - 2, 0, 1.4, 2, 0.5); }
+  else { b.run(15); b.saw(x + 3, b.f - 2, 0, 1.6, 1.8, 0); b.saw(x + 7, b.f - 2, 0, 1.6, 1.8, 0.5); b.saw(x + 11, b.f - 2, 0, 1.6, 1.8, 0); }
+};
+SEG.sawh = (b, d) => { const x = b.x; b.run(13); b.saw(x + 6, b.f - 1.5, pick(d, [3, 4, 5]), 0, pick(d, [3, 2.6, 2.2]), 0); if (d >= 2) b.saw(x + 6, b.f - 3.2, pick(d, [3, 4, 5]), 0, 2.6, 0.5); };
+SEG.orbgap = (b, d) => { const x = b.x; if (d === 1) { b.gap(8); b.orb(x + 4, b.f - 4); } else if (d === 2) { b.gap(11); b.orb(x + 3, b.f - 3); b.orb(x + 8, b.f - 4); } else { b.gap(12); b.orb(x + 3, b.f - 3); b.orb(x + 9, b.f - 4); } b.run(4); };
+SEG.spkorb = (b, d) => { const x = b.x, n = pick(d, [9, 11, 12]); b.spk(n); b.orb(x + 3, b.f - 4); b.orb(x + n - 4, b.f - 4); b.run(3); };
+SEG.lava = (b, d) => { const x = b.x, n = pick(d, [11, 14, 15]); b.run(n); for (let i = 3; i < n - 2; i += pick(d, [5, 4, 4])) b.set(x + i, b.f - 3, 'v'); b.set(x + 5, b.f - 1, '^'); if (d >= 2) b.set(x + 9, b.f - 1, '^'); if (d >= 3) b.set(x + 12, b.f - 1, '^'); };
+SEG.headwind = (b, d) => { const x = b.x, wx = pick(d, [-2, -3, -2.5]); b.wind(x, b.f - 5, 18, 7, wx, 0); b.run(5); b.gap(3); b.run(pick(d, [5, 4, 4])); if (d >= 2) { b.spk(2); b.run(3); } if (d >= 3) { b.gap(3); b.run(4); } b.winds[b.winds.length - 1].w = b.x - x; };
+SEG.tailwind = (b, d) => { const x = b.x; b.wind(x, b.f - 5, 24, 7, 3, 0); b.run(4); b.gap(pick(d, [5, 6, 5])); b.run(pick(d, [7, 8, 4])); if (d >= 3) { b.gap(5); b.run(8); } b.winds[b.winds.length - 1].w = b.x - x; };
+SEG.ice = (b, d) => { if (d === 1) { ice(b, 8); b.run(3); } else if (d === 2) { ice(b, 6); b.spk(2); ice(b, 6); b.run(2); } else { ice(b, 8); b.gap(3); ice(b, 5); b.spk(2); ice(b, 6); b.run(2); } };
+SEG.pitspring = (b, d) => { b.run(3); spring(b); b.gap(pick(d, [5, 7, 6])); b.run(4); if (d >= 3) { spring(b); b.gap(7); b.run(4); } };
+SEG.flames = (b, d) => {
+  const x = b.x, n = pick(d, [9, 12, 15]); b.run(n);
+  const sp = pick(d, [[3], [3, 8], [3, 6.5, 10]]); sp.forEach((o, i) => b.haz('flame', x + o, b.f - 2.2, 0.9, 2.2, pick(d, [240, 200, 180]), pick(d, [70, 70, 70]), i * pick(d, [0, 60, 50]), 36));
+};
+SEG.lasers = (b, d) => {
+  const x = b.x, n = pick(d, [9, 12, 15]); b.run(n);
+  const sp = pick(d, [[4], [3, 8], [3, 6.5, 10]]); sp.forEach((o, i) => { b.haz('laser', x + o, b.f - 5, 0.3, 5, pick(d, [240, 200, 180]), pick(d, [90, 80, 80]), i * pick(d, [0, 70, 60]), 40); });
+};
+SEG.crush = (b, d) => {
+  const x = b.x, n = pick(d, [10, 13, 16]); b.run(n);
+  const sp = pick(d, [[4], [3.5, 9], [3, 7, 11]]); sp.forEach((o, i) => b.haz('crush', x + o, b.f - 7, 2, 1.5, pick(d, [260, 230, 210]), 40, i * pick(d, [0, 90, 70]), 40, 5.7));
+};
+SEG.rotor = (b, d) => {
+  const x = b.x, n = pick(d, [11, 12, 20]); b.run(n);
+  b.rotor(x + 6, b.f - 4.4, 3.4, 2, pick(d, [4.2, 3.4, 3.4]), 1, 0);
+  if (d >= 3) b.rotor(x + 13.5, b.f - 4.4, 3.4, 2, 3.4, -1, 0.25);
+};
+DEEP.crush = DEEP.lasers = DEEP.rotor = 1;
+
+// ---------- колодец: подъём по стенам и спуск ----------
+SEG.well = (b, d) => {
+  const f = b.f, h = pick(d, [6, 8, 9]), x = b.x;
+  b.shaft(h, 3);
+  if (d >= 2) b.saw(x + 2.5, b.f + pick(d, [4, 4, 5]), 0, pick(d, [2, 2.5, 2.5]), pick(d, [2.4, 2.4, 2.2]), 0.2);
+  if (d >= 3) b.set(x + 1, b.f + 6, 'v');
+  b.run(4); b.f = f; b.run(2);
+};
+
+// ---------- башня: комната, правая стена высотой h с карнизом; падение = просто назад в комнату ----------
+const TAIDS = { plat: 1, oneway: 1, lift: 1, fan: 1, orb: 1, spring: 1, crumb: 1 };
+SEG.tower = (b, d, aid) => {
+  aid = aid || 'plat';
+  const f = b.f, x0 = b.x, H = b.H;
+  const h = aid === 'spring' ? pick(d, [4, 5, 6]) : pick(d, [6, 8, 10]);
+  const pw = (d >= 3 && aid !== 'oneway') ? 2 : 3, G = aid === 'oneway' ? -1 : 3;
+  const R = (aid === 'plat' || aid === 'crumb' || aid === 'oneway') ? 2 + 2 * pw + G : 12;
+  b.run(R); // пол комнаты
+  const wx = x0 + R, wallW = 6;
+  b.rect(wx, f - h, wallW, H - (f - h), '#');
+  const n = Math.max(1, h / 2 - 1);
+  const side = i => ((n - 1 - i) % 2 === 0) ? 1 : 0; // 1 — правая сторона (у стены)
+  if (aid === 'plat' || aid === 'crumb' || aid === 'oneway') {
+    for (let i = 0; i < n; i++) { const r = f - 2 * (i + 1); const px = side(i) ? wx - 1 - pw : x0 + 1; if (aid === 'oneway') ow(b, px, r, pw + 1); else P(b, px, r, pw, aid === 'crumb' ? 'c' : '#'); }
+  } else if (aid === 'lift') {
+    const sx = wx - 3;
+    b.rect(sx, f, 3, H - f, '.'); b.rect(sx, f + 2, 3, H - f - 2, '#');
+    b.mover(sx, f - h / 2, 3, 0, (h + 0.6) / 2, pick(d, [360, 330, 300]), 0.75);
+  } else if (aid === 'fan') {
+    b.wind(wx - 4, f - h - 1.2, 2.2, h + 1.2, 0, -100);
+  } else if (aid === 'orb') {
+    const k = Math.round(h / 2.6);
+    for (let i = 0; i < k; i++) b.orb(wx - 4 + (i % 2 ? 1 : -1), f - 3 - Math.round(i * 2.6));
+  } else if (aid === 'spring') {
+    b.rect(wx - 4, f, 1, 1, 'S');
+  }
+  b.x = wx + wallW; b.maxx = Math.max(b.maxx, b.x);
+  b.f = f; b.run(2);
+};
+
+// ---------- траншея: верхний путь (быстрый, рискованный) и нижний (длинный, безопасный) ----------
+function measure(fn, d) { const m = new Bld(SEGH, SEGF); m.x = 0; fn(m, d); return m.x; }
+const LOWER = { plain: (b, d) => { b.run(6); }, spikes: SEG.spikes, saws: SEG.saws, flames: SEG.flames, conv: SEG.conv, ice: SEG.ice, lasers: SEG.lasers, crush: SEG.crush, rotor: SEG.rotor, sawh: SEG.sawh };
+SEG.trench = (b, d, up, lo) => {
+  up = up || 'plat'; lo = lo || 'plain';
+  const f = b.f, x0 = b.x, D = DEEP[lo] ? 10 : 5, inner = measure(LOWER[lo], d);
+  const nst = D === 5 ? 2 : 4, T = 3 + inner + 3 + 3 * nst, Zw = T - 6;
+  // нижний путь: съезд, участок, лестница наверх (над лестницей платформ нет)
+  b.f = f + D; b.run(3); LOWER[lo](b, d); b.run(3);
+  for (let lv = D - 2; lv >= 1; lv -= 2) { b.f = f + lv; b.run(3); }
+  b.f = f;
+  // верхний путь укладывается в [x0, x0+Zw], затем 3 тайла вниз до верхней ступени
+  const gmax = pick(d, [2, 3, 4]), w = pick(d, [3, 3, 2]);
+  if (up === 'plat' || up === 'crumb' || up === 'hi') {
+    const n = Math.ceil(Zw / (w + gmax)), g = Zw / n - w;
+    for (let i = 0; i < n; i++) { const px = Math.round(x0 + g + i * (w + g)); P(b, px, up === 'hi' && i % 2 ? f - 2 : f, w, up === 'crumb' ? 'c' : '#'); }
+  } else if (up === 'mover') {
+    const n = Math.max(1, Math.round((Zw - 3) / 10)), M = (Zw - 3 - 3 * n) / n;
+    let x = x0; P(b, x, f, 3);
+    for (let i = 0; i < n; i++) {
+      const lx = x + 3, mw = pick(d, [3, 3, 2.6]), ax = (M - mw) / 2;
+      b.mover(lx + ax, f, mw, ax, 0, pick(d, [240, 210, 190]), (i % 2) * 0.5);
+      x += 3 + M; P(b, Math.round(x), f, 3);
+    }
+  } else if (up === 'orb') {
+    const pw = 3, n = Math.max(1, Math.round((Zw - pw) / (pick(d, [7, 8, 9]) + pw))), gap = (Zw - pw * (n + 1)) / n;
+    let x = x0; P(b, x, f, pw);
+    for (let i = 0; i < n; i++) { b.orb(Math.round(x + pw + gap / 2), f - 3); x += pw + gap; P(b, Math.round(x), f, pw); }
+  }
+  b.x = x0 + T; b.maxx = Math.max(b.maxx, b.x);
+};
+
+// ---------- обёртки: тот же участок, но глубже / выше ----------
+function lo(fn, depth) { return (b, d) => { const f = b.f, k = depth / 2; b.stairsDown(k, 2, 3); fn(b, d); b.run(3); b.stairs(k, 2, 3); b.f = f; }; }
+
+
+// ---------- сборка трассы из плана ----------
+function parseTok(t) { const [h, dd] = t.split('@'); const p = h.split(':'); return { name: p[0], a: p[1], c: p[2], d: +dd || 1 }; }
+function buildPlan(plan, cpGap) {
+  const toks = plan.map(parseTok);
+  function pass(cps) {
+    const b = new Bld(SEGH, SEGF); b.run(2); b.run(6); const ends = []; let lastCp = 0;
+    toks.forEach((t, i) => {
+      if (t.name === 'trench') SEG.trench(b, t.d, t.a, t.c); else if (t.name === 'tower') SEG.tower(b, t.d, t.a);
+      else SEG[t.name](b, t.d);
+      b.run(3);
+      if (cps && cps.has(i)) b.cp();
+      ends.push(b.x);
+    });
+    return { b, ends };
+  }
+  const first = pass(null), total = first.ends[first.ends.length - 1] + 10, cps = new Set();
+  let last = 0;
+  first.ends.forEach((e, i) => { if (e - last >= (cpGap || 88) && total - e >= 22 && i < toks.length - 1) { cps.add(i); last = e; } });
+  return pass(cps).b;
+}
+const PLANS = [
+  // ---- Склеп ----
+  ['Разминка', 0, ['gaps@1', 'stairs@1', 'trench:plat:plain@1', 'tower:plat@1', 'gaps@2']],
+  ['Колючки', 0, ['spikes@1', 'trench:plat:spikes@1', 'gaps@2', 'spikes@2', 'tower:plat@1', 'stairs@2']],
+  ['Лесенка', 0, ['stairs@2', 'tower:oneway@1', 'spikes@2', 'trench:hi:plain@1', 'tower:oneway@2', 'gaps@2']],
+  ['Стена', 0, ['well@1', 'gaps@2', 'trench:plat:spikes@2', 'stairs@2', 'well@2', 'tower:plat@2', 'spikes@2']],
+  ['Тающий мост', 0, ['crumb@1', 'trench:crumb:plain@1', 'crumb@2', 'tower:crumb@1', 'spikes@2', 'crumb@3']],
+  // ---- Ледник ----
+  ['Двойной прыжок', 1, ['orbgap@1', 'gaps@2', 'tower:orb@1', 'orbgap@2', 'trench:orb:plain@1', 'spikes@2']],
+  ['Пружины', 1, ['pitspring@1', 'conv@1', 'tower:spring@1', 'pitspring@2', 'trench:plat:conv@1', 'conv@2']],
+  ['Пила', 1, ['saws@1', 'sawh@1', 'trench:plat:saws@1', 'saws@2', 'tower:plat@2', 'sawh@2']],
+  ['Шорткат', 1, ['trench:mover:plain@1', 'gaps@2', 'trench:mover:spikes@1', 'tower:lift@1', 'trench:mover:saws@2', 'spikes@2']],
+  ['Ледяной зигзаг', 1, ['ice@1', 'trench:plat:ice@1', 'ice@2', 'well@2', 'tower:lift@2', 'ice@3']],
+  // ---- Жар ----
+  ['Встречный ветер', 2, ['headwind@1', 'tailwind@1', 'trench:plat:plain@2', 'headwind@2', 'conv@2', 'tower:plat@2']],
+  ['Подъёмник', 2, ['tower:lift@2', 'well@2', 'trench:mover:conv@2', 'tower:lift@3', 'sawh@2', 'spikes@3']],
+  ['Орбы и шипы', 2, ['spkorb@1', 'orbgap@2', 'trench:orb:spikes@2', 'spkorb@2', 'tower:orb@2', 'orbgap@2']],
+  ['Огненные струи', 2, ['flames@1', 'flames@2', 'trench:plat:flames@2', 'tower:plat@2', 'flames@3', 'lava@2']],
+  ['Разлом', 2, ['crumb@2', 'trench:crumb:spikes@2', 'tower:crumb@2', 'crumb@3', 'trench:mover:flames@2', 'gaps@3']],
+  // ---- Бездна ----
+  ['Лазерные ворота', 3, ['lasers@1', 'lasers@2', 'trench:plat:lasers@1', 'tower:lift@2', 'lasers@3', 'spikes@3']],
+  ['Пресс', 3, ['crush@1', 'conv@2', 'crush@2', 'trench:plat:crush@1', 'tower:oneway@3', 'crush@3']],
+  ['Вертушка', 3, ['rotor@1', 'rotor@2', 'trench:mover:rotor@1', 'tower:plat@3', 'rotor@3', 'saws@3']],
+  ['Вентиляторы', 3, ['tower:fan@1', 'tower:fan@2', 'tailwind@2', 'trench:plat:sawh@2', 'tower:fan@3', 'headwind@2']],
+  ['Призрачный финал', 3, ['crush@2', 'trench:mover:lasers@2', 'tower:lift@3', 'rotor@2', 'flames@3', 'trench:orb:flames@2', 'well@3']],
+  // ---- Оранжерея ----
+  ['Зелёный старт', 4, ['gaps@2', 'trench:plat:spikes@2', 'tower:oneway@2', 'conv@2', 'spikes@2', 'pitspring@2']],
+  ['Лианы', 4, ['crumb@2', 'trench:crumb:plain@2', 'tower:crumb@2', 'trench:mover:spikes@2', 'crumb@3', 'tower:plat@3']],
+  ['Весенний сад', 4, ['pitspring@2', 'tower:spring@2', 'trench:orb:spikes@2', 'pitspring@3', 'tower:spring@3', 'conv@2']],
+  ['Садовые прессы', 4, ['crush@2', 'trench:plat:crush@2', 'conv@2', 'crush@3', 'tower:oneway@3', 'flames@2']],
+  ['Прыжки веры', 4, ['spkorb@2', 'orbgap@3', 'trench:orb:flames@2', 'spkorb@2', 'tower:orb@3', 'gaps@3']],
+  ['Ритм пил', 4, ['saws@2', 'sawh@2', 'trench:mover:saws@2', 'saws@3', 'rotor@2', 'sawh@3']],
+  ['Под потолком', 4, ['lava@2', 'trench:plat:lasers@2', 'lava@3', 'tower:lift@3', 'lasers@3', 'lava@2']],
+  ['Рассыпной туннель', 4, ['crumb@3', 'trench:crumb:flames@2', 'tower:crumb@3', 'conv@3', 'trench:hi:spikes@3', 'crumb@3']],
+  ['Колодцы', 4, ['well@3', 'trench:plat:saws@3', 'well@2', 'tower:fan@3', 'well@3', 'headwind@2']],
+  ['Финал теплицы', 4, ['flames@3', 'trench:mover:crush@2', 'tower:lift@3', 'lasers@3', 'rotor@3', 'trench:orb:spikes@3', 'crumb@3']],
+  // ---- Небеса ----
+  ['Облачная тропа', 5, ['tower:oneway@3', 'trench:hi:plain@3', 'tailwind@2', 'tower:spring@3', 'trench:crumb:plain@3', 'gaps@3']],
+  ['Сквозь пилы', 5, ['saws@3', 'trench:plat:sawh@3', 'rotor@2', 'saws@3', 'tower:lift@3', 'sawh@3']],
+  ['Ветер и шипы', 5, ['headwind@3', 'tailwind@3', 'trench:plat:spikes@3', 'headwind@2', 'tower:fan@3', 'spikes@3']],
+  ['Лестница орбов', 5, ['tower:orb@3', 'orbgap@3', 'trench:orb:plain@3', 'spkorb@2', 'tower:orb@3', 'orbgap@3']],
+  ['Фабрика высоко', 5, ['conv@3', 'trench:mover:conv@3', 'crush@3', 'tower:lift@3', 'conv@3', 'trench:plat:crush@2']],
+  ['Крутая шахта', 5, ['well@3', 'tower:fan@3', 'well@3', 'tower:plat@3', 'trench:plat:rotor@2', 'well@3']],
+  ['Тающие орбы', 5, ['crumb@3', 'orbgap@3', 'trench:crumb:spikes@3', 'tower:crumb@3', 'spkorb@2', 'orbgap@3']],
+  ['Коридор лезвий', 5, ['lava@3', 'sawh@3', 'trench:plat:rotor@3', 'saws@3', 'lava@3', 'rotor@3']],
+  ['Ледяные ворота', 5, ['ice@3', 'trench:plat:ice@3', 'lasers@3', 'ice@3', 'tower:lift@3', 'trench:mover:lasers@3']],
+  ['Небесный рубеж', 5, ['pitspring@3', 'tower:spring@3', 'trench:mover:flames@3', 'tower:fan@3', 'rotor@3', 'crush@3', 'orbgap@3']],
+  // ---- Ядро ----
+  ['Раскалённый старт', 6, ['spikes@3', 'flames@3', 'trench:plat:flames@3', 'conv@3', 'tower:plat@3', 'crumb@3', 'saws@3']],
+  ['Вертикаль', 6, ['well@3', 'tower:lift@3', 'well@3', 'tower:fan@3', 'trench:hi:spikes@3', 'well@3']],
+  ['Чёрная лента', 6, ['conv@3', 'trench:mover:conv@3', 'saws@3', 'conv@3', 'crush@3', 'trench:plat:conv@3', 'tower:oneway@3']],
+  ['Огненный дождь', 6, ['flames@3', 'lava@3', 'trench:plat:flames@3', 'lasers@3', 'flames@3', 'tower:plat@3', 'lava@3']],
+  ['Цепочка орбов', 6, ['orbgap@3', 'spkorb@2', 'trench:orb:spikes@3', 'tower:orb@3', 'orbgap@3', 'spkorb@2']],
+  ['Сломанный мост', 6, ['crumb@3', 'trench:crumb:saws@3', 'tower:crumb@3', 'crumb@3', 'trench:crumb:flames@3', 'crumb@3']],
+  ['Лабиринт ядра', 6, ['saws@3', 'rotor@3', 'trench:mover:rotor@3', 'sawh@3', 'lava@3', 'trench:plat:saws@3', 'rotor@3']],
+  ['Шахта и лента', 6, ['conv@3', 'well@3', 'conv@3', 'trench:mover:crush@3', 'well@3', 'tower:lift@3']],
+  ['Предел', 6, ['crush@3', 'lasers@3', 'rotor@3', 'trench:mover:lasers@3', 'flames@3', 'tower:fan@3', 'orbgap@3', 'crush@3']],
+  ['Ядро призрака', 6, ['pitspring@3', 'tower:spring@3', 'trench:mover:rotor@3', 'well@3', 'crush@3', 'lasers@3', 'tower:lift@3', 'trench:orb:flames@3', 'rotor@3', 'flames@3', 'crumb@3', 'orbgap@3']],
 ];
-const LEVELS = LEVEL_DEFS.map(d => mk(d[2], d[3], d[4], d[0], d[1]));
-
-if (typeof module !== 'undefined') module.exports = { LEVELS, initState, cloneState, step, setMargin, setHB, sawPos, PW, PH, CF };
+const LEVELS = PLANS.map(p => buildPlan(p[2]).finishLevel(p[0], p[1]));
+if (typeof module !== 'undefined') module.exports = Object.assign({}, _C, { SEG, DEEP, LOWER, TAIDS, SEGH, SEGF, PLANS, LEVELS, buildPlan, parseTok });
 
 </script>
 <script>
@@ -744,7 +791,7 @@ const GFX = (function () {
     { id: 5, n: 'Небеса', sky: ['#3a1a5e', '#c2508f', '#ffc27a'], far: '#d77aa8', mid: '#c35f96', near: '#a94a85', tile: '#f3d9e8', tile2: '#dfbcd4', deep: '#b78bb0', deep2: '#a47aa0', top: '#ffffff', top2: '#ffe9f4', acc: '#ffd166', glow: 'pink', fog: '#ffd9c0', body: '#fff5fb', amb: 'white' },
     { id: 6, n: 'Ядро', sky: ['#12020a', '#3d0a1c', '#8a1d34'], far: '#58132a', mid: '#44101f', near: '#320b17', tile: '#6d5d70', tile2: '#5a4b5e', deep: '#3a2c3f', deep2: '#2f2333', top: '#ffc1c8', top2: '#ff5a72', acc: '#ff5a72', glow: 'red', fog: '#b03050', body: '#ffe0e4', amb: 'red' },
   ];
-  const GLOWS = { gold: '#ffd166', cyan: '#5ef0ff', coral: '#ff6a4d', white: '#ffffff', violet: '#a58cff', green: '#59e6a2', red: '#ff3a50', ice: '#bfefff', orange: '#ff9a3a', pink: '#ff9ad0', yellow: '#e8ff7a' };
+  const GLOWS = { gold: '#ffd166', cyan: '#5ef0ff', coral: '#ff6a4d', white: '#ffffff', violet: '#a58cff', green: '#59e6a2', red: '#ff3a50', ice: '#bfefff', orange: '#ff9a3a', pink: '#ff9ad0', yellow: '#e8ff7a', blue: '#6a9bff', lime: '#c6ff5a', rose: '#ff7ad9' };
   const GN = Object.keys(GLOWS), GI = {}; GN.forEach((k, i) => GI[k] = i);
   const GL = [];
   function bakeGlows() {
@@ -999,11 +1046,12 @@ const GFX = (function () {
     const g = ATL.getContext('2d');
     for (let v = 0; v < SOLIDV; v++) for (let m = 0; m < 16; m++) { const i = v * 16 + m; bakeSolid(g, (i & 7) * TD, (i >> 3) * TD, TD, m, v, wd); }
     // объекты: 0..3 конвейер вправо, 4..7 влево, 8 шипы вверх, 9 шипы вниз, 10 и 11 осыпающаяся плита (2 вида), 12 конвейер-основа
-    OBJ = mk(TD * 8, TD * 4); const o = OBJ.getContext('2d');
+    OBJ = mk(TD * 8, TD * 5); const o = OBJ.getContext('2d');
     for (let f = 0; f < 4; f++) { bakeConv(o, f * TD, 0, TD, wd, 1, f); bakeConv(o, f * TD + 4 * TD, 0, TD, wd, -1, f); }
     bakeSpikes(o, 0, TD, TD, true); bakeSpikes(o, TD, TD, TD, false);
     bakeCrumb(o, 2 * TD, TD, TD, wd, 0); bakeCrumb(o, 3 * TD, TD, TD, wd, 1);
     bakeDecor(o, TD, wd);
+    bakeSpring(o, 0, 4 * TD, TD, wd); bakeIce(o, 2 * TD, 4 * TD, TD, wd); bakeOneway(o, 3 * TD, 4 * TD, TD, wd);
   }
   function bakeSolid(g, x0, y0, S_, mask, v, wd) {
     const up = mask & 1, lf = mask & 2, rt = mask & 4, dn = mask & 8, R = rng(v * 977 + mask * 31 + wd.id * 7 + 1);
@@ -1085,6 +1133,38 @@ const GFX = (function () {
     g.strokeStyle = 'rgba(255,255,255,.25)'; g.lineWidth = Math.max(1, S_ * .025); g.beginPath(); g.arc(S_ * .5, S_ * .62, S_ * .17, 0, TAU); g.stroke();
     const a = f * dir * Math.PI / 8; g.beginPath(); g.moveTo(S_ * .5, S_ * .62); g.lineTo(S_ * .5 + Math.cos(a) * S_ * .17, S_ * .62 + Math.sin(a) * S_ * .17); g.moveTo(S_ * .5, S_ * .62); g.lineTo(S_ * .5 - Math.cos(a) * S_ * .17, S_ * .62 - Math.sin(a) * S_ * .17); g.stroke();
     g.fillStyle = 'rgba(255,255,255,.2)'; g.fillRect(0, bh, S_ * .05, S_ - bh);
+    g.restore();
+  }
+  function bakeSpring(g, x0, y0, S_, wd) {
+    g.save(); g.translate(x0, y0); g.beginPath(); g.rect(0, 0, S_, S_); g.clip();
+    const bg = g.createLinearGradient(0, S_ * .55, 0, S_); bg.addColorStop(0, '#4a4f6a'); bg.addColorStop(1, '#262a40'); g.fillStyle = bg; g.fillRect(0, S_ * .55, S_, S_ * .45);
+    g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(0, S_ * .55, S_, Math.max(1, S_ * .03));
+    g.strokeStyle = '#d7dcf2'; g.lineWidth = Math.max(2, S_ * .07); g.lineJoin = 'round'; g.beginPath(); g.moveTo(S_ * .22, S_ * .55); for (let i = 0; i < 4; i++) { g.lineTo(S_ * .78, S_ * (.5 - i * .075)); g.lineTo(S_ * .22, S_ * (.46 - i * .075)); } g.stroke();
+    const pg = g.createLinearGradient(0, S_ * .02, 0, S_ * .22); pg.addColorStop(0, '#fff2a0'); pg.addColorStop(1, '#ff9a3a'); g.fillStyle = pg;
+    g.beginPath(); g.moveTo(S_ * .06, S_ * .22); g.lineTo(S_ * .06, S_ * .12); g.quadraticCurveTo(S_ * .06, S_ * .02, S_ * .16, S_ * .02); g.lineTo(S_ * .84, S_ * .02); g.quadraticCurveTo(S_ * .94, S_ * .02, S_ * .94, S_ * .12); g.lineTo(S_ * .94, S_ * .22); g.closePath(); g.fill();
+    g.strokeStyle = 'rgba(120,50,10,.6)'; g.lineWidth = Math.max(1, S_ * .03); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(S_ * .14, S_ * .045, S_ * .5, S_ * .03);
+    g.fillStyle = '#7a2a10'; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(S_ * (.3 + i * .2), S_ * .17); g.lineTo(S_ * (.36 + i * .2), S_ * .07); g.lineTo(S_ * (.42 + i * .2), S_ * .17); g.fill(); }
+    g.restore();
+  }
+  function bakeIce(g, x0, y0, S_, wd) {
+    g.save(); g.translate(x0, y0); g.beginPath(); g.rect(0, 0, S_, S_); g.clip();
+    const gr = g.createLinearGradient(0, 0, 0, S_); gr.addColorStop(0, '#e8fbff'); gr.addColorStop(.2, '#9fe2f5'); gr.addColorStop(1, '#4ea7cf'); g.fillStyle = gr; g.fillRect(0, 0, S_, S_);
+    g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(0, 0, S_, Math.max(2, S_ * .09));
+    g.strokeStyle = 'rgba(255,255,255,.65)'; g.lineWidth = Math.max(1, S_ * .035); g.lineCap = 'round';
+    g.beginPath(); g.moveTo(S_ * .15, S_ * .4); g.lineTo(S_ * .45, S_ * .22); g.moveTo(S_ * .55, S_ * .75); g.lineTo(S_ * .85, S_ * .5); g.moveTo(S_ * .3, S_ * .9); g.lineTo(S_ * .38, S_ * .68); g.stroke();
+    g.fillStyle = 'rgba(20,70,120,.25)'; g.fillRect(0, S_ * .85, S_, S_ * .15); g.fillRect(S_ * .94, 0, S_ * .06, S_);
+    g.fillStyle = 'rgba(255,255,255,.8)'; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(S_ * (.2 + i * .3), S_ * .05, S_ * .02, 0, TAU); g.fill(); }
+    g.restore();
+  }
+  function bakeOneway(g, x0, y0, S_, wd) {
+    g.save(); g.translate(x0, y0);
+    const h = S_ * .3, gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, mix(wd.top, '#ffffff', .35)); gr.addColorStop(.35, wd.tile); gr.addColorStop(1, wd.tile2); g.fillStyle = gr;
+    g.beginPath(); g.moveTo(0, S_ * .02); g.lineTo(S_, S_ * .02); g.lineTo(S_, h); g.lineTo(0, h); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.4)'; g.fillRect(0, S_ * .02, S_, Math.max(1, S_ * .03));
+    g.fillStyle = wd.acc; g.globalAlpha = .9; for (let i = 0; i < 2; i++) { g.beginPath(); g.moveTo(S_ * (.15 + i * .5), h * .75); g.lineTo(S_ * (.3 + i * .5), h * .3); g.lineTo(S_ * (.45 + i * .5), h * .75); g.closePath(); g.fill(); } g.globalAlpha = 1;
+    g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(0, h, S_, S_ * .04);
+    g.fillStyle = 'rgba(255,255,255,.18)'; g.fillRect(S_ * .06, h, S_ * .06, S_ * .22); g.fillRect(S_ * .88, h, S_ * .06, S_ * .22);
     g.restore();
   }
   function bakeSpikes(g, x0, y0, S_, up) {
@@ -1234,7 +1314,7 @@ const GFX = (function () {
   }
 
   // ---------- рисование уровня ----------
-  const isSolidCh = c => c === 35 || c === 62 || c === 60;
+  const isSolidCh = c => c === 35 || c === 62 || c === 60 || c === 73 || c === 83;
   let DECX = null, DECY = null, DECV = null, DECN = 0;
   function buildDecor(L) {
     const x = [], y = [], v = []; let h = 12345;
@@ -1288,6 +1368,13 @@ const GFX = (function () {
         if (c >= CF + CR - 20 && c <= CF + CR) a = 1;
         g.drawImage(OBJ, (2 + ((x + y) & 1)) * TD, TD, TD, TD, px + sh, py + (c > 0 && c <= CF ? c / CF * TD * .05 : 0), TD, TD);
         if (c > 0 && c <= CF) { g.fillStyle = 'rgba(255,255,255,' + (0.12 * c / CF) + ')'; }
+      } else if (ch === 83) {
+        const sq = (S.spr && S.spr[0] === x && S.spr[1] === y) ? Math.max(0, 1 - (tAnim - S.spr[2]) * 5) : 0;
+        g.drawImage(OBJ, 0, 4 * TD, TD, TD, px, py + sq * TD * .18, TD, TD - sq * TD * .18);
+      } else if (ch === 73) {
+        g.drawImage(OBJ, 2 * TD, 4 * TD, TD, TD, px, py, TD, TD);
+      } else if (ch === 45) {
+        g.drawImage(OBJ, 3 * TD, 4 * TD, TD, TD, px, py, TD, TD);
       } else if (ch === 94) {
         g.drawImage(OBJ, 0, TD, TD, TD, px, py, TD, TD);
       } else if (ch === 118) {
@@ -1300,6 +1387,14 @@ const GFX = (function () {
     const TD = S.TD;
     for (let i = 0; i < L.saws.length; i++) {
       const s = L.saws[i];
+      if (s.r) {
+        const hx = ox + s.x * TD, hy = oy + s.y * TD; if (hx < -TD * 6 || hx > S.VW * S.DPR + TD * 6) continue;
+        const q = sawPos(s, tSim), tx = ox + q[0] * TD, ty = oy + q[1] * TD;
+        g.strokeStyle = '#3a3f58'; g.lineWidth = TD * .16; g.lineCap = 'round'; g.beginPath(); g.moveTo(hx, hy); g.lineTo(tx, ty); g.stroke();
+        g.strokeStyle = '#8c93b8'; g.lineWidth = TD * .06; g.beginPath(); g.moveTo(hx, hy); g.lineTo(tx, ty); g.stroke();
+        g.fillStyle = '#20243a'; g.beginPath(); g.arc(hx, hy, TD * .26, 0, TAU); g.fill(); g.fillStyle = '#ffd166'; g.beginPath(); g.arc(hx, hy, TD * .1, 0, TAU); g.fill();
+        continue;
+      }
       if (s.ax || s.ay) {
         const x0 = ox + (s.x - s.ax) * TD, y0 = oy + (s.y - s.ay) * TD, x1 = ox + (s.x + s.ax) * TD, y1 = oy + (s.y + s.ay) * TD;
         if (x1 < -TD * 2 && x0 < -TD * 2) continue; if (x0 > S.VW * S.DPR + TD * 2 && x1 > S.VW * S.DPR + TD * 2) continue;
@@ -1310,8 +1405,8 @@ const GFX = (function () {
     }
     const sw = SAW.width;
     for (let i = 0; i < L.saws.length; i++) {
-      const s = L.saws[i], a = Math.sin(((s.ph || 0) + tSim / (s.per * 60)) * TAU);
-      const sx = ox + (s.x + s.ax * a) * TD, sy = oy + (s.y + s.ay * a) * TD;
+      const s = L.saws[i], q = sawPos(s, tSim);
+      const sx = ox + q[0] * TD, sy = oy + q[1] * TD;
       if (sx < -TD * 2 || sx > S.VW * S.DPR + TD * 2) continue;
       g.save(); g.translate(sx, sy); g.rotate(tAnim * 9 * (i & 1 ? -1 : 1));
       g.drawImage(SAW, -sw / 2, -sw / 2); g.restore();
@@ -1365,8 +1460,8 @@ const GFX = (function () {
   function drawSawGlow(g, L, ox, oy, tSim) {
     const TD = S.TD; g.globalCompositeOperation = 'lighter'; g.globalAlpha = .55;
     for (let i = 0; i < L.saws.length; i++) {
-      const s = L.saws[i], a = Math.sin(((s.ph || 0) + tSim / (s.per * 60)) * TAU);
-      const sx = ox + (s.x + s.ax * a) * TD, sy = oy + (s.y + s.ay * a) * TD; if (sx < -TD * 3 || sx > S.VW * S.DPR + TD * 3) continue;
+      const s = L.saws[i], q = sawPos(s, tSim);
+      const sx = ox + q[0] * TD, sy = oy + q[1] * TD; if (sx < -TD * 3 || sx > S.VW * S.DPR + TD * 3) continue;
       const gs = TD * 2.6; g.drawImage(GL[GI.red], sx - gs / 2, sy - gs / 2, gs, gs);
     }
     g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
@@ -1383,6 +1478,109 @@ const GFX = (function () {
       const gs = TD * 1.6; g.drawImage(spr, ox + (x + .5) * TD - gs / 2, oy + y * TD - gs * .35, gs, gs * .7);
     }
     g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  }
+
+  // ---------- движущиеся платформы, лазеры, огонь, прессы, потоки ----------
+  function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r); g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h); g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r); g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath(); }
+  function drawMovers(g, L, ox, oy, tSim, tAnim) {
+    const TD = S.TD, wd = WORLDS[S.wi], VWp = S.VW * S.DPR;
+    for (let i = 0; i < L.pl.length; i++) {
+      const p = L.pl[i];
+      // направляющая (след хода)
+      if (p.ax || p.ay) {
+        const gx0 = ox + (p.x - p.ax) * TD, gx1 = ox + (p.x + p.ax + p.w) * TD; if (gx1 < -TD || gx0 > VWp + TD) continue;
+        const gy0 = oy + (p.y - p.ay + .15) * TD, gy1 = oy + (p.y + p.ay + .15) * TD;
+        g.strokeStyle = 'rgba(255,255,255,.12)'; g.lineWidth = TD * .12; g.lineCap = 'round'; g.setLineDash([TD * .18, TD * .22]);
+        g.beginPath(); if (p.ax) { g.moveTo(ox + (p.x - p.ax + p.w / 2) * TD, oy + (p.y + .15) * TD); g.lineTo(ox + (p.x + p.ax + p.w / 2) * TD, oy + (p.y + .15) * TD); } else { g.moveTo(ox + (p.x + p.w / 2) * TD, gy0); g.lineTo(ox + (p.x + p.w / 2) * TD, gy1); } g.stroke(); g.setLineDash([]);
+      }
+      platXY(p, tSim); const x = ox + PXX * TD, y = oy + PYY * TD, w = p.w * TD, h = TD * .34;
+      if (x + w < -TD || x > VWp + TD) continue;
+      g.fillStyle = 'rgba(0,0,0,.3)'; rrect(g, x + 2, y + 4, w, h, h * .4); g.fill();
+      const gr = g.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, mix(wd.top, '#ffffff', .4)); gr.addColorStop(.3, '#7f86ad'); gr.addColorStop(1, '#3b4060');
+      g.fillStyle = gr; rrect(g, x, y, w, h, h * .4); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = Math.max(1, TD * .025); g.beginPath(); g.moveTo(x + h * .4, y + 1); g.lineTo(x + w - h * .4, y + 1); g.stroke();
+      // стрелки направления и огни
+      g.fillStyle = wd.acc; const dir = (p.ax ? 'h' : 'v');
+      const n = Math.max(1, Math.round(p.w)), cy = y + h * .55;
+      for (let k = 0; k < n; k++) { const cx = x + (k + .5) * w / n; g.globalAlpha = .6 + .35 * Math.sin(tAnim * 6 + k); g.beginPath();
+        if (dir === 'h') { g.moveTo(cx - TD * .1, cy - TD * .07); g.lineTo(cx - TD * .1 - TD * .08, cy); g.lineTo(cx - TD * .1, cy + TD * .07); g.moveTo(cx + TD * .1, cy - TD * .07); g.lineTo(cx + TD * .18, cy); g.lineTo(cx + TD * .1, cy + TD * .07); g.lineWidth = TD * .035; g.strokeStyle = wd.acc; g.stroke(); }
+        else { g.moveTo(cx - TD * .07, cy - TD * .03); g.lineTo(cx, cy - TD * .12); g.lineTo(cx + TD * .07, cy - TD * .03); g.lineWidth = TD * .035; g.strokeStyle = wd.acc; g.stroke(); } }
+      g.globalAlpha = 1;
+      g.fillStyle = '#2a2e48'; g.fillRect(x + w * .08, y + h, w * .84, TD * .08);
+    }
+  }
+  const FLM = [];
+  function drawHaz(g, L, ox, oy, tSim, tAnim) {
+    const TD = S.TD, VWp = S.VW * S.DPR, wd = WORLDS[S.wi];
+    for (let i = 0; i < L.haz.length; i++) {
+      const h = L.haz[i], hx = ox + h.x * TD; if (hx < -TD * 4 || hx > VWp + TD * 4) continue;
+      const on = h.k === 'crush' ? false : hazOn(h, tSim), wn = h.k === 'crush' ? false : hazWarn(h, tSim), w = h.w * TD;
+      if (h.k === 'laser') {
+        const y0 = oy + h.y * TD, y1 = oy + (h.y + h.h) * TD, cxp = hx + w / 2;
+        // эмиттеры
+        for (let e = 0; e < 2; e++) { const ey = e ? y1 : y0; g.fillStyle = '#2b2f4a'; rrect(g, cxp - TD * .3, e ? ey - TD * .06 : ey - TD * .22, TD * .6, TD * .28, TD * .08); g.fill(); g.fillStyle = on ? '#ff6a8a' : wn ? ((Math.floor(tAnim * 14) & 1) ? '#ff6a8a' : '#6a3040') : '#5a2a3c'; g.beginPath(); g.arc(cxp, e ? ey - TD * .0 : ey - TD * .08, TD * .1, 0, TAU); g.fill(); }
+        if (on) {
+          const fl = .85 + .15 * Math.sin(tAnim * 40);
+          g.globalCompositeOperation = 'lighter'; g.globalAlpha = .55 * fl; const gw = TD * 1.1; g.drawImage(GL[GI.red], cxp - gw / 2, y0, gw, y1 - y0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+          g.strokeStyle = 'rgba(255,60,90,.55)'; g.lineWidth = TD * .26; g.lineCap = 'butt'; g.beginPath(); g.moveTo(cxp, y0); g.lineTo(cxp, y1); g.stroke();
+          g.strokeStyle = '#fff2f4'; g.lineWidth = TD * .09; g.beginPath(); g.moveTo(cxp, y0); g.lineTo(cxp, y1); g.stroke();
+        } else if (wn) {
+          g.strokeStyle = 'rgba(255,90,120,' + ((Math.floor(tAnim * 14) & 1) ? .55 : .15) + ')'; g.lineWidth = TD * .05; g.setLineDash([TD * .14, TD * .18]); g.beginPath(); g.moveTo(cxp, y0); g.lineTo(cxp, y1); g.stroke(); g.setLineDash([]);
+        } else { g.strokeStyle = 'rgba(255,120,150,.12)'; g.lineWidth = TD * .03; g.beginPath(); g.moveTo(cxp, y0); g.lineTo(cxp, y1); g.stroke(); }
+      } else if (h.k === 'flame') {
+        const by = oy + (h.y + h.h) * TD, cxp = hx + w / 2;
+        g.fillStyle = '#2b2f4a'; rrect(g, cxp - TD * .4, by - TD * .06, TD * .8, TD * .12, TD * .04); g.fill();
+        g.fillStyle = on ? '#ff9a3a' : wn ? ((Math.floor(tAnim * 14) & 1) ? '#ff9a3a' : '#5a2a1a') : '#4a2a22'; g.beginPath(); g.ellipse(cxp, by - TD * .06, TD * .2, TD * .06, 0, 0, TAU); g.fill();
+        if (on || wn) {
+          const k = on ? 1 : .22 + .12 * Math.sin(tAnim * 30), hh = h.h * TD * k, ww = w * (on ? 1 : .7);
+          g.globalCompositeOperation = 'lighter'; g.globalAlpha = on ? .6 : .35; const gs = TD * 2.2; g.drawImage(GL[GI.orange], cxp - gs / 2, by - hh / 2 - gs / 2, gs, gs); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+          for (let l = 0; l < 3; l++) {
+            const sc = 1 - l * .27, fw = ww * .62 * sc, fh = hh * (1 - l * .12) * (.92 + .08 * Math.sin(tAnim * 22 + l * 2 + h.x));
+            g.fillStyle = l === 0 ? '#ff5a1a' : l === 1 ? '#ffb43a' : '#fff3b0'; g.beginPath(); g.moveTo(cxp - fw, by - TD * .05);
+            g.quadraticCurveTo(cxp - fw * 1.1, by - fh * .45, cxp + Math.sin(tAnim * 17 + l) * fw * .35, by - fh);
+            g.quadraticCurveTo(cxp + fw * 1.1, by - fh * .45, cxp + fw, by - TD * .05); g.closePath(); g.fill();
+          }
+        }
+      } else if (h.k === 'crush') {
+        const cy = crushY(h, tSim);
+        const u = (tSim + h.ph) % h.per, st = h.per - h.warn - 6 - h.on - 30, warn = u >= st && u < st + h.warn;
+        const sx = warn ? Math.sin(tAnim * 70) * TD * .035 : 0;
+        const x = hx + sx, y = oy + (h.y + cy) * TD, bh = h.h * TD;
+        // рельса и тень-предупреждение
+        g.fillStyle = 'rgba(40,44,70,.9)'; g.fillRect(hx + w * .3, oy + (h.y - 1.2) * TD, w * .4, (cy + 1.2) * TD);
+        if (warn) { g.fillStyle = 'rgba(255,60,80,' + (.1 + .1 * Math.sin(tAnim * 30)) + ')'; g.fillRect(hx, y + bh, w, Math.max(0, (h.dy - cy) * TD)); }
+        g.fillStyle = 'rgba(0,0,0,.35)'; rrect(g, x + 2, y + 4, w, bh, TD * .1); g.fill();
+        const gr = g.createLinearGradient(0, y, 0, y + bh); gr.addColorStop(0, '#9aa1c6'); gr.addColorStop(.5, '#5a6086'); gr.addColorStop(1, '#2e3252'); g.fillStyle = gr; rrect(g, x, y, w, bh * .78, TD * .1); g.fill();
+        g.fillStyle = warn ? '#ff4a5a' : '#ffd166'; for (let k = 0; k < Math.max(2, Math.round(h.w * 2)); k++) g.fillRect(x + (k + .35) * w / Math.max(2, Math.round(h.w * 2)), y + bh * .12, w / Math.max(2, Math.round(h.w * 2)) * .3, bh * .12);
+        g.fillStyle = '#e8ecff'; const ns = Math.max(3, Math.round(h.w * 3)); for (let k = 0; k < ns; k++) { const sx0 = x + k * w / ns; g.beginPath(); g.moveTo(sx0 + w / ns * .08, y + bh * .78); g.lineTo(sx0 + w / ns * .5, y + bh); g.lineTo(sx0 + w / ns * .92, y + bh * .78); g.closePath(); g.fill(); }
+        g.strokeStyle = 'rgba(255,255,255,.45)'; g.lineWidth = Math.max(1, TD * .03); g.beginPath(); g.moveTo(x + 2, y + 1); g.lineTo(x + w - 2, y + 1); g.stroke();
+      }
+    }
+  }
+  function drawWinds(g, L, ox, oy, tAnim) {
+    const TD = S.TD, VWp = S.VW * S.DPR;
+    for (let i = 0; i < L.winds.length; i++) {
+      const z = L.winds[i], zx = ox + z.x * TD, zw = z.w * TD; if (zx + zw < -TD || zx > VWp + TD) continue;
+      const zy = oy + z.y * TD, zh = z.h * TD;
+      g.save(); g.beginPath(); g.rect(zx, zy, zw, zh); g.clip();
+      g.strokeStyle = 'rgba(220,245,255,.34)'; g.lineWidth = Math.max(1.5, TD * .05); g.lineCap = 'round';
+      const n = Math.max(3, Math.round(z.w * z.h / 5));
+      for (let k = 0; k < n; k++) {
+        const r1 = ((k * 0.6180339) % 1), r2 = ((k * 0.7548776 + .3) % 1);
+        if (z.wy < 0) { const sp = 3.2 + r1 * 2.2, yy = zy + zh - (((tAnim * sp + r2 * z.h) % z.h)) * TD, xx = zx + (.12 + .76 * r1) * zw, ln = TD * (.7 + r2 * .8); g.beginPath(); g.moveTo(xx, yy); g.lineTo(xx + Math.sin(tAnim * 3 + k) * TD * .08, yy + ln); g.stroke(); }
+        else { const dir = z.wx > 0 ? 1 : -1, sp = 5 + r1 * 3, xx = zx + (dir > 0 ? (((tAnim * sp + r2 * z.w) % z.w)) : z.w - (((tAnim * sp + r2 * z.w) % z.w))) * TD, yy = zy + (.1 + .8 * r1) * zh, ln = TD * (.8 + r2 * 1.2) * dir; g.beginPath(); g.moveTo(xx, yy); g.lineTo(xx - ln, yy + Math.sin(tAnim * 2 + k) * TD * .1); g.stroke(); }
+      }
+      g.restore();
+      if (z.wy < 0) { // вентилятор у основания
+        const fy = oy + (z.y + z.h) * TD, fx = zx + zw / 2;
+        g.fillStyle = '#2b2f4a'; rrect(g, zx - TD * .1, fy - TD * .02, zw + TD * .2, TD * .22, TD * .06); g.fill();
+        g.fillStyle = '#8c93b8'; const bl = zw * .46; for (let k = 0; k < 3; k++) { const a = tAnim * 14 + k * 2.09, wv = Math.abs(Math.cos(a)); g.beginPath(); g.ellipse(fx + Math.sin(a) * bl * .75, fy - TD * .02, Math.max(2, bl * .25 * wv + 2), TD * .05, 0, 0, TAU); g.fill(); }
+      } else {
+        const dir = z.wx > 0 ? 1 : -1, fx = dir > 0 ? zx : zx + zw, fy = zy + zh * .5;
+        g.fillStyle = '#2b2f4a'; rrect(g, fx - TD * .22, zy + zh * .1, TD * .44, zh * .8, TD * .1); g.fill();
+        g.strokeStyle = '#8c93b8'; g.lineWidth = TD * .08; g.beginPath(); for (let k = 0; k < 3; k++) { const a = tAnim * 14 + k * 2.09; g.moveTo(fx, fy); g.lineTo(fx, fy + Math.sin(a) * zh * .3); } g.stroke();
+      }
+    }
   }
 
   // ---------- частицы ----------
@@ -1417,24 +1615,59 @@ const GFX = (function () {
 
   // ---------- персонажи ----------
   const BODYS = {};
-  function bodySprite(col) {
-    const key = col + S.TD; if (BODYS[key]) return BODYS[key];
-    const TD = S.TD, w = Math.ceil(TD * .74), h = Math.ceil(TD * 1.0), c = mk(w + 4, h + 4), g = c.getContext('2d');
+  function bodySprite(col, sh, TD) {
+    const key = col + '|' + sh + '|' + TD; if (BODYS[key]) return BODYS[key];
+    const w = Math.ceil(TD * .74), h = Math.ceil(TD * 1.0), c = mk(w + 4, h + 4), g = c.getContext('2d');
     const bw = w * .86, bh = h * .86; g.translate(2 + w / 2, 2 + h);
     const top = mix(col, '#ffffff', .45), bot = mix(col, '#1a1030', .35);
-    const gr = g.createLinearGradient(0, -bh, 0, -bh * .14); gr.addColorStop(0, top); gr.addColorStop(.45, col); gr.addColorStop(1, bot);
-    g.fillStyle = gr; g.beginPath(); g.moveTo(-bw / 2, -bh * .14); g.lineTo(-bw / 2, -bh * .55); g.quadraticCurveTo(-bw / 2, -bh, 0, -bh); g.quadraticCurveTo(bw / 2, -bh, bw / 2, -bh * .55); g.lineTo(bw / 2, -bh * .14); g.closePath(); g.fill();
-    g.strokeStyle = 'rgba(255,255,255,.4)'; g.lineWidth = Math.max(1, TD * .03); g.beginPath(); g.moveTo(-bw / 2, -bh * .2); g.lineTo(-bw / 2, -bh * .55); g.quadraticCurveTo(-bw / 2, -bh, 0, -bh); g.stroke();
-    g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.ellipse(-bw * .2, -bh * .8, bw * .13, bh * .08, -.6, 0, TAU); g.fill();
-    g.fillStyle = 'rgba(0,0,0,.12)'; g.beginPath(); g.ellipse(bw * .22, -bh * .3, bw * .2, bh * .18, 0, 0, TAU); g.fill();
-    BODYS[key] = { cv: c, w: w + 4, h: h + 4, bw, bh, bot, col };
+    const grad = (y0, y1) => { const q = g.createLinearGradient(0, y0, 0, y1); q.addColorStop(0, top); q.addColorStop(.45, col); q.addColorStop(1, bot); return q; };
+    const rr = (x, y, ww, hh, r) => { g.beginPath(); g.moveTo(x + r, y); g.lineTo(x + ww - r, y); g.quadraticCurveTo(x + ww, y, x + ww, y + r); g.lineTo(x + ww, y + hh - r); g.quadraticCurveTo(x + ww, y + hh, x + ww - r, y + hh); g.lineTo(x + r, y + hh); g.quadraticCurveTo(x, y + hh, x, y + hh - r); g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath(); };
+    const hi = () => { g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.ellipse(-bw * .2, -bh * .8, bw * .13, bh * .08, -.6, 0, TAU); g.fill(); };
+    if (sh === 0) {
+      g.fillStyle = grad(-bh, -bh * .14); g.beginPath(); g.moveTo(-bw / 2, -bh * .14); g.lineTo(-bw / 2, -bh * .55); g.quadraticCurveTo(-bw / 2, -bh, 0, -bh); g.quadraticCurveTo(bw / 2, -bh, bw / 2, -bh * .55); g.lineTo(bw / 2, -bh * .14); g.closePath(); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.4)'; g.lineWidth = Math.max(1, TD * .03); g.beginPath(); g.moveTo(-bw / 2, -bh * .2); g.lineTo(-bw / 2, -bh * .55); g.quadraticCurveTo(-bw / 2, -bh, 0, -bh); g.stroke();
+      hi(); g.fillStyle = 'rgba(0,0,0,.12)'; g.beginPath(); g.ellipse(bw * .22, -bh * .3, bw * .2, bh * .18, 0, 0, TAU); g.fill();
+    } else if (sh === 1) { // куб
+      g.fillStyle = grad(-bh * .95, -bh * .1); rr(-bw / 2, -bh * .95, bw, bh * .85, bw * .16); g.fill();
+      g.strokeStyle = bot; g.lineWidth = Math.max(1.5, TD * .04); g.stroke();
+      g.strokeStyle = 'rgba(255,255,255,.4)'; g.lineWidth = Math.max(1, TD * .03); g.beginPath(); g.moveTo(-bw / 2 + bw * .1, -bh * .9); g.lineTo(bw / 2 - bw * .1, -bh * .9); g.stroke();
+      g.fillStyle = bot; for (const [xx, yy] of [[-.38, -.86], [.38, -.86], [-.38, -.18], [.38, -.18]]) { g.beginPath(); g.arc(bw * xx, bh * yy, TD * .025, 0, TAU); g.fill(); }
+    } else if (sh === 2) { // кот
+      g.fillStyle = grad(-bh, -bh * .1);
+      g.beginPath(); g.moveTo(-bw * .5, -bh * .1); g.lineTo(-bw * .5, -bh * .62); g.lineTo(-bw * .5, -bh * 1.0); g.lineTo(-bw * .2, -bh * .82); g.quadraticCurveTo(0, -bh * .88, bw * .2, -bh * .82); g.lineTo(bw * .5, -bh * 1.0); g.lineTo(bw * .5, -bh * .62); g.lineTo(bw * .5, -bh * .1); g.closePath(); g.fill();
+      g.fillStyle = '#ff9ab8'; g.beginPath(); g.moveTo(-bw * .42, -bh * .9); g.lineTo(-bw * .26, -bh * .8); g.lineTo(-bw * .42, -bh * .7); g.closePath(); g.moveTo(bw * .42, -bh * .9); g.lineTo(bw * .26, -bh * .8); g.lineTo(bw * .42, -bh * .7); g.closePath(); g.fill();
+      g.strokeStyle = bot; g.lineWidth = Math.max(1, TD * .03); g.lineJoin = 'round'; g.beginPath(); g.moveTo(-bw * .5, -bh * .1); g.lineTo(-bw * .5, -bh * 1.0); g.lineTo(-bw * .2, -bh * .82); g.quadraticCurveTo(0, -bh * .88, bw * .2, -bh * .82); g.lineTo(bw * .5, -bh * 1.0); g.lineTo(bw * .5, -bh * .1); g.stroke();
+      g.fillStyle = bot; for (let i = 0; i < 3; i++) g.fillRect(-bw * .2 + i * bw * .2, -bh * .98, bw * .05, bh * .08);
+    } else if (sh === 3) { // робот
+      g.fillStyle = grad(-bh * .95, -bh * .1); rr(-bw / 2, -bh * .95, bw, bh * .85, bw * .08); g.fill();
+      g.strokeStyle = bot; g.lineWidth = Math.max(1.5, TD * .04); g.stroke();
+      g.strokeStyle = bot; g.lineWidth = Math.max(1.5, TD * .05); g.beginPath(); g.moveTo(0, -bh * .95); g.lineTo(0, -bh * 1.0); g.stroke();
+      g.fillStyle = 'rgba(255,255,255,.3)'; g.fillRect(-bw * .46, -bh * .9, bw * .92, Math.max(1, TD * .03));
+      g.fillStyle = bot; for (const xx of [-.4, .4]) { g.beginPath(); g.arc(bw * xx, -bh * .86, TD * .022, 0, TAU); g.fill(); }
+      g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(-bw * .3, -bh * .3, bw * .6, bh * .16);
+      g.fillStyle = '#ffd166'; g.fillRect(-bw * .22, -bh * .26, bw * .1, bh * .08); g.fillStyle = '#7dffb0'; g.fillRect(bw * .02, -bh * .26, bw * .1, bh * .08);
+    } else if (sh === 4) { // звезда
+      const cy = -bh * .5, R1 = bw * .66, R2 = bw * .31;
+      g.fillStyle = grad(cy - R1, cy + R1); g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i & 1 ? R2 : R1; g.lineTo(Math.cos(a) * r, cy + Math.sin(a) * r); } g.closePath(); g.fill();
+      g.strokeStyle = bot; g.lineWidth = Math.max(1.5, TD * .04); g.lineJoin = 'round'; g.stroke();
+      g.fillStyle = 'rgba(255,255,255,.4)'; g.beginPath(); g.ellipse(-bw * .18, cy - R1 * .55, bw * .1, bh * .06, -.7, 0, TAU); g.fill();
+    }
+    BODYS[key] = { cv: c, w: w + 4, h: h + 4, bw, bh, bot, top, col };
     return BODYS[key];
   }
-  function newRunner(col) { return { col, sq: 0, sqv: 0, ph: 0, bl: 0, blT: 2 + Math.random() * 2, pgr: true, pvy: 0, lean: 0, sc: new Float32Array(16), sci: false, bob: Math.random() * 6, lx: 0 }; }
+  function drawFace(g, R, face, bw, bh, vy, ey, spread, visor) {
+    const ex = face * bw * .08, er = bw * .15 * spread, blink = R.bl > 0 ? .12 : 1;
+    if (visor) { g.fillStyle = '#1a1238'; g.beginPath(); g.ellipse(ex + face * bw * .06, ey, bw * .36, bh * .17, 0, 0, TAU); g.fill(); }
+    g.fillStyle = '#fff';
+    for (let e = 0; e < 2; e++) { const exx = ex + face * bw * .06 + (e ? face * bw * .2 : -face * bw * .14) * 1; g.beginPath(); g.ellipse(exx, ey, er * .62, er * .95 * blink, 0, 0, TAU); g.fill(); }
+    if (blink > .5) { g.fillStyle = '#1a1238'; const lk = Math.max(-1, Math.min(1, vy / 14)); for (let e = 0; e < 2; e++) { const exx = ex + face * bw * .06 + (e ? face * bw * .2 : -face * bw * .14) + face * er * .22; g.beginPath(); g.arc(exx, ey + lk * er * .3, er * .32, 0, TAU); g.fill(); } g.fillStyle = 'rgba(255,255,255,.9)'; for (let e = 0; e < 2; e++) { const exx = ex + face * bw * .06 + (e ? face * bw * .2 : -face * bw * .14) + face * er * .3; g.beginPath(); g.arc(exx, ey + lk * er * .3 - er * .2, er * .1, 0, TAU); g.fill(); } }
+    g.fillStyle = 'rgba(255,120,150,.35)'; g.beginPath(); g.ellipse(ex + face * bw * .06 - face * bw * .22, ey + bh * .12, bw * .07, bh * .035, 0, 0, TAU); g.ellipse(ex + face * bw * .06 + face * bw * .34, ey + bh * .12, bw * .07, bh * .035, 0, 0, TAU); g.fill();
+  }
+  function newRunner(col) { return { col, sh: 0, sq: 0, sqv: 0, ph: 0, bl: 0, blT: 2 + Math.random() * 2, pgr: true, pvy: 0, lean: 0, sc: new Float32Array(16), sci: false, bob: Math.random() * 6, lx: 0 }; }
   const SEG = 0.12, NSC = 7;
   // x,y — ноги (тайлы), g — контекст в пикселях устройства
   function drawRunner(g, R, x, y, face, vx, vy, gr, dt, tAnim, alpha, ox, oy, tag, T) {
-    const TD = S.TD, spr = bodySprite(R.col);
+    const TD = T || S.TD, spr = bodySprite(R.col, R.sh | 0, TD);
     // состояние анимации
     const run = gr ? Math.min(1, Math.abs(vx) / 8) : 0;
     if (gr && !R.pgr) R.sqv -= 4 + Math.min(6, R.pvy * .35);
@@ -1470,35 +1703,68 @@ const GFX = (function () {
     // свечение
     g.globalCompositeOperation = 'lighter'; g.globalAlpha = alpha * .5; const gs = TD * 2.4; g.drawImage(GL[R.gi], px - gs / 2, py - TD * .5 - gs / 2, gs, gs); g.globalCompositeOperation = 'source-over'; g.globalAlpha = alpha;
     // шарф
+    if ((R.sh | 0) < 4) {
     g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = spr.bot; g.lineWidth = TD * .17;
     g.beginPath(); g.moveTo(ox + sc[0] * TD, oy + sc[1] * TD); for (let i = 1; i < NSC; i++) g.lineTo(ox + sc[i * 2] * TD, oy + sc[i * 2 + 1] * TD); g.stroke();
     g.strokeStyle = R.col; g.lineWidth = TD * .1; g.stroke();
     g.fillStyle = spr.bot; g.beginPath(); g.arc(ox + sc[NSC * 2 - 2] * TD, oy + sc[NSC * 2 - 1] * TD, TD * .06, 0, TAU); g.fill();
+    }
     // тело
     g.save(); g.translate(px, py); g.rotate(R.lean); g.scale(sx, sy);
-    const bw = spr.bw, bh = spr.bh;
-    g.drawImage(spr.cv, -spr.w / 2, -spr.h + 2);
-    // подол: зубцы, волна
-    g.fillStyle = spr.bot; g.beginPath(); g.moveTo(-bw / 2, -bh * .14 - 1);
-    const nt = 4, ww = bw / nt, wob = gr ? Math.sin(R.ph * 3) * (.3 + run) : Math.sin(tAnim * 6) * .6;
-    for (let i = 0; i < nt; i++) { const xx = -bw / 2 + i * ww; g.quadraticCurveTo(xx + ww * .25, bh * (.01 + .04 * Math.sin(R.ph * 3 + i * 1.7) * wob), xx + ww * .5, -bh * .1); g.quadraticCurveTo(xx + ww * .75, bh * .01 + bh * .05 * Math.cos(R.ph * 3 + i * 1.7) * wob, xx + ww, -bh * .14); }
-    g.lineTo(bw / 2, -bh * .14 - 1); g.closePath(); g.fill();
-    // лицо
-    const ey = -bh * .62, ex = face * bw * .08, er = bw * .15, blink = R.bl > 0 ? .12 : 1;
-    g.fillStyle = '#1a1238'; g.beginPath(); g.ellipse(ex + face * bw * .06, ey, bw * .36, bh * .17, 0, 0, TAU); g.fill();
-    g.fillStyle = '#fff';
-    for (let e = 0; e < 2; e++) { const exx = ex + face * bw * .06 + (e ? face * bw * .2 : -face * bw * .14) * 1; g.beginPath(); g.ellipse(exx, ey, er * .62, er * .95 * blink, 0, 0, TAU); g.fill(); }
-    if (blink > .5) { g.fillStyle = '#1a1238'; const lk = Math.max(-1, Math.min(1, vy / 14)); for (let e = 0; e < 2; e++) { const exx = ex + face * bw * .06 + (e ? face * bw * .2 : -face * bw * .14) + face * er * .22; g.beginPath(); g.arc(exx, ey + lk * er * .3, er * .32, 0, TAU); g.fill(); } g.fillStyle = 'rgba(255,255,255,.9)'; for (let e = 0; e < 2; e++) { const exx = ex + face * bw * .06 + (e ? face * bw * .2 : -face * bw * .14) + face * er * .3; g.beginPath(); g.arc(exx, ey + lk * er * .3 - er * .2, er * .1, 0, TAU); g.fill(); } }
-    g.fillStyle = 'rgba(255,120,150,.35)'; g.beginPath(); g.ellipse(ex + face * bw * .06 - face * bw * .22, ey + bh * .12, bw * .07, bh * .035, 0, 0, TAU); g.ellipse(ex + face * bw * .06 + face * bw * .34, ey + bh * .12, bw * .07, bh * .035, 0, 0, TAU); g.fill();
+    const bw = spr.bw, bh = spr.bh, sh = R.sh | 0;
+    if (sh === 0) { // призрак-простыня
+      g.drawImage(spr.cv, -spr.w / 2, -spr.h + 2);
+      g.fillStyle = spr.bot; g.beginPath(); g.moveTo(-bw / 2, -bh * .14 - 1);
+      const nt = 4, ww = bw / nt, wob = gr ? Math.sin(R.ph * 3) * (.3 + run) : Math.sin(tAnim * 6) * .6;
+      for (let i = 0; i < nt; i++) { const xx = -bw / 2 + i * ww; g.quadraticCurveTo(xx + ww * .25, bh * (.01 + .04 * Math.sin(R.ph * 3 + i * 1.7) * wob), xx + ww * .5, -bh * .1); g.quadraticCurveTo(xx + ww * .75, bh * .01 + bh * .05 * Math.cos(R.ph * 3 + i * 1.7) * wob, xx + ww, -bh * .14); }
+      g.lineTo(bw / 2, -bh * .14 - 1); g.closePath(); g.fill();
+      drawFace(g, R, face, bw, bh, vy, -bh * .62, 1, true);
+    } else if (sh === 1) { // куб
+      g.drawImage(spr.cv, -spr.w / 2, -spr.h + 2);
+      const st = Math.sin(R.ph * 3) * (gr ? run : 0) * bh * .05;
+      g.fillStyle = spr.bot; g.fillRect(-bw * .36, -bh * .1 - 1 + Math.max(0, st), bw * .24, bh * .1 + 1 - Math.max(0, st)); g.fillRect(bw * .12, -bh * .1 - 1 + Math.max(0, -st), bw * .24, bh * .1 + 1 - Math.max(0, -st));
+      drawFace(g, R, face, bw, bh, vy, -bh * .52, 1.05, true);
+    } else if (sh === 2) { // кот
+      const tw = Math.sin(tAnim * 5 + R.bob) * bw * .12 + (gr ? 0 : -bw * .1);
+      g.strokeStyle = spr.bot; g.lineWidth = bw * .17; g.lineCap = 'round'; g.beginPath(); g.moveTo(-face * bw * .4, -bh * .22); g.quadraticCurveTo(-face * bw * .85, -bh * .3 + tw, -face * bw * .7, -bh * .62 + tw * 1.5); g.stroke();
+      g.strokeStyle = spr.top; g.lineWidth = bw * .08; g.stroke();
+      g.drawImage(spr.cv, -spr.w / 2, -spr.h + 2);
+      drawFace(g, R, face, bw, bh, vy, -bh * .56, .95, true);
+      g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = Math.max(1, bw * .03); g.beginPath();
+      const wy = -bh * .5, wx = face * bw * .24; for (let k = -1; k <= 1; k += 2) { g.moveTo(wx + face * bw * .24, wy + k * bh * .02); g.lineTo(wx + face * bw * .6, wy + k * bh * .07); g.moveTo(wx - face * bw * .24 - face * bw * .12, wy + k * bh * .02); g.lineTo(wx - face * bw * .65, wy + k * bh * .07); } g.stroke();
+    } else if (sh === 3) { // робот
+      const st = Math.sin(R.ph * 3) * (gr ? run : 0) * bh * .05;
+      g.fillStyle = spr.bot; g.fillRect(-bw * .34, -bh * .1 - 1 + Math.max(0, st), bw * .24, bh * .1 + 1 - Math.max(0, st)); g.fillRect(bw * .1, -bh * .1 - 1 + Math.max(0, -st), bw * .24, bh * .1 + 1 - Math.max(0, -st));
+      g.drawImage(spr.cv, -spr.w / 2, -spr.h + 2);
+      const bl = Math.sin(tAnim * 6 + R.bob) > .2;
+      g.fillStyle = bl ? '#fff' : spr.top; g.beginPath(); g.arc(0, -bh * 1.02, bw * .07, 0, TAU); g.fill();
+      const ey = -bh * .56, ew = bw * .17, eh = (R.bl > 0 ? .02 : .12) * bh, ex = face * bw * .05;
+      g.fillStyle = '#101a30'; g.fillRect(-bw * .4, ey - bh * .15, bw * .8, bh * .3);
+      g.fillStyle = '#7dffb0'; g.fillRect(ex - bw * .26, ey - eh, ew, eh * 2); g.fillRect(ex + bw * .09, ey - eh, ew, eh * 2);
+      g.fillStyle = spr.bot; g.fillRect(-bw * .3, -bh * .32, bw * .6, bh * .05);
+    } else if (sh === 4) { // звезда
+      g.rotate(Math.sin(tAnim * 2.4 + R.bob) * .08 + (gr ? 0 : vx * .01));
+      g.drawImage(spr.cv, -spr.w / 2, -spr.h + 2);
+      drawFace(g, R, face, bw, bh, vy, -bh * .44, 1.05, false);
+    } else { // пламя
+      const fl = Math.sin(tAnim * 17 + R.bob), fl2 = Math.sin(tAnim * 23 + 1);
+      const wob = (gr ? run : .6) * .12 * (-face);
+      const body = (k, col) => { g.fillStyle = col; g.beginPath(); g.moveTo(-bw * .5 * k, -bh * .3); g.quadraticCurveTo(-bw * .56 * k, -bh * .02, 0, -bh * .02); g.quadraticCurveTo(bw * .56 * k, -bh * .02, bw * .5 * k, -bh * .3);
+        g.quadraticCurveTo(bw * .5 * k, -bh * .62, bw * (.12 + wob) * k, -bh * (.82 + .05 * fl)); g.quadraticCurveTo(bw * (.05 + wob * 2) * k, -bh * (1 + .06 * fl2), bw * (wob * 3) * k, -bh * (1.08 + .08 * fl));
+        g.quadraticCurveTo(-bw * .08 * k, -bh * .8, -bw * .22 * k, -bh * .72); g.quadraticCurveTo(-bw * .55 * k, -bh * .56, -bw * .5 * k, -bh * .3); g.closePath(); g.fill(); };
+      body(1, spr.bot); body(.9, R.col); body(.55, spr.top);
+      g.fillStyle = 'rgba(255,255,255,.5)'; g.beginPath(); g.ellipse(-bw * .12, -bh * .5, bw * .08, bh * .1, -.3, 0, TAU); g.fill();
+      drawFace(g, R, face, bw, bh, vy, -bh * .36, .9, false);
+    }
     g.restore();
     if (tag) { g.globalAlpha = Math.min(1, alpha + .35); g.font = TAGFONT; g.textAlign = 'center'; g.fillStyle = 'rgba(0,0,0,.45)'; g.fillText(tag, px + 1, py - TD * 1.2 + 1); g.fillStyle = R.col; g.fillText(tag, px, py - TD * 1.2); }
     g.globalAlpha = 1;
   }
   let TAGFONT = '700 11px Rubik,system-ui,sans-serif';
   function setFont(px) { TAGFONT = '700 ' + px + 'px Rubik,system-ui,sans-serif'; }
-  function runnerFor(col, glowName) { const r = newRunner(col); r.gi = GI[glowName]; return r; }
+  function runnerFor(col, glowName, sh) { const r = newRunner(col); r.gi = GI[glowName]; r.sh = sh | 0; return r; }
 
-  return { WORLDS, GI, GL, S, resize, prepare, drawSky, drawGround, drawVig, updAmbient, drawAmbient, buildDecor, drawLevel, drawSaws, drawObjects, drawSawGlow, drawTileGlow, spawn, updParticles, drawParticles, runnerFor, drawRunner, setFont, rgba, mix, mk, rng };
+  return { WORLDS, GI, GL, S, resize, prepare, drawSky, drawGround, drawVig, updAmbient, drawAmbient, buildDecor, drawLevel, drawSaws, drawMovers, drawHaz, drawWinds, drawObjects, drawSawGlow, drawTileGlow, spawn, updParticles, drawParticles, runnerFor, drawRunner, setFont, rgba, mix, mk, rng, hex: k => GLOWS[k].slice(1) };
 })();
 
 </script>
@@ -1524,7 +1790,7 @@ let lastTE=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-la
 
 // ---------- сохранение ----------
 const LSK='zabeg.v1';
-let SV={unlocked:1,best:{},ghosts:{},mute:0,fx:1};
+let SV={unlocked:1,best:{},ghosts:{},best2:{},ghosts2:{},mute:0,fx:1}; // best/ghosts — времена старых трасс (больше не используются), best2/ghosts2 — новые
 try{const o=JSON.parse(localStorage.getItem(LSK));if(o&&typeof o==='object')SV=Object.assign(SV,o)}catch(e){}
 SV.unlocked=Math.max(1,Math.min(NLV,SV.unlocked|0||1));
 function save(){try{localStorage.setItem(LSK,JSON.stringify(SV))}catch(e){}}
@@ -1532,10 +1798,26 @@ function fmt(f){if(!f)return '—';const s=f/60;return s.toFixed(2)}
 function mergeProg(p){
   if(!p)return false;let ch=false;
   if(p.u>SV.unlocked){SV.unlocked=Math.min(NLV,p.u);ch=true}
-  if(p.b)for(const k in p.b){const v=p.b[k];if(v&&(!SV.best[k]||v<SV.best[k])){SV.best[k]=v;ch=true}}
+  if(p.b2)for(const k in p.b2){const v=p.b2[k];if(v&&(!SV.best2[k]||v<SV.best2[k])){SV.best2[k]=v;ch=true}}
   if(ch)save();return ch;
 }
-function progOut(){return {u:SV.unlocked,b:SV.best}}
+function progOut(){return {u:SV.unlocked,b2:SV.best2}}
+
+// ---------- скины ----------
+const SKC=[['Коралл','#ff6a4d','coral'],['Бирюза','#5ef0ff','cyan'],['Золото','#ffd166','gold'],['Мята','#59e6a2','green'],['Фиалка','#a58cff','violet'],['Роза','#ff7ad9','rose'],['Мандарин','#ff9a3a','orange'],['Лайм','#c6ff5a','lime'],['Синий','#5b8dff','blue'],['Снег','#f2efff','white']];
+const SKS=['Призрак','Куб','Кот','Робот','Звезда','Пламя'];
+const SKT=[['По цвету',null],['Золото','gold'],['Голубой','cyan'],['Розовый','rose'],['Салатовый','lime'],['Белый','white'],['Радуга','*']];
+const RAINB=['coral','orange','gold','lime','cyan','blue','violet','rose'];
+const SKEY='skin.zabeg';
+const ci=(v,m)=>Math.max(0,Math.min(m,(v|0)));
+function cleanSk(o){o=o||{};return {sh:ci(o.sh,SKS.length-1),c:ci(o.c,SKC.length-1),t:ci(o.t,SKT.length-1)}}
+let SK=cleanSk(null);
+try{const o=JSON.parse(localStorage.getItem(SKEY));if(o&&typeof o==='object')SK=cleanSk(o)}catch(e){}
+function saveSkin(){try{localStorage.setItem(SKEY,JSON.stringify(SK))}catch(e){}}
+// ближайший свободный цвет: если цвет занят — сдвигаем на +1, −1, +2, −2 …
+function nearFree(c,taken){if(!taken.includes(c))return c;const n=SKC.length;for(let d=1;d<n;d++)for(const q of [c+d,c-d]){const k=((q%n)+n)%n;if(!taken.includes(k))return k}return c}
+function skinTrail(sk,t){const T=SKT[sk.t];if(!T[1])return GFX.GI[SKC[sk.c][2]];if(T[1]==='*')return GFX.GI[RAINB[Math.floor(t*9)%RAINB.length]];return GFX.GI[T[1]]}
+function paint(R,sk,alphaCol){R.col=SKC[sk.c][1];R.gi=GFX.GI[SKC[sk.c][2]];R.sh=sk.sh;R.sci=false}
 
 // ---------- звук ----------
 let AC=null;
@@ -1554,7 +1836,7 @@ function noise(d,vol,hp){
 }
 const SFX={
   jump(){tone(260,620,.14,'square',.06)},wall(){tone(320,760,.15,'square',.06)},air(){tone(500,1100,.16,'triangle',.09)},
-  land(){tone(110,60,.08,'sine',.12)},die(){noise(.4,.2,200);tone(300,40,.35,'sawtooth',.08)},orb(){tone(880,1760,.2,'sine',.1);tone(1320,2200,.2,'sine',.05,.05)},
+  land(){tone(110,60,.08,'sine',.12)},spring(){tone(200,900,.22,'sine',.12);tone(400,1400,.2,'triangle',.06,.04)},die(){noise(.4,.2,200);tone(300,40,.35,'sawtooth',.08)},orb(){tone(880,1760,.2,'sine',.1);tone(1320,2200,.2,'sine',.05,.05)},
   win(){[523,659,784,1047].forEach((f,i)=>tone(f,f,.22,'triangle',.1,i*.1))},beep(){tone(660,660,.12,'square',.07)},go(){tone(990,990,.35,'square',.09)},
   lose(){[400,320,250].forEach((f,i)=>tone(f,f*.9,.22,'triangle',.08,i*.12))},click(){tone(700,900,.05,'square',.04)},
 };
@@ -1592,16 +1874,33 @@ function curInput(){
 
 // ---------- состояние игры ----------
 let screen='title',mode='',online=false;
-let lvl=0,L=null,me=null,gh=null,ghInp=null,rec=[],phase='',cdStart=0;
+let lvl=0,L=null,me=null,gh=null,ghInp=null,ghs=[],rec=[],phase='',cdStart=0;
 let sel={level:0,ep:0},handledEp=0,startedEp=0,myRd=0,myFin=0,raceId=0,paused=false,duelStep=0,duelP1=0,duelP2=0,lastGhostFrames=0;
 let pp={x:0,y:0,face:1,d:0,t:0,fin:0,vx:0,vy:0,g:0,on:0};
 let shake=0,flash=0,camX=0,camY=0,camInit=false,animT=0,orbIdx=null;
 const pv={x:0,y:0,t:0},gpv={x:0,y:0,t:0}; // состояние предыдущего шага — для интерполяции
 const PCOL=['','#ff6a4d','#5ef0ff'];
 const PGLOW=['','coral','cyan'];
-const rnMe=GFX.runnerFor('#ff6a4d','coral'),rnOther=GFX.runnerFor('#5ef0ff','cyan'),rnGh=GFX.runnerFor('#cfc8ff','white'),rnT1=GFX.runnerFor('#ff6a4d','coral'),rnT2=GFX.runnerFor('#5ef0ff','cyan');
+const rnMe=GFX.runnerFor('#ff6a4d','coral'),rnOther=GFX.runnerFor('#5ef0ff','cyan'),rnGh=GFX.runnerFor('#cfc8ff','white'),rnT1=GFX.runnerFor('#ff6a4d','coral'),rnT2=GFX.runnerFor('#5ef0ff','cyan'),rnPv=GFX.runnerFor('#ff6a4d','coral'),rnPg=GFX.runnerFor('#ff6a4d','coral');
+// скины игроков по ролям: [_, роль 1, роль 2]; при совпадении цвета второй сдвигается на ближайший свободный
+let ROLESK=[null,cleanSk(null),cleanSk(null)];
+function roleSkins(){
+  let s1,s2;
+  if(online){const p=Duo.partner(),ps=cleanSk(p&&p.sk);const h=Duo.isHost();s1=h?SK:ps;s2=h?ps:SK}
+  else if(mode==='duel'){s1=SK;s2={sh:(SK.sh+1)%SKS.length,c:SK.c,t:SK.t}}
+  else{s1=SK;s2={sh:SK.sh,c:SK.c,t:SK.t}}
+  const c2=nearFree(s2.c,[s1.c]);
+  ROLESK=[null,Object.assign({},s1),Object.assign({},s2,{c:c2})];
+  PCOL[1]=SKC[ROLESK[1].c][1];PCOL[2]=SKC[ROLESK[2].c][1];PGLOW[1]=SKC[ROLESK[1].c][2];PGLOW[2]=SKC[ROLESK[2].c][2];
+}
+function refreshRunners(){
+  if(mode==='hot'||mode==='party'){multiRefresh();return}
+  roleSkins();const r=myRole();
+  paint(rnMe,ROLESK[r]);paint(rnOther,ROLESK[3-r]);
+  if(mode==='duel'&&!online)paint(rnGh,ROLESK[1]);else{rnGh.col='#cfc8ff';rnGh.gi=GFX.GI.white;rnGh.sh=SK.sh;rnGh.sci=false}
+}
 function show(s){
-  const was=screen;screen=s;for(const id of ['title','lv','stage','res','help'])$('s-'+id).classList.toggle('on',id===s);
+  const was=screen;screen=s;for(const id of ['title','lv','stage','res','help','skin','co','hot','pass'])$('s-'+id).classList.toggle('on',id===s);
   const pl=(s==='race');$('hud').classList.toggle('on',pl);$('ctl').classList.toggle('on',pl);if(!pl){$('cd').classList.remove('on');$('hint').style.display='none'}
   if(was!==s&&!matchMedia('(prefers-reduced-motion:reduce)').matches){const c=$('curtain');c.style.transition='none';c.style.opacity='.8';void c.offsetWidth;c.style.transition='opacity .4s ease-out';c.style.opacity='0'}
   bgWorld=-1;
@@ -1613,7 +1912,7 @@ function rle(a){const o=[];let p=-1,c=0;for(const v of a){if(v===p)c++;else{if(c
 function unrle(o){const a=[];for(let i=0;i<o.length;i+=2)for(let k=0;k<o[i+1];k++)a.push(o[i]);return a}
 
 // ---------- сеть ----------
-function netSet(extra){if(!online)return;Duo.set(Object.assign({sel:sel,rd:myRd,pg:progOut()},extra||{}))}
+function netSet(extra){if(!online)return;Duo.set(Object.assign({sel:sel,rd:myRd,pg:progOut(),sk:SK},extra||{}))}
 function netPos(){
   if(!online||!me)return;
   Duo.set({x:+me.x.toFixed(2),y:+me.y.toFixed(2),vx:+me.vx.toFixed(1),vy:+me.vy.toFixed(1),f:me.face,g:me.gr?1:0,d:me.dead>0?1:0,dn:me.deaths,t:me.t,fin:myFin,rid:raceId,ts:Date.now()});
@@ -1701,7 +2000,7 @@ function checkStart(p){
     // партнёр нажал «Готов» раньше, чем дошёл пакет: сдвигаем отсчёт на половину пинга — старт у обоих совпадает
     const pg=Duo.ping();beginRace(fromBtn?0:(pg?Math.min(400,pg.ms/2):0))}
 }
-$('g-go').onclick=()=>{SFX.click();myRd=sel.ep;netSet();renderStage();fromBtn=true;checkStart();fromBtn=false};
+$('g-go').onclick=()=>{SFX.click();if(mode==='party'){partyReady();return}myRd=sel.ep;netSet();renderStage();fromBtn=true;checkStart();fromBtn=false};
 $('g-back').onclick=()=>{SFX.click();backToLevels()};
 function backToLevels(){
   if(online){sel={level:0,ep:Math.max(Date.now(),((Duo.partner()&&Duo.partner().sel&&Duo.partner().sel.ep)||0)+1,sel.ep+1)};handledEp=sel.ep;myRd=0;raceId=0;netSet({rid:0})}
@@ -1711,7 +2010,7 @@ function backToLevels(){
 // ---------- меню ----------
 function openLevels(){
   show('lv');renderLevels();
-  $('l-ttl').textContent=online?'Выберите трассу':mode==='duel'?'Дуэль: трасса':'Одиночный забег';
+  $('l-ttl').textContent=online?'Выберите трассу':mode==='duel'?'Дуэль: трасса':mode==='hot'?'Компания: трасса':mode==='party'?'Комната: трасса':'Одиночный забег';
   const cur=document.querySelector('#l-grid .card.cur');if(cur)setTimeout(()=>{try{cur.scrollIntoView({block:'center'})}catch(e){}},30);
 }
 function renderLevels(){
@@ -1723,7 +2022,7 @@ function renderLevels(){
       const h=document.createElement('div');h.className='wh';h.innerHTML='<span>'+WN[lastW]+'</span><i>трассы '+i+'–'+j+'</i>';g.appendChild(h)}
     const b=document.createElement('button');
     b.className='card w'+Lv.world+(lock?' lock':'')+(i===un&&un<NLV?' cur':'');
-    b.innerHTML='<div class="n">'+i+'</div><div class="nm">'+Lv.name+'</div><div class="bt">'+(SV.best[i]?'★ '+fmt(SV.best[i]):'')+'</div>';
+    b.innerHTML='<div class="n">'+i+'</div><div class="nm">'+Lv.name+'</div><div class="bt">'+(SV.best2[i]?'★ '+fmt(SV.best2[i]):'')+'</div>';
     b.onclick=()=>{if(i>Math.min(SV.unlocked,NLV)){tone(150,100,.15,'square',.06);return}SFX.click();pickLevel(i)};
     g.appendChild(b);
   }
@@ -1731,12 +2030,14 @@ function renderLevels(){
   $('l-bar').style.width=(un/NLV*100)+'%';
 }
 function pickLevel(i){
+  if(mode==='party'){partyPick(i);return}
+  if(mode==='hot'){hotStart(i);return}
   if(online){selectLevel(i);return}
   lvl=i;L=LEVELS[i-1];
   if(mode==='duel'){duelStep=1}
   beginRace();
 }
-$('l-back').onclick=()=>{SFX.click();if(online){try{Duo.leave()}catch(e){}online=false}show('title')};
+$('l-back').onclick=()=>{SFX.click();if(online){try{Duo.leave()}catch(e){}online=false}if(mode==='party'){partyExit();return}if(mode==='hot'){show('co');return}show('title')};
 $('t-on').onclick=async()=>{
   audio();online=true;mode='net';
   try{await Duo.pair()}catch(e){online=false;return}
@@ -1769,20 +2070,21 @@ let bgWorld=-1;
 function prepWorld(w){if(bgWorld===w&&!fitDirty)return;GFX.prepare(w);bgWorld=w;fitDirty=false}
 function beginRace(comp){
   L=LEVELS[lvl-1];me=initState(L,true);rec=[];myFin=0;raceId=online?sel.ep:(Date.now()%1e9)|0;gReset();phase='count';camInit=false;
-  gh=null;ghInp=null;
-  if(!online){
+  gh=null;ghInp=null;ghs=[];
+  if(mode==='hot')hotGhosts();
+  if(!online&&mode!=='hot'&&mode!=='party'){
     if(mode==='duel'&&duelStep===2&&duelP1Inp){ghInp=duelP1Inp}
-    else if(SV.ghosts[lvl]){ghInp=unrle(SV.ghosts[lvl].r)}
+    else if(SV.ghosts2[lvl]){ghInp=unrle(SV.ghosts2[lvl].r)}
     if(ghInp){gh=initState(L,false)}
   }
   orbIdx=new Int16Array(L.W*L.H).fill(-1);for(let i=0;i<L.orbs.length;i++)orbIdx[L.orbs[i][1]*L.W+L.orbs[i][0]]=i;
   pv.x=me.x;pv.y=me.y;pv.t=0;if(gh){gpv.x=gh.x;gpv.y=gh.y;gpv.t=0}
   show('race');prepWorld(L.world);GFX.buildDecor(L);
-  rnMe.col=PCOL[myRole()];rnMe.gi=GFX.GI[PGLOW[myRole()]];rnMe.sci=false;rnOther.col=PCOL[3-myRole()];rnOther.gi=GFX.GI[PGLOW[3-myRole()]];rnOther.sci=false;rnGh.sci=false;
-  if(mode==='duel'&&!online){rnGh.col=PCOL[1];rnGh.gi=GFX.GI.coral}else{rnGh.col='#cfc8ff';rnGh.gi=GFX.GI.white}
+  refreshRunners();
   cdStart=performance.now()+300-(comp||0);lastCd=-1;
-  $('hname').textContent=lvl+'. '+L.name+(online?'':mode==='duel'?' · игрок '+duelStep:'');
-  $('tp1').style.background=PCOL[myRole()];$('tp2').style.background=online?PCOL[3-myRole()]:'#cfc8ff';$('tp2').style.display=(online||gh)?'':'none';
+  $('hname').textContent=lvl+'. '+L.name+(mode==='hot'?' · '+hot.names[hot.step-1]:mode==='party'?'':online?'':mode==='duel'?' · игрок '+duelStep:'');
+  $('tp1').style.background=mode==='hot'||mode==='party'?multiMyColor():PCOL[myRole()];$('tp2').style.background=online?PCOL[3-myRole()]:'#cfc8ff';$('tp2').style.display=(online||gh)&&mode!=='hot'&&mode!=='party'?'':'none';
+  multiDots();
   if(online){Duo.set({pg:null});netPos()} // прогресс не нужен в каждом пакете позиции
   const h=$('hint');if(!SV.hinted){h.style.display='block';h.innerHTML='◀ ▶ — бег · ПРЫГ — прыжок<br>у стены прыгайте ещё раз — отскок';}else h.style.display='none';
 }
@@ -1790,18 +2092,24 @@ let duelP1Inp=null,lastCd=-1,finAt=0;
 // после финиша повторяем позицию с финишем, пока не дойдёт (потерянный пакет не ждёт 1,5 с повтора)
 setInterval(()=>{if(online&&myFin&&finAt&&performance.now()-finAt<3000&&(screen==='res'||screen==='race'))netPos()},250);
 function finishRace(){
-  phase='done';myFin=me.won;SFX.win();ghWasBetter=!!(gh&&gh.won&&gh.won<myFin);isRec=!SV.best[lvl]||myFin<SV.best[lvl];
+  phase='done';myFin=me.won;SFX.win();ghWasBetter=!!(gh&&gh.won&&gh.won<myFin);
+  const multi=mode==='hot'||mode==='party';
+  isRec=!multi&&(!SV.best2[lvl]||myFin<SV.best2[lvl]);
   SV.hinted=1;
-  if(isRec)SV.best[lvl]=myFin;
-  if(lvl+1>SV.unlocked&&lvl<NLV)SV.unlocked=lvl+1;
-  if(!SV.ghosts[lvl]||myFin<SV.ghosts[lvl].f){SV.ghosts[lvl]={f:myFin,r:rle(rec)};lastGhostFrames=myFin}
+  if(isRec)SV.best2[lvl]=myFin;
+  if(lvl+1>SV.unlocked&&lvl<NLV&&mode!=='party')SV.unlocked=lvl+1;
+  if(!multi&&(!SV.ghosts2[lvl]||myFin<SV.ghosts2[lvl].f)){SV.ghosts2[lvl]={f:myFin,r:rle(rec)};lastGhostFrames=myFin}
   save();
   if(online){netPos();netSet()}
   finAt=performance.now();
-  if(online)toResult();else setTimeout(()=>{if(screen==='race'&&phase==='done')toResult()},1200);
+  if(mode==='hot'){hotFinish();setTimeout(()=>{if(screen==='race'&&phase==='done')toResult()},1200)}
+  else if(mode==='party'){partyFinish();setTimeout(()=>{if(screen==='race'&&phase==='done')toResult()},900)}
+  else if(online)toResult();else setTimeout(()=>{if(screen==='race'&&phase==='done')toResult()},1200);
 }
 function toResult(){show('res');phase='res';renderResult()}
 function renderResult(){
+  if(mode==='hot'||mode==='party'){renderMultiResult();return}
+  $('r-tab').style.display='none';$('r-t').style.display='';
   const nxt=lvl<NLV;
   let head='',sub='',t='',r=myRole();
   $('r-n').textContent='Трасса '+lvl+' · '+L.name;
@@ -1822,7 +2130,7 @@ function renderResult(){
     else{const w=duelP1<myFin?1:duelP1>myFin?2:0;head=w===2?'Победил игрок 2!':w===1?'Победил игрок 1!':'Ничья!';sub='Разница '+(Math.abs(duelP1-myFin)/60).toFixed(2)+' с';
       t='<div><span style="color:#ff6a4d">Игрок 1</span><b>'+fmt(duelP1)+'</b></div><div><span style="color:#5ef0ff">Игрок 2</span><b>'+fmt(myFin)+'</b></div>';$('r-again').textContent='Реванш';$('r-next').textContent='Следующая трасса';}
   }else{
-    const b=SV.best[lvl];head=isRec?'Новый рекорд!':'Финиш!';
+    const b=SV.best2[lvl];head=isRec?'Новый рекорд!':'Финиш!';
     sub=ghWasBetter?'Призрак оказался быстрее':'Рекорд сохранён — призрак побежит за вами';
     t='<div><span>Время</span><b>'+fmt(myFin)+'</b></div><div><span>Рекорд</span><b>'+fmt(b)+'</b></div>';
   }
@@ -1834,13 +2142,15 @@ function renderResult(){
 }
 let res_done=0,ghWasBetter=false,isRec=false;
 $('r-again').onclick=()=>{SFX.click();
+  if(mode==='hot'||mode==='party'){multiAgain();return}
   if(online)selectLevel(lvl);else{if(mode==='duel'){duelStep=1;duelP1Inp=null}beginRace()}};
 $('r-next').onclick=()=>{SFX.click();
+  if(mode==='hot'||mode==='party'){multiNext();return}
   if(!online&&mode==='duel'&&duelStep===1){duelP1=myFin;duelP1Inp=rec.slice();duelStep=2;beginRace();return}
   const n=Math.min(NLV,lvl+1);if(n>SV.unlocked)return;
   if(online)selectLevel(n);else{lvl=n;if(mode==='duel'){duelStep=1;duelP1Inp=null}beginRace()}};
-$('r-lv').onclick=()=>{SFX.click();backToLevels()};
-$('bx').onclick=()=>{SFX.click();phase='';if(online){backToLevels()}else openLevels()};
+$('r-lv').onclick=()=>{SFX.click();if(mode==='hot'||mode==='party'){multiLevels();return}backToLevels()};
+$('bx').onclick=()=>{SFX.click();phase='';if(mode==='party'){partyExit();return}if(online){backToLevels()}else openLevels()};
 
 // ---------- главный цикл: фиксированный шаг 60 Гц, отрисовка с интерполяцией ----------
 const STEP=1000/60;
@@ -1880,15 +2190,17 @@ function tick(){
   if(gh&&!gh.won){const i=gh.t;step(L,gh,i<ghInp.length?ghInp[i]:0);if(Math.abs(gh.x-gpv.x)>1.5||Math.abs(gh.y-gpv.y)>1.5){gpv.x=gh.x;gpv.y=gh.y}}
   // осколки осыпающихся плит
   const ct=me.ct;for(let i=0;i<ct.length;i++)if(ct[i]===CF+1){const c=L.crumbs[i];for(let k=0;k<7;k++)GFX.spawn(c[0]+Math.random(),c[1]+.4,(Math.random()-.5)*2,Math.random()*-1,.9,.14,0,0,18);}
-  netPos();
+  if(ghs.length)hotGhostStep();
+  netPos();partyPos();
 }
 const GI=GFX.GI;
 function onEv(e){
   SFX[e]&&SFX[e]();
   const px=me.x,py=me.y,low=!SV.fx;
   if(e==='land'||e==='jump'||e==='wall')for(let i=0;i<(low?3:7);i++)GFX.spawn(px+(Math.random()-.5)*.5,py-.03,(Math.random()-.5)*3.5,-Math.random()*1.6,.45,.2,GI.white,2,0);
+  if(e==='spring'){GFX.S.spr=[Math.floor(px),Math.floor(py+.1),animT];for(let i=0;i<(low?5:12);i++)GFX.spawn(px+(Math.random()-.5)*.7,py,(Math.random()-.5)*3,-2-Math.random()*4,.5,.14,GI.gold,i&1?1:0,6)}
   if(e==='orb'||e==='air')for(let i=0;i<(low?8:16);i++){const a=i/16*6.28;GFX.spawn(px,py-.4,Math.cos(a)*4.5,Math.sin(a)*4.5,.5,.12,GI.gold,i&1?1:0,0)}
-  if(e==='die'){shake=.35;flash=.6;for(let i=0;i<(low?14:30);i++){const a=Math.random()*6.28,s=2+Math.random()*7;GFX.spawn(px,py-.4,Math.cos(a)*s,Math.sin(a)*s-2,.9,.16,myRole()===1?GI.coral:GI.cyan,i&1?1:0,14)}}
+  if(e==='die'){shake=.35;flash=.6;for(let i=0;i<(low?14:30);i++){const a=Math.random()*6.28,s=2+Math.random()*7;GFX.spawn(px,py-.4,Math.cos(a)*s,Math.sin(a)*s-2,.9,.16,GI[PGLOW[myRole()]],i&1?1:0,14)}}
   if(e==='win'){for(let i=0;i<(low?20:48);i++){const a=Math.random()*6.28,s=2+Math.random()*8;GFX.spawn(px,py-.5,Math.cos(a)*s,Math.sin(a)*s-4,1.3,.15,[GI.gold,GI.cyan,GI.coral,GI.white,GI.pink][i%5],i&1?1:0,9)}}
 }
 
@@ -1917,18 +2229,22 @@ function renderRace(dt){
   const fxOn=!!SV.fx;
   if(fxOn){GFX.updAmbient(dt,(camX-pcx)*TCSS/VW);GFX.drawAmbient(g,animT,44)}
   GFX.drawLevel(g,L,0,ox,oy,me.ct,me.oc,orbIdx,animT,tS,me.cpx,me.cpy);
+  GFX.drawWinds(g,L,ox,oy,animT);
+  GFX.drawMovers(g,L,ox,oy,tS,animT);
   GFX.drawSaws(g,L,ox,oy,tS,animT);
+  GFX.drawHaz(g,L,ox,oy,tS,animT);
   GFX.drawObjects(g,L,ox,oy,me.oc,orbIdx,animT,me.cpx,me.cpy);
   if(fxOn)GFX.drawTileGlow(g,L,ox,oy,animT);
   // шлейф и пыль
   if(phase==='run'&&!me.dead){tmpTrail-=dt;if(tmpTrail<=0){tmpTrail=.04;
-    if(fxOn&&(Math.abs(me.vx)>3||!me.gr))GFX.spawn(mx,my-.4,(Math.random()-.5)*.6,(Math.random()-.5)*.6,.5,.34,myRole()===1?GI.coral:GI.cyan,1,0);
+    if(fxOn&&(Math.abs(me.vx)>3||!me.gr))GFX.spawn(mx,my-.4,(Math.random()-.5)*.6,(Math.random()-.5)*.6,.5,.34,skinTrail(ROLESK[myRole()],animT),1,0);
     if(me.gr&&Math.abs(me.vx)>5&&Math.random()<.5)GFX.spawn(mx-me.face*.2,my-.04,-me.face*(.4+Math.random()),-Math.random()*.8,.4,.18,GI.white,2,0);
     if(me.wd&&!me.gr&&me.vy>2)GFX.spawn(mx+me.wd*.3,my-.5,(Math.random()-.5),(Math.random())*2,.3,.1,GI.gold,0,6)}}
   // призраки
   const r=myRole();
   if(online){
     if(ghostUpdate(dt)&&!pp.d)GFX.drawRunner(g,rnOther,pp.x,pp.y,pp.face,pp.vx||0,pp.vy||0,!!pp.g,dt,animT,.55,ox,oy,'ИГРОК '+(3-r),TDp);
+  }else if(mode==='hot'||mode==='party'){drawMultiGhosts(g,dt,ox,oy,TDp)
   }else if(gh&&!gh.dead){
     const gx=gpv.x+(gh.x-gpv.x)*alpha,gy=gpv.y+(gh.y-gpv.y)*alpha;
     GFX.drawRunner(g,rnGh,gx,gy,gh.face,gh.vx,gh.vy,gh.gr,dt,animT,.5,ox,oy,mode==='duel'?'ИГРОК 1':'ПРИЗРАК',TDp);
@@ -1949,7 +2265,39 @@ function renderRace(dt){
     const p2=Math.round(Math.max(0,Math.min(1,(o-L.start.x)/span))*tw);
     if(p1!==hudP1){hudP1=p1;$('tp1').style.transform='translateX('+p1+'px)'}
     if(p2!==hudP2){hudP2=p2;$('tp2').style.transform='translateX('+p2+'px)'}
+    multiHud(span,tw);
   }
+}
+// ---------- экран «Скины» ----------
+const skIcons=[];
+function openSkins(){
+  const sh=$('sk-sh');if(!sh.children.length){
+    SKS.forEach((n,i)=>{const b=document.createElement('button');b.className='skb';b.setAttribute('aria-label',n);const c=document.createElement('canvas');c.width=c.height=96;b.appendChild(c);b.appendChild(document.createTextNode(n));
+      b.onclick=()=>{SFX.click();SK.sh=i;saveSkin();skinUI()};sh.appendChild(b);skIcons.push({cv:c,R:GFX.runnerFor('#fff','white',i)})});
+    const co=$('sk-col');SKC.forEach((c,i)=>{const b=document.createElement('button');b.className='skc';b.style.background=c[1];b.setAttribute('aria-label',c[0]);b.onclick=()=>{SFX.click();SK.c=i;saveSkin();skinUI()};co.appendChild(b)});
+    const tr=$('sk-tr');SKT.forEach((t,i)=>{const b=document.createElement('button');b.className='skt';const dot=document.createElement('i');dot.style.background=t[1]===null?'linear-gradient(135deg,#fff,#999)':t[1]==='*'?'conic-gradient(#ff6a4d,#ffd166,#59e6a2,#5ef0ff,#a58cff,#ff7ad9,#ff6a4d)':'#'+GFX.hex(t[1]);b.appendChild(dot);b.appendChild(document.createTextNode(t[0]));b.onclick=()=>{SFX.click();SK.t=i;saveSkin();skinUI()};tr.appendChild(b)});
+  }
+  skinUI();show('skin');
+}
+function skinUI(){
+  const sh=$('sk-sh').children,co=$('sk-col').children,tr=$('sk-tr').children;
+  for(let i=0;i<sh.length;i++){sh[i].classList.toggle('on',i===SK.sh);const ic=skIcons[i],g=ic.cv.getContext('2d');ic.R.col=SKC[SK.c][1];ic.R.gi=GFX.GI[SKC[SK.c][2]];ic.R.sci=false;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,96,96);GFX.drawRunner(g,ic.R,0,0,1,0,0,true,.016,0,1,48,86,'',64)}
+  for(let i=0;i<co.length;i++)co[i].classList.toggle('on',i===SK.c);
+  for(let i=0;i<tr.length;i++)tr[i].classList.toggle('on',i===SK.t);
+}
+$('t-sk').onclick=()=>{audio();SFX.click();openSkins()};
+$('sk-back').onclick=()=>{SFX.click();show('title')};
+let skTrail=0;
+function renderSkinPrev(g,dt,elId,skin){
+  const el=$(elId||'sk-prev'),r=el.getBoundingClientRect();skin=skin||SK;if(r.width<10)return;
+  const T=Math.max(50,Math.min(r.height*.62,r.width*.3))*DPR,cxp=(r.left+r.width*.5)*DPR,gy=(r.top+r.height*.84)*DPR;
+  g.fillStyle='rgba(20,14,50,.55)';g.beginPath();g.ellipse(cxp,gy+T*.1,T*2.4,T*.16,0,0,6.3);g.fill();
+  const j=Math.max(0,Math.sin(animT*2.6)),vy=j>.02?-8*Math.cos(animT*2.6):0;
+  paint(rnPv,skin);paint(rnPg,skin);
+  skTrail-=dt;if(skTrail<=0){skTrail=.035;const gx=(cxp-T*.4)/T,gyy=(gy-T*(.4+j*1.1))/T;GFX.spawn(gx,gyy,-2-Math.random()*2,(Math.random()-.5)*.8,.5,.3,skinTrail(skin,animT),1,0);if(j<=.02&&Math.random()<.5)GFX.spawn(gx,gy/T-.04,-1.5-Math.random(),-Math.random(),.4,.14,GFX.GI.white,2,0)}
+  GFX.updParticles(dt);GFX.drawParticles(g,0,0,T);
+  GFX.drawRunner(g,rnPg,0,0,1,j>.02?0:8,vy,j<=.02,dt,animT,.5,cxp-T*1.7,gy-T*Math.max(0,Math.sin(animT*2.6-.9))*1.1,'',T);
+  GFX.drawRunner(g,rnPv,0,0,1,j>.02?0:8,vy,j<=.02,dt,animT,1,cxp,gy-T*j*1.1,'',T);
 }
 // ---- фон меню: тот же слойный мир, бегущие призраки на титуле ----
 let idleWorld=0;
@@ -1966,19 +2314,234 @@ function renderIdle(dt){
   if(screen==='title'){
     const gy=Math.round(VH*DPR*.9/TD)*TD, ox=-((camPx*1.0)%TD);
     GFX.drawGround(g,ox-TD,gy,Math.ceil(VH*DPR/TD)+1);
+    paint(rnT1,SK);paint(rnT2,{sh:SK.sh,c:nearFree(SK.c,[SK.c]),t:SK.t});
     const j=Math.max(0,Math.sin(animT*3.2)),j2=Math.max(0,Math.sin(animT*3.2-.7));
     const x1=VW*DPR*(VW>VH?.2:.26)/TD,x2=x1+2.4+Math.sin(animT*.9)*.6;
     GFX.drawRunner(g,rnT1,x1,gy/TD-j*1.7,1,j>.02?0:8,j>.02?-6*Math.cos(animT*3.2):0,j<=.02,dt,animT,1,0,0,'',TD);
     GFX.drawRunner(g,rnT2,x2,gy/TD-j2*1.7,1,j2>.02?0:8,j2>.02?-6*Math.cos(animT*3.2-.7):0,j2<=.02,dt,animT,.5,0,0,'',TD);
     GFX.updParticles(dt);GFX.drawParticles(g,0,0,TD);
   }
+  if(screen==='skin')renderSkinPrev(g,dt);else if(screen==='pass'&&hot)renderSkinPrev(g,dt,'pass-prev',hot.sks[hot.step-1]);
   GFX.drawVig(g);
 }
 
 requestAnimationFrame(frame);
 setMute(SV.mute);setFx(SV.fx);fit();
 // тестовый доступ
-window.ZB={get me(){return me},get phase(){return phase},get screen(){return screen},get L(){return L},get lvl(){return lvl},get online(){return online},get sel(){return sel},SV,setInput(f){forceInp=f},LEVELS,get paused(){return paused},get pp(){return pp},get myFin(){return myFin},renderLevels,pickLevel,get DPR(){return DPR},get frames(){return nFrames},get ticks(){return nTicks},get alpha(){return alpha},get cv(){return cv},fit,show,renderStage,renderResult,fake(n){mode='solo';online=false;lvl=n;L=LEVELS[n-1];myFin=612;isRec=true;ghWasBetter=false},setOnline(v){online=v}};
+window.ZB={get hot(){return typeof hot!=='undefined'?hot:null},get party(){return typeof party!=='undefined'?party:null},get SK(){return SK},get me(){return me},get phase(){return phase},get screen(){return screen},get L(){return L},get lvl(){return lvl},get online(){return online},get sel(){return sel},SV,setInput(f){forceInp=f},LEVELS,get paused(){return paused},get pp(){return pp},get myFin(){return myFin},renderLevels,pickLevel,get DPR(){return DPR},get frames(){return nFrames},get ticks(){return nTicks},get alpha(){return alpha},get cv(){return cv},fit,show,renderStage,renderResult,fake(n){mode='solo';online=false;lvl=n;L=LEVELS[n-1];myFin=612;isRec=true;ghWasBetter=false},setOnline(v){online=v}};
+
+</script>
+<script>
+'use strict';
+// ===== Компания 3–6: на одном телефоне (mode 'hot') и по сети через Party (mode 'party') =====
+let hot=null,party=null,xDots=[];
+const HOT_TITLE='Игрок ';
+function fmtPlace(i){return i+1}
+function skinIcon(cv,sk,R){const g=cv.getContext('2d');R.col=SKC[sk.c][1];R.gi=GFX.GI[SKC[sk.c][2]];R.sh=sk.sh;R.sci=false;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,96,96);GFX.drawRunner(g,R,0,0,1,0,0,true,.016,0,1,48,86,'',64)}
+function multiMyColor(){return mode==='hot'?SKC[hot.sks[hot.step-1].c][1]:party?SKC[mySkinNow().c][1]:'#fff'}
+function mySkinNow(){if(mode==='hot')return hot.sks[hot.step-1];const p=party&&Party.players&&Party.players.find(q=>q.slot===party.me);return cleanSk((p&&p.skin)||SK)}
+function multiRefresh(){
+  const sk=mySkinNow();paint(rnMe,sk);ROLESK[1]=sk;PCOL[1]=SKC[sk.c][1];PGLOW[1]=SKC[sk.c][2];
+  rnGh.col='#cfc8ff';rnGh.gi=GFX.GI.white;rnGh.sh=SK.sh;rnGh.sci=false;
+}
+
+// ---------- выбор режима ----------
+$('t-co').onclick=()=>{audio();SFX.click();show('co')};
+$('co-back').onclick=()=>{SFX.click();show('title')};
+$('co-hot').onclick=()=>{SFX.click();hotSetup()};
+$('co-net').onclick=()=>{SFX.click();partyLobby()};
+
+// ---------- один телефон: настройка ----------
+let hotN=3,hotNames=[],hotSks=[];
+function hotSkinsFor(n){const out=[],taken=[];for(let i=0;i<n;i++){const old=hotSks[i];let sk=old&&i>0?old:(i===0?cleanSk(SK):{sh:(SK.sh+i)%SKS.length,c:(SK.c+i*3)%SKC.length,t:0});sk=Object.assign({},sk);if(taken.includes(sk.c))sk.c=nearFree(sk.c,taken);taken.push(sk.c);out.push(sk)}return out}
+const hotIcons=[];
+function hotSetup(){
+  mode='hot';online=false;
+  const bar=$('hot-n');if(!bar.children.length)for(let n=3;n<=6;n++){const b=document.createElement('button');b.textContent=n;b.onclick=()=>{SFX.click();hotN=n;hotRender()};bar.appendChild(b)}
+  hotRender();show('hot');
+}
+function hotRender(){
+  hotSks=hotSkinsFor(hotN);
+  const bar=$('hot-n').children;for(let i=0;i<bar.length;i++)bar[i].classList.toggle('on',i+3===hotN);
+  const ls=$('hot-list'),keep=hotNames.slice();ls.innerHTML='';hotIcons.length=0;
+  for(let i=0;i<hotN;i++){
+    const row=document.createElement('div');row.className='hp';
+    const num=document.createElement('b');num.textContent=i+1;
+    const chip=document.createElement('button');chip.className='hpc';chip.setAttribute('aria-label','Сменить цвет');const cv=document.createElement('canvas');cv.width=cv.height=96;chip.appendChild(cv);
+    const inp=document.createElement('input');inp.type='text';inp.maxLength=12;inp.placeholder=HOT_TITLE+(i+1);inp.value=keep[i]!==undefined?keep[i]:'';inp.setAttribute('autocomplete','off');inp.setAttribute('autocapitalize','words');
+    inp.oninput=()=>{hotNames[i]=inp.value};
+    const R=GFX.runnerFor('#fff','white',hotSks[i].sh);hotIcons.push({cv,R});
+    chip.onclick=()=>{SFX.click();const taken=hotSks.map((s,k)=>k===i?-1:s.c);hotSks[i].c=nearFree((hotSks[i].c+1)%SKC.length,taken);skinIcon(cv,hotSks[i],R)};
+    skinIcon(cv,hotSks[i],R);
+    row.appendChild(num);row.appendChild(chip);row.appendChild(inp);ls.appendChild(row);
+  }
+}
+$('hot-back').onclick=()=>{SFX.click();show('co')};
+$('hot-go').onclick=()=>{SFX.click();mode='hot';openLevels()};
+function hotName(i){return (hotNames[i]||'').trim()||HOT_TITLE+(i+1)}
+function hotStart(i,keep){
+  lvl=i;L=LEVELS[i-1];
+  const n=keep&&hot?hot.n:hotN;
+  hot={n,names:keep&&hot?hot.names:Array.from({length:n},(_,k)=>hotName(k)),sks:keep&&hot?hot.sks:hotSks.slice(0,n).map(s=>Object.assign({},s)),times:[],inps:[],step:1,lvl:i};
+  hot.sks=hot.sks.map(s=>cleanSk(s));
+  showPass(1);
+}
+function showPass(k){
+  hot.step=k;const sk=hot.sks[k-1];
+  $('pass-t').textContent='Трасса '+hot.lvl+' · '+LEVELS[hot.lvl-1].name;
+  $('pass-n').textContent=hot.names[k-1];$('pass-n').style.color=SKC[sk.c][1];
+  $('pass-h').textContent=k===1?'Передайте телефон первому игроку. Призраков пока нет.':k+'-й игрок: за вами побегут призраки '+(k-1===1?'игрока 1':'игроков 1–'+(k-1))+'.';
+  $('pass-go').textContent='Готов — старт!';
+  show('pass');
+}
+$('pass-go').onclick=()=>{SFX.click();audio();lvl=hot.lvl;L=LEVELS[lvl-1];beginRace()};
+$('pass-back').onclick=()=>{SFX.click();openLevels()};
+function hotGhosts(){
+  ghs=hot.inps.map((inp,i)=>{const R=GFX.runnerFor('#fff','white',hot.sks[i].sh);paint(R,hot.sks[i]);return {S:initState(L,false),inp,R,name:hot.names[i].toUpperCase(),px:L.start.x,py:L.start.y}});
+}
+function hotGhostStep(){
+  if(mode!=='hot')return;
+  for(const g of ghs){g.px=g.S.x;g.py=g.S.y;if(!g.S.won){const i=g.S.t;step(L,g.S,i<g.inp.length?g.inp[i]:0);if(Math.abs(g.S.x-g.px)>1.5||Math.abs(g.S.y-g.py)>1.5){g.px=g.S.x;g.py=g.S.y}}}
+}
+function hotFinish(){hot.times[hot.step-1]=myFin;hot.inps[hot.step-1]=rec.slice()}
+
+// ---------- сетевая комната ----------
+let partyReady_=false;
+function partyInit(){
+  if(typeof Party==='undefined'||partyReady_)return;partyReady_=true;
+  Party.init({game:'zabeg',title:'Призрачный забег',min:3,max:6,accent:'#5ef0ff',autoResume:false,
+    skin:()=>cleanSk(SK),
+    resolveSkin:(sk,taken)=>{sk=cleanSk(sk);const used=(taken||[]).map(t=>cleanSk(t).c);return Object.assign({},sk,{c:nearFree(sk.c,used)})},
+    skinColor:sk=>SKC[cleanSk(sk).c][1]});
+  Party.on('start',partyStart);
+  Party.on('msg',partyMsg);
+  Party.on('roster',()=>{if(!party)return;if(screen==='stage')renderPartyStage();if(screen==='res')renderMultiResult()});
+  Party.on('leave',()=>{if(!party)return;if(screen==='stage')renderPartyStage();if(screen==='res')renderMultiResult();if(Party.isHost&&screen==='stage')partyCheckGo()});
+  Party.on('join',slot=>{if(party&&Party.isHost&&party.ep){Party.send('track',{level:party.lvl,ep:party.ep},slot)}});
+  Party.on('hostLost',()=>{if(!party)return;paused=false;$('ov-t').textContent='Хозяин вышел из комнаты';$('ov').classList.add('on');setTimeout(()=>{$('ov').classList.remove('on');partyExit()},2600)});
+  Party.on('end',()=>{});
+}
+function partyLobby(){
+  partyInit();
+  if(typeof Party==='undefined'){return}
+  mode='party';online=false;
+  Party.lobby();
+}
+function partyStart(cfg){
+  mode='party';online=false;
+  party={cfg,me:Party.me.slot,ep:0,lvl:0,ready:new Set(),fin:{},go:false};
+  Object.keys(prun).forEach(k=>delete prun[k]);
+  paused=false;$('ov').classList.remove('on');
+  if(Party.isHost)openLevels();else{show('stage');renderPartyStage()}
+}
+function partyName(p){return p.name||('Игрок '+(p.slot+1))}
+function partySk(p){return cleanSk(p.skin)}
+function partyOnline(){return (Party.players||[]).filter(p=>p.online!==false)}
+function renderPartyStage(){
+  if(!party)return;
+  const ps=Party.players||[];
+  $('g-n').textContent=party.ep?'Трасса '+lvl+' · '+WN[L.world]:'Комната '+(Party.code||'');
+  $('g-nm').textContent=party.ep?L.name:(Party.isHost?'':'Хозяин выбирает трассу…');
+  $('g-pl').innerHTML=ps.map(p=>{const ok=party.ready.has(p.slot);return '<span class="pill'+(ok?' ok':'')+(p.online===false?'" style="opacity:.45':'" style="color:'+SKC[partySk(p).c][1])+'">'+esc(partyName(p))+(p.slot===party.me?' (вы)':'')+(party.ep?(ok?' ✓':' …'):'')+'</span>'}).join('');
+  const mineReady=party.ready.has(party.me);
+  $('g-go').style.display=party.ep&&!mineReady?'':'none';
+  $('g-w').textContent=!party.ep?'Ждём, пока хозяин выберет трассу.':mineReady?(party.ready.size>=partyOnline().length?'Поехали!':'Ждём остальных…'):'Нажмите «Готов» — когда готовы все, начнётся общий отсчёт.';
+}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function partyPick(i){
+  if(!party||!Party.isHost)return;
+  const ep=Date.now();Party.send('track',{level:i,ep});applyTrack(i,ep);
+}
+function applyTrack(i,ep){
+  if(!party||i<1||i>NLV)return;
+  lvl=i;L=LEVELS[i-1];party.lvl=i;party.ep=ep;party.ready=new Set();party.fin={};party.go=false;myFin=0;phase='';
+  show('stage');renderPartyStage();
+}
+function partyReady(){
+  if(!party||!party.ep)return;party.ready.add(party.me);
+  if(Party.isHost){Party.send('rd',{ep:party.ep,r:[...party.ready]});partyCheckGo()}else Party.send('ready',{ep:party.ep},0);
+  renderPartyStage();
+}
+function partyCheckGo(){
+  if(!party||!Party.isHost||party.go||!party.ep)return;
+  const on=partyOnline();if(!on.length||!on.every(p=>party.ready.has(p.slot)))return;
+  party.go=true;Party.send('go',{ep:party.ep});beginRace(0);
+}
+function partyMsg(type,d,from){
+  if(!party||!d&&type!=='menu')return;
+  if(type==='track'&&from===0&&!Party.isHost){if(screen==='race'&&phase==='run'&&party.ep===d.ep)return;applyTrack(d.level,d.ep)}
+  else if(type==='rd'&&d.ep===party.ep){party.ready=new Set(d.r);if(screen==='stage')renderPartyStage()}
+  else if(type==='ready'&&Party.isHost&&d.ep===party.ep){party.ready.add(from);Party.send('rd',{ep:party.ep,r:[...party.ready]});if(screen==='stage')renderPartyStage();partyCheckGo()}
+  else if(type==='go'&&d.ep===party.ep&&!Party.isHost&&screen==='stage'){const pg=Party.ping(0);beginRace(pg?Math.min(400,pg.ms/2):0)}
+  else if(type==='fin'&&d.ep===party.ep){party.fin[from]=d.t;if(screen==='res')renderMultiResult()}
+  else if(type==='menu'&&!Party.isHost){party.ep=0;party.ready=new Set();phase='';show('stage');renderPartyStage()}
+}
+function partyPos(){
+  if(mode!=='party'||!me||!party)return;
+  Party.set({x:+me.x.toFixed(2),y:+me.y.toFixed(2),vx:+me.vx.toFixed(1),vy:+me.vy.toFixed(1),f:me.face,g:me.gr?1:0,d:me.dead>0?1:0,t:me.t,fin:myFin,rid:party.ep});
+}
+function partyFinish(){party.fin[party.me]=myFin;Party.send('fin',{ep:party.ep,t:myFin});partyPos()}
+function partyExit(){try{Party.leave()}catch(e){}party=null;mode='';phase='';paused=false;$('ov').classList.remove('on');show('title')}
+const prun={};
+function prunner(p){const k=p.slot;if(!prun[k]){prun[k]=GFX.runnerFor('#fff','white',0)}const R=prun[k],sk=partySk(p);if(R.col!==SKC[sk.c][1]||R.sh!==sk.sh)paint(R,sk);return R}
+
+// ---------- призраки и шкала в гонке ----------
+function drawMultiGhosts(g,dt,ox,oy,T){
+  if(mode==='hot'){
+    for(const q of ghs){if(q.S.dead>0)continue;const x=q.px+(q.S.x-q.px)*alpha,y=q.py+(q.S.y-q.py)*alpha;GFX.drawRunner(g,q.R,x,y,q.S.face,q.S.vx,q.S.vy,q.S.gr,dt,animT,.5,ox,oy,q.name,T)}
+  }else if(party){
+    for(const p of Party.players||[]){if(p.slot===party.me)continue;
+      const s=Party.sample(p.slot,{lerp:['x','y'],vel:{x:'vx',y:'vy'},maxExtrapolate:100});
+      if(!s||s.rid!==party.ep||s.d)continue;
+      GFX.drawRunner(g,prunner(p),s.x,s.y,s.f||1,s.vx||0,s.vy||0,!!s.g,dt,animT,.55,ox,oy,partyName(p).toUpperCase().slice(0,12),T)}
+  }
+}
+function multiDots(){
+  const tr=$('track');tr.querySelectorAll('i.xd').forEach(e=>e.remove());xDots=[];
+  if(mode==='hot'){ghs.forEach((q,i)=>{const e=document.createElement('i');e.className='xd';e.style.background=SKC[hot.sks[i].c][1];tr.appendChild(e);xDots.push({el:e,get:()=>q.S.x,last:-1})})}
+  else if(mode==='party'&&party){(Party.players||[]).forEach(p=>{if(p.slot===party.me)return;const e=document.createElement('i');e.className='xd';e.style.background=SKC[partySk(p).c][1];tr.appendChild(e);xDots.push({el:e,get:()=>{const s=Party.state(p.slot);return s&&s.rid===party.ep?s.x:L.start.x},last:-1})})}
+}
+function multiHud(span,tw){for(const d of xDots){const v=Math.round(Math.max(0,Math.min(1,(d.get()-L.start.x)/span))*tw);if(v!==d.last){d.last=v;d.el.style.transform='translateX('+v+'px)'}}}
+
+// ---------- результаты ----------
+function rowHtml(place,sk,name,tm,sub,cls){return '<div class="rw '+(cls||'')+'"><span class="pl">'+(place||'')+'</span><span class="dt" style="background:'+SKC[sk.c][1]+'"></span><span class="nm">'+esc(name)+'</span><span class="tm">'+tm+(sub?'<small>'+sub+'</small>':'')+'</span></div>'}
+function renderMultiResult(){
+  $('r-t').style.display='none';$('r-tab').style.display='';
+  const nxt=lvl<NLV;$('r-n').textContent='Трасса '+lvl+' · '+L.name;
+  let rows=[],head='',sub='',html='';
+  $('r-again').style.display='';$('r-next').style.display='';$('r-lv').style.display='';
+  if(mode==='hot'){
+    const k=hot.times.length,done=hot.times.map((t,i)=>({i,t})).sort((a,b)=>a.t-b.t);
+    html=done.map((r,pos)=>rowHtml(pos+1,hot.sks[r.i],hot.names[r.i],fmt(r.t),pos?'+'+((r.t-done[0].t)/60).toFixed(2):'','' )).join('');
+    for(let i=k;i<hot.n;i++)html+=rowHtml('',hot.sks[i],hot.names[i],'—','ждёт очереди','off');
+    if(k<hot.n){head=hot.names[k-1]+' финишировал';sub='Передайте телефон дальше — игрок '+(k+1)+' побежит за призраками.';$('r-again').style.display='none';$('r-lv').style.display='none';$('r-next').textContent='Передать: '+hot.names[k]}
+    else{const w=done[0],tie=done.length>1&&done[1].t===w.t;head=tie?'Ничья на первом месте!':'Победил '+hot.names[w.i]+'!';sub='Время победителя '+fmt(w.t)+' с';$('r-again').textContent='Реванш';$('r-next').textContent='Следующая трасса';$('r-next').style.display=nxt&&lvl+1<=SV.unlocked?'':'none';$('r-lv').textContent='К трассам'}
+  }else if(party){
+    const ps=(Party.players||[]).map(p=>{const st=Party.state(p.slot);let t=party.fin[p.slot]||0;if(!t&&st&&st.rid===party.ep&&st.fin)t=st.fin;const prog=st&&st.rid===party.ep&&st.x?Math.max(0,Math.min(100,Math.round((st.x-L.start.x)/(L.finX-L.start.x)*100))):0;return {p,t,prog}});
+    const fin=ps.filter(r=>r.t).sort((a,b)=>a.t-b.t),run=ps.filter(r=>!r.t);
+    html=fin.map((r,pos)=>rowHtml(pos+1,partySk(r.p),partyName(r.p)+(r.p.slot===party.me?' (вы)':''),fmt(r.t),pos?'+'+((r.t-fin[0].t)/60).toFixed(2):'',(r.p.slot===party.me?'me ':'')+(pos===0?'w':''))).join('');
+    html+=run.map(r=>rowHtml('',partySk(r.p),partyName(r.p)+(r.p.slot===party.me?' (вы)':''),r.p.online===false?'вышел':r.prog+'%',r.p.online===false?'':'бежит…',(r.p.slot===party.me?'me ':'')+'off')).join('');
+    const mp=fin.findIndex(r=>r.p.slot===party.me);
+    if(!run.some(r=>r.p.online!==false)&&fin.length){head=mp===0?'ПОБЕДА!':'Гонка окончена';sub='Победил '+partyName(fin[0].p)+' · '+fmt(fin[0].t)+' с'}
+    else{head=mp>=0?(mp+1)+'-е место':'Финиш!';sub='Ждём остальных игроков…'}
+    if(Party.isHost){$('r-again').textContent='Ещё раз';$('r-next').textContent='Следующая трасса';$('r-next').style.display=nxt?'':'none';$('r-lv').textContent='К выбору трасс';sub+=' · следующий шаг — за вами'}
+    else{$('r-again').style.display='none';$('r-next').style.display='none';$('r-lv').textContent='Выйти из комнаты';sub+=' · дальше выбирает хозяин'}
+  }
+  $('r-tab').innerHTML=html;$('r-h').textContent=head;$('r-s').textContent=sub;
+}
+setInterval(()=>{if(mode==='party'&&screen==='res')renderMultiResult()},1000);
+function multiAgain(){
+  if(mode==='hot'){hotStart(lvl,true);return}
+  if(party&&Party.isHost){const ep=Date.now();Party.send('track',{level:lvl,ep});applyTrack(lvl,ep)}
+}
+function multiNext(){
+  if(mode==='hot'){if(hot.times.length<hot.n){showPass(hot.times.length+1)}else{hotStart(Math.min(NLV,lvl+1),true)}return}
+  if(party&&Party.isHost){const n=Math.min(NLV,lvl+1),ep=Date.now();Party.send('track',{level:n,ep});applyTrack(n,ep)}
+}
+function multiLevels(){
+  if(mode==='hot'){openLevels();return}
+  if(party&&Party.isHost){Party.send('menu',{});party.ep=0;openLevels()}else partyExit();
+}
 
 </script>
 </body>
