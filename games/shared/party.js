@@ -81,7 +81,12 @@
 // through the relays. Guest→guest traffic is forwarded by the host.
 (function () {
   if (window.Party) return;
-  const BROKERS = Array.isArray(window.DUO_TEST_BROKERS) ? window.DUO_TEST_BROKERS : ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
+  const BROKERS = Array.isArray(window.DUO_TEST_BROKERS) ? window.DUO_TEST_BROKERS : ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt', 'wss://mqtt.eclipseprojects.io:443/mqtt'];
+  // Transport budget. Public brokers throttle / kick clients that publish too often, and all phones on one Wi-Fi share one
+  // public IP, so the relay path is batched: every RELAY_TICK ms at most one publish per topic per broker, each broker
+  // connection has its own token bucket, fast state is latest-wins, reliable messages are acked and retransmitted.
+  const RELAY_TICK = 100, BUCKET_CAP = 16, BUCKET_RATE = 11, BATCH_MAX = 24000;
+  const T_HOST_LOST = 15000, T_GUEST_OFF = 15000, T_GUEST_DROP = 25000, T_WEAK = 3000;
   const NTFY = 'ntfy.sh';
   const STUN = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }, { urls: 'stun:stun.cloudflare.com:3478' }, { urls: 'stun:stun.nextcloud.com:443' }];
   const BASE = (document.currentScript && document.currentScript.src) ? new URL('.', document.currentScript.src).href : '';
@@ -183,9 +188,9 @@
           else if (type === 3) { const tl = (body[0] << 8) | body[1], t = new TextDecoder().decode(body.subarray(2, 2 + tl)); let off = 2 + tl; if ((h0 >> 1 & 3) > 0) off += 2; emit('message', t, new TextDecoder().decode(body.subarray(off))); }
         }
       };
-      ws.onclose = ws.onerror = () => { clearTimeout(to); clearInterval(ping); const was = c.connected; c.connected = false; buf = new Uint8Array(0); if (was) emit('close'); later(); };
+      ws.onclose = ws.onerror = () => { if (ws._done) return; ws._done = true; clearTimeout(to); clearInterval(ping); const was = c.connected; c.connected = false; buf = new Uint8Array(0); if (was) { emit('close'); retry = 0; } later(); };
     }
-    function later() { if (dead) return; retry++; setTimeout(open, Math.min(15000, 1500 * retry)); }
+    function later() { if (dead) return; retry++; setTimeout(open, retry === 1 ? 700 : Math.min(15000, 1500 * retry)); }
     open();
     return c;
   }
@@ -196,14 +201,52 @@
   function relayStatus() { const ok = relays.filter(r => r.ok).length; return relays.length ? ok + ' из ' + relays.length : '—'; }
   function relayUp() { return relays.some(r => r.ok); }
   // suffix: 'h' (host inbox) | 'all' (broadcast to guests) | 'g/<token>' (one guest). `imp` = may also go through slow ntfy.
-  function relayPub(suffix, s, imp) { relays.forEach(r => { if (r.ok && (r.kind === 'mqtt' || imp)) r.send(s, suffix); }); }
+  // Outgoing relay traffic is queued per topic and flushed as one batch publish per RELAY_TICK (see flushRelays).
+  const RQ = {};   // suffix -> { list: [json strings], fast: {key: json string}, imp: bool }
+  function rq(suffix) { return RQ[suffix] || (RQ[suffix] = { list: [], fast: {}, imp: false }); }
+  function relayPub(suffix, s, imp) {
+    const q = rq(suffix); q.list.push(s); if (q.list.length > 1500) q.list.splice(0, q.list.length - 1500);
+    if (imp) { q.imp = true; ntfyMaybe(s); }
+  }
+  function relayFast(suffix, key, s) { rq(suffix).fast[key] = s; }
+  function mqttUp() { return relays.some(r => r.ok && r.kind === 'mqtt'); }
+  function take(r) {
+    const t = now(), pen = t < (r.penalty || 0) ? 0.45 : 1;
+    r.tokens = Math.min(BUCKET_CAP, (r.tokens == null ? BUCKET_CAP : r.tokens) + (t - (r.refill || t)) / 1000 * BUCKET_RATE * pen); r.refill = t;
+    if (r.tokens < 1) return false; r.tokens -= 1; return true;
+  }
+  let ntfyTokens = 3, ntfyRefill = 0;
+  function ntfyMaybe(s) {
+    // ntfy.sh allows only a small burst per public IP (shared by every phone on the Wi-Fi): use it only while no MQTT broker works
+    if (mqttUp() || s.length > 3800) return;
+    const t = now(); ntfyTokens = Math.min(3, ntfyTokens + (t - (ntfyRefill || t)) / 6000); ntfyRefill = t;
+    if (ntfyTokens < 1) return; ntfyTokens -= 1;
+    relays.forEach(r => { if (r.ok && r.kind === 'ntfy') r.send(s); });
+  }
+  let lastFlushR = 0;
+  function flushRelays(force) {
+    if (!code || !relays.length) return;
+    const t = now(); if (!force && t - lastFlushR < RELAY_TICK - 4) return; lastFlushR = t;
+    for (const suffix in RQ) {
+      const q = RQ[suffix], fk = Object.keys(q.fast);
+      if (!q.list.length && !fk.length) continue;
+      const items = []; let size = 0, used = 0;
+      for (const k of fk) { items.push(q.fast[k]); size += q.fast[k].length; }
+      while (used < q.list.length && (size + q.list[used].length < BATCH_MAX || !items.length)) { size += q.list[used].length + 1; items.push(q.list[used]); used++; }
+      const batch = '{"t":"B","i":' + JSON.stringify(tok) + ',"b":[' + items.join(',') + ']}';
+      let sent = 0;
+      relays.forEach(r => { if (r.ok && r.kind === 'mqtt' && (force || take(r))) { r.send(batch, suffix); sent++; } });
+      if (sent) { q.list.splice(0, used); q.fast = {}; q.imp = false; }
+      else if (!mqttUp()) { q.fast = {}; if (q.list.length > 300) q.list.splice(0, q.list.length - 300); }  // keep reliable items for when a broker comes back
+    }
+  }
   function mqttRelay(url, ss, subs) {
-    const name = url.replace(/^wss?:\/\/|:\d+\/mqtt$/g, '').replace(/^broker\.|^test\./, '');
-    const r = { name, kind: 'mqtt', ok: false, send() {}, stop() {} };
+    const name = url.replace(/^wss?:\/\/|:\d+\/mqtt$/g, '').replace(/^broker\.|^test\.|^mqtt\./, '');
+    const r = { name, kind: 'mqtt', ok: false, send() {}, stop() {}, tokens: BUCKET_CAP, refill: 0, penalty: 0 };
     const id = 'party_' + tok + '_' + rnd(4);
     const cl = (window.mqtt && window.mqtt.connect) ? window.mqtt.connect(url, { clientId: id, keepalive: 20, reconnectPeriod: 3000, connectTimeout: 7000, clean: true }) : MiniMqtt(url, id);
     cl.on('connect', () => { if (ss !== session) return; r.ok = true; subs.forEach(s => cl.subscribe(base() + '/' + s, { qos: 0 }, () => {})); diag.mq = relayStatus(); ui(); onRelayUp(); });
-    cl.on('close', () => { r.ok = false; diag.mq = relayStatus(); ui(); });
+    cl.on('close', () => { if (r.ok) r.penalty = now() + 30000; r.ok = false; diag.mq = relayStatus(); ui(); });  // probably throttled: publish slower to it for a while
     cl.on('message', (t, buf) => { if (ss === session) relayIn(String(buf)); });
     r.send = (s, suffix) => { try { cl.publish(base() + '/' + suffix, s, { qos: 0 }); } catch (e) {} };
     r.stop = () => { try { cl.end(true); } catch (e) {} };
@@ -233,7 +276,11 @@
     relays = BROKERS.map(u => mqttRelay(u, ss, subs)); relays.push(ntfyRelay(ss));
     diag.mq = 'подключаюсь…';
   }
-  function relayIn(text) { let d; try { d = JSON.parse(text); } catch (e) { return; } onPkt(d, 'mq'); }
+  function relayIn(text) {
+    let d; try { d = JSON.parse(text); } catch (e) { return; }
+    if (d && d.t === 'B' && Array.isArray(d.b)) { if (d.i === tok) return; d.b.forEach(x => onPkt(x, 'mq')); }
+    else onPkt(d, 'mq');
+  }
 
   // ---------- links (one per guest on the host, one to the host on a guest) ----------
   const L = {};
@@ -245,8 +292,8 @@
   // mode: 'fast' (rtc fast channel, else relay) | 'rel' (rtc ordered channel, else relay) | 'both' (rtc and relay) | 'mq' (relay only)
   function xmit(key, m, mode, imp) {
     m.to = isHost ? key : 'h';
-    const s = JSON.stringify(m), lk = L[key], al = alive(lk), suffix = isHost ? 'g/' + key : 'h';
-    if (mode === 'fast') { if (al) return chSend(lk.fast, s); }
+    const s = JSON.stringify(m), lk = L[key], al = alive(lk), suffix = isHost ? 'all' : 'h';
+    if (mode === 'fast') { if (al) return chSend(lk.fast, s); if (m.t === 'p' || m.t === 'P') return relayFast(suffix, m.t + (isHost ? key : ''), s); }
     else if (mode === 'rel') { if (al && safeOpen(lk)) return chSend(lk.safe, s); }
     else if (mode === 'both') { if (al) chSend(safeOpen(lk) ? lk.safe : lk.fast, s); }
     relayPub(suffix, s, imp);
@@ -255,12 +302,12 @@
 
   // ---------- reliable ordered stream per link (+ NACK resend over the relays) ----------
   const OUT = {}, IN = {};
-  const outS = (k) => OUT[k] || (OUT[k] = { q: 0, buf: [] });
+  const outS = (k) => OUT[k] || (OUT[k] = { q: 0, buf: [], ack: 0 });
   const inS = (k) => IN[k] || (IN[k] = { next: 1, hold: {}, since: 0, nacked: 0 });
   function sendRel(key, k, d, fr, ts) {
     const o = outS(key), m = pk('m', { q: ++o.q, k, d });
     if (fr != null) m.fr = fr; if (ts != null) m.ts = ts;
-    o.buf.push(m); if (o.buf.length > 200) o.buf.shift();
+    o.buf.push(m); m._t = now(); if (o.buf.length > 1000) o.buf.shift();
     xmit(key, m, 'rel');
   }
   function onRel(key, m) {
@@ -278,17 +325,28 @@
     for (const key in IN) {
       const s = IN[key]; if (!s.since) continue;
       const age = now() - s.since;
-      if (age > 2500) { s.next = Math.min(...Object.keys(s.hold).map(Number)); drain(key, s); continue; }
-      if (age > 350 && now() - s.nacked > 600) {
+      if (age > 15000) { s.next = Math.min(...Object.keys(s.hold).map(Number)); drain(key, s); continue; }  // give up on a hole only after retransmits had plenty of time
+      if (age > 350 && now() - s.nacked > 900) {
         s.nacked = now();
         const n = pk('nack', { from: s.next }); n.to = isHost ? key : 'h';
-        relayPub(isHost ? 'g/' + key : 'h', JSON.stringify(n), false);
+        relayPub(isHost ? 'all' : 'h', JSON.stringify(n), false);
       }
     }
+    // sender side: resend what the peer has not acknowledged yet
+    const t0 = now();
+    for (const key in OUT) {
+      const o = OUT[key], lk = L[key], rto = alive(lk) ? 900 : 2200; let n = 0;
+      for (const m of o.buf) { if (m.q <= o.ack) continue; if (t0 - (m._t || 0) > rto) { m._t = t0; xmit(key, m, 'both'); if (++n >= 30) break; } }
+    }
   }
+  function onAck(key, n) {
+    const o = OUT[key]; if (!o || typeof n !== 'number' || n <= o.ack) return;
+    o.ack = n; while (o.buf.length && o.buf[0].q <= n) o.buf.shift();
+  }
+  const ackOf = (key) => (IN[key] ? IN[key].next - 1 : 0);
   function onNack(key, d) {
     const o = OUT[key]; if (!o || typeof d.from !== 'number') return;
-    o.buf.filter(m => m.q >= d.from).slice(0, 60).forEach(m => { const lk = L[key]; xmit(key, m, 'both'); });
+    const t0 = now(); o.buf.filter(m => m.q >= d.from).slice(0, 60).forEach(m => { m._t = t0; xmit(key, m, 'both'); });
   }
   function procRel(key, m) {
     if (isHost) {
@@ -306,12 +364,13 @@
     if (!d || typeof d !== 'object' || typeof d.i !== 'string' || d.i === tok || !code) return;
     if (d.to && d.to !== tok && !(d.to === 'h' && isHost)) return;
     const t0 = now();
-    if (d.t !== 'p' && d.t !== 'P') {
+    if (d.t !== 'p' && d.t !== 'P' && d.t !== 'm') {
       const key = d.i + d.e + ':' + d.s;
       if (seen.has(key)) return;
-      seen.add(key); seenQ.push(key); if (seenQ.length > 800) seen.delete(seenQ.shift());
+      seen.add(key); seenQ.push(key); if (seenQ.length > 5000) seen.delete(seenQ.shift());
     }
     if (isHost) {
+      const S0 = seatByTok[d.i]; if (S0 && S0.byeEp && d.e === S0.byeEp) return;  // late copies (other brokers) after a farewell
       if (d.t === 'join') return hostJoin(d, via);
       const S = seatByTok[d.i]; if (!S) return;
       if (d.e !== S.ep) { if (d.t === 'hb' || d.t === 'p') return; }
@@ -319,13 +378,13 @@
       const lk = Lk(d.i); if (via === 'rtc') lk.tRtc = t0; else lk.tMq = t0;
       if (!S.online) setOnline(S, true);
       switch (d.t) {
-        case 'hb': hostHb(S, d); break;
+        case 'hb': hostHb(S, d); if (d.ak != null) onAck(d.i, d.ak); break;
         case 'p': hostState(S, d); break;
         case 'm': onRel(d.i, d); break;
         case 'nack': onNack(d.i, d); break;
         case 'q': xmit(d.i, pk('a', { ts: d.ts }), via === 'rtc' ? 'fast' : 'mq'); break;
         case 'sig': onSig(d); break;
-        case 'bye': removeSeat(S); break;
+        case 'bye': S.byeEp = d.e; removeSeat(S); break;
       }
       return;
     }
@@ -340,6 +399,7 @@
       case 'start': if (st === 'joined' && d.cfg) { room.started = true; room.cfg = d.cfg; fireStart(d.cfg, false); } break;
       case 'm': onRel('H', d); break;
       case 'P': guestStates(d); break;
+      case 'hh': if (d.acks && typeof d.acks[tok] === 'number') onAck('H', d.acks[tok]); break;
       case 'nack': onNack('H', d); break;
       case 'a': if (typeof d.ts === 'number') { const v = performance.now() - d.ts; if (v >= 0 && v < 20000) lk.rtt[via] = lk.rtt[via] ? lk.rtt[via] * 0.7 + v * 0.3 : v; } break;
       case 'sig': onSig(d); break;
@@ -393,8 +453,8 @@
     if (st !== 'hosting' || typeof d.i !== 'string') return;
     let S = seatByTok[d.i], isNew = false;
     if (!S) {
-      if (room.started) { const m = pk('full', { why: 'started' }); m.to = d.i; relayPub('g/' + d.i, JSON.stringify(m), true); return; }
-      if (seats.length >= G.max) { const m = pk('full', { why: 'full' }); m.to = d.i; relayPub('g/' + d.i, JSON.stringify(m), true); return; }
+      if (room.started) { const m = pk('full', { why: 'started' }); m.to = d.i; relayPub('all', JSON.stringify(m), true); return; }
+      if (seats.length >= G.max) { const m = pk('full', { why: 'full' }); m.to = d.i; relayPub('all', JSON.stringify(m), true); return; }
       S = addSeat(d.i, d); isNew = true;
     } else {
       if (S.ep !== d.e) { S.ep = d.e; delete OUT[S.tok]; delete IN[S.tok]; const r = rec(S.slot); r.lastS = 0; closeLink(S.tok); }
@@ -408,7 +468,7 @@
     S.last = now();
     const lk = Lk(S.tok); if (via === 'rtc') lk.tRtc = now(); else lk.tMq = now();
     const w = pk('welcome', { pid: S.id, slot: S.slot, room: pubRoom() }); w.to = S.tok;
-    relayPub('g/' + S.tok, JSON.stringify(w), true);
+    relayPub('all', JSON.stringify(w), true);
     if (isNew) { hostEvent('join', S.slot); bump(); }
   }
   function hostHb(S, d) {
@@ -444,13 +504,21 @@
   }
   // forward fresh states from everyone to every guest as one bundle (20–60 Hz over rtc, ~20 Hz over a relay)
   const lastBundle = {};
+  let lastRelayBundle = 0;
   function bundleTick() {
+    if (!code) return;
+    flushRelays(false);
     if (!isHost || seats.length < 2) return;
     const t0 = now();
+    if (t0 - lastRelayBundle >= RELAY_TICK - 4 && seats.some(G2 => G2.slot && G2.online && !alive(L[G2.tok]))) {
+      lastRelayBundle = t0; const es = [];
+      seats.forEach(S => { const r = ST[S.slot]; if (r && r.latest && (r.ver > (r.sentR || 0) || t0 - (r.sentRT || 0) > 1000)) { r.sentR = r.ver; r.sentRT = t0; es.push([S.slot, r.fq, r.w || t0, r.latest]); } });
+      if (es.length) relayFast('all', 'P', JSON.stringify(pk('P', { es })));
+    }
     seats.forEach(G2 => {
       if (G2.slot === 0 || !G2.online) return;
-      const lk = L[G2.tok], gap = alive(lk) ? 16 : 50;
-      if (t0 - (lastBundle[G2.tok] || 0) < gap) return;
+      const lk = L[G2.tok]; if (!alive(lk)) return;
+      if (t0 - (lastBundle[G2.tok] || 0) < 16) return;
       const es = [];
       seats.forEach(S => { if (S.slot === G2.slot) return; const r = ST[S.slot]; if (r && r.latest && r.ver > (r.sent[G2.tok] || 0)) { r.sent[G2.tok] = r.ver; es.push([S.slot, r.fq, r.w || t0, r.latest]); } });
       if (!es.length) return;
@@ -460,7 +528,7 @@
   }
   function guestStates(d) {
     if (!Array.isArray(d.es)) return;
-    d.es.forEach(e => { const r = rec(e[0]); if (e[1] <= r.fq) return; r.fq = e[1]; r.w = e[2]; r.latest = e[3]; r.ver++; recordSnap(r, e[2], e[3]); });
+    d.es.forEach(e => { if (e[0] === me.slot) return; const r = rec(e[0]); if (e[1] <= r.fq) return; r.fq = e[1]; r.w = e[2]; r.latest = e[3]; r.ver++; recordSnap(r, e[2], e[3]); });
   }
 
   // ---------- guest ----------
@@ -544,7 +612,7 @@
   }
   function scheduleFlush() {
     if (flushTimer) return;
-    const gap = alive(L.H) || isHost ? 16 : 45;
+    const gap = alive(L.H) || isHost ? 16 : RELAY_TICK;
     flushTimer = setTimeout(() => flushState(false), Math.max(0, gap - (now() - lastFlush)));
   }
 
@@ -570,11 +638,12 @@
     const pc = lk.pc = new RTCPeerConnection({ iceServers: STUN });
     pc.onconnectionstatechange = () => {
       if (pc !== lk.pc) return;
-      if (pc.connectionState === 'failed' || pc.connectionState === 'closed') { lk.made = 0; rtcDiag(); ui(); if (!isHost) setTimeout(rtcKick, 4000); }
+      if (pc.connectionState === 'failed' || pc.connectionState === 'closed') { rtcDiag(); ui(); if (!isHost) setTimeout(rtcKick, 3000); }
+      if (pc.connectionState === 'connected') { rtcDiag(); ui(); }
     };
     return pc;
   }
-  function sigSend(key, k, extra) { const m = pk('sig', Object.assign({ k, sid: L[key].sid }, extra)); m.to = isHost ? key : 'h'; relayPub(isHost ? 'g/' + key : 'h', JSON.stringify(m), true); }
+  function sigSend(key, k, extra) { const m = pk('sig', Object.assign({ k, sid: L[key].sid }, extra)); m.to = isHost ? key : 'h'; relayPub(isHost ? 'all' : 'h', JSON.stringify(m), true); }
   async function rtcOffer(key) {
     if (!rtcOk()) return;
     const lk = Lk(key);
@@ -603,7 +672,12 @@
     if (isHost) {
       const S = seatByTok[d.i]; if (!S) return;
       const lk = Lk(d.i);
-      if (d.k === 'hi') { if (!alive(lk) && (!lk.made || now() - lk.made > 6000)) rtcOffer(d.i).catch(() => {}); return; }
+      if (d.k === 'hi') {
+        const cs = lk.pc ? lk.pc.connectionState : 'none';
+        const stuck = !lk.pc || cs === 'failed' || cs === 'closed' || (!fastOpen(lk) && now() - lk.made > 15000) || (fastOpen(lk) && !alive(lk) && now() - lk.made > 15000);
+        if (!alive(lk) && stuck) rtcOffer(d.i).catch(() => {});
+        return;
+      }
       if (d.k === 'answer' && d.sid === lk.sid && lk.pc && !lk.answered && typeof d.sdp === 'string') {
         lk.answered = true;
         try { await lk.pc.setRemoteDescription({ type: 'answer', sdp: d.sdp }); } catch (e) { lk.answered = false; }
@@ -634,11 +708,18 @@
   }
 
   // ---------- periodic work ----------
-  let lastHb = 0, lastPingR = 0, lastPingM = 0, lastRoster = 0, lastKick = 0, lastJoin = 0, lastAct = 0;
+  let lastHb = 0, lastPingR = 0, lastPingM = 0, lastRoster = 0, lastKick = 0, lastJoin = 0, lastAct = 0, lastHh = 0;
+  function hostHh() {
+    // tiny host heartbeat with the acks of every guest stream: direct to linked guests, one copy on the relays for the rest
+    const acks = {}; seats.forEach(S => { if (S.slot) acks[S.tok] = ackOf(S.tok); });
+    const m = pk('hh', { acks }), s = JSON.stringify(m); let anyRelay = false;
+    seats.forEach(S => { if (!S.slot || !S.online) return; const lk = L[S.tok]; if (alive(lk)) chSend(lk.fast, s); else anyRelay = true; });
+    if (anyRelay || seats.length > 1) relayFast('all', 'hh', s);
+  }
   function sendHb() {
     if (isHost || st !== 'joined') return;
     const lk = Lk('H'), al = alive(lk);
-    const hb = pk('hb', { name: myName, skin: localSkin, ms: Math.round((al ? lk.rtt.rtc : lk.rtt.mq) || 0) });
+    const hb = pk('hb', { name: myName, skin: localSkin, ms: Math.round((al ? lk.rtt.rtc : lk.rtt.mq) || 0), ak: ackOf('H') });
     xmit('H', hb, 'both');
     if (Object.keys(mine).length) flushState(true);
   }
@@ -647,8 +728,10 @@
     const t0 = now();
     checkStreams();
     if (isHost) {
-      seats.slice().forEach(S => { if (S.slot && S.online && t0 - S.last > 8000) goOffline(S); });
-      if (t0 - lastRoster > 2000) { lastRoster = t0; bcastRoster(); rtcDiag(); ui(); }
+      seats.slice().forEach(S => { if (S.slot && S.online && t0 - S.last > (room.started ? T_GUEST_OFF : T_GUEST_DROP)) goOffline(S); });
+      if (t0 - lastHh > 1000) { lastHh = t0; hostHh(); }
+      if (t0 - lastRoster > 3000) { lastRoster = t0; bcastRoster(); rtcDiag(); ui(); }
+      weak(seats.filter(S => S.slot && S.online && t0 - S.last > T_WEAK).map(S => S.name));
       return;
     }
     if (st === 'joining' || st === 'lost') {
@@ -659,14 +742,23 @@
       return;
     }
     if (st !== 'joined') return;
-    if (t0 - lastHb > 1500) { lastHb = t0; sendHb(); }
+    if (t0 - lastHb > 1000) { lastHb = t0; sendHb(); }
     const lk = Lk('H');
     if (t0 - lastPingR > 1000) { lastPingR = t0; if (alive(lk)) xmit('H', pk('q', { ts: performance.now() }), 'fast'); }
     if (t0 - lastPingM > 2000) { lastPingM = t0; xmit('H', pk('q', { ts: performance.now() }), 'mq'); }
     if (t0 - lastKick > 5000) { lastKick = t0; rtcKick(); }
     if (t0 - lastAct > 10000) { lastAct = t0; saveAct(); }
     rtcDiag();
-    if (t0 - hostLast > 8000) hostGone('Хозяин пропал: связи нет больше 8 секунд');
+    weak(t0 - hostLast > T_WEAK ? ['хозяином'] : []);
+    if (t0 - hostLast > T_HOST_LOST) hostGone('Хозяин пропал: связи нет больше 15 секунд');
+  }
+  // small non-blocking notice while some link is silent (instead of dropping the player at once)
+  let weakEl = null, weakTxt = '';
+  function weak(names) {
+    const txt = names.length && code && st !== 'lost' ? '⚠ Связь с ' + names.join(', ') + ' прерывается — восстанавливаю…' : '';
+    if (txt === weakTxt) return; weakTxt = txt;
+    if (!weakEl) { weakEl = document.createElement('div'); weakEl.style.cssText = 'position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 6px);transform:translateX(-50%);z-index:10000;background:rgba(20,20,26,.88);color:#ffd27a;font:600 13px/1.3 -apple-system,Roboto,sans-serif;padding:6px 12px;border-radius:999px;pointer-events:none;max-width:92vw;text-align:center;border:1px solid rgba(255,210,122,.35)'; (document.body || document.documentElement).appendChild(weakEl); }
+    weakEl.textContent = txt; weakEl.style.display = txt ? 'block' : 'none';
   }
   setInterval(tick, 250);
   setInterval(bundleTick, 16);
@@ -677,6 +769,7 @@
   function stopAll() {
     session++;
     relays.forEach(r => r.stop()); relays = [];
+    for (const k in RQ) delete RQ[k]; weak([]);
     for (const k in L) { closeLink(k); delete L[k]; }
     for (const k in OUT) delete OUT[k]; for (const k in IN) delete IN[k];
     for (const k in ST) delete ST[k]; for (const k in lastBundle) delete lastBundle[k];
@@ -720,6 +813,7 @@
         seats.forEach(S => { const lk = L[S.tok]; if (S.slot && alive(lk)) chSend(safeOpen(lk) ? lk.safe : lk.fast, m); });
       } else if (st === 'joined') xmit('H', pk('bye', {}), 'both', true);
     }
+    flushRelays(true);
     relays = []; // keep the sockets open a moment so the farewell actually leaves
     setTimeout(() => relaysNow.forEach(r => r.stop()), 400);
     clearAct(); stopAll(); st = 'idle'; code = ''; isHost = false; error = ''; view = 'main'; silent = false;
@@ -770,7 +864,7 @@
     seats.forEach((S, i) => { S.slot = i; });
     bump();
   }
-  function kick(slot) { const S = seats[slot]; if (!isHost || !S || !S.slot) return; const m = pk('kicked', {}); m.to = S.tok; relayPub('g/' + S.tok, JSON.stringify(m), true); const lk = L[S.tok]; if (alive(lk)) chSend(lk.safe || lk.fast, JSON.stringify(m)); const was = room.started; room.started = false; removeSeat(S); room.started = was; }
+  function kick(slot) { const S = seats[slot]; if (!isHost || !S || !S.slot) return; const m = pk('kicked', {}); m.to = S.tok; relayPub('all', JSON.stringify(m), true); const lk = L[S.tok]; if (alive(lk)) chSend(lk.safe || lk.fast, JSON.stringify(m)); const was = room.started; room.started = false; removeSeat(S); room.started = was; }
 
   // ---------- profile ----------
   function setSkin(o) {
