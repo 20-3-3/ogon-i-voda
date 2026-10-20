@@ -136,6 +136,63 @@ canvas{touch-action:none;display:block}
 }
 @media (prefers-reduced-motion:reduce){.scr.on,.ov.on .card,.logo{animation:none}#wipe{display:none}}
 a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(env(safe-area-inset-left,0px) + 12px);right:auto;bottom:auto;z-index:30;height:44px;min-height:44px;min-width:44px;width:auto;margin:0;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;font-size:16px;line-height:1;letter-spacing:0;text-transform:none;box-sizing:border-box;flex:none;opacity:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}a.allg{font-family:inherit;font-weight:700;color:#d9b25f;background:rgba(4,26,38,.72);border:2px solid #d9b25f;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.4);padding:0 16px}a.allg:active{background:rgba(217,178,95,.25)}
+/* skins */
+#s-skins.on{display:flex}
+.skbody{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:6px}
+.skctl{display:flex;flex-direction:column;gap:6px;min-width:0}
+.sk-cards{display:flex;flex-wrap:wrap;gap:6px}
+.skc{flex:1 1 30%;min-width:96px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 4px;border-radius:12px;border:2px solid rgba(217,178,95,.35);background:linear-gradient(160deg,#165a77,#0a2e42);color:var(--paper);font-size:12px;line-height:1.1}
+.skc canvas{max-width:100%}
+.skc b{font-family:var(--hf);font-weight:400;font-size:13px}
+.skc.on{border-color:var(--fire);box-shadow:0 0 0 2px rgba(255,154,46,.45),0 0 14px rgba(255,170,60,.35)}
+.sk-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.skcol{min-height:46px;border-radius:12px;border:2px solid rgba(255,255,255,.25);display:grid;place-items:center;font-size:20px;color:#fff;text-shadow:0 1px 3px #000a;padding:0}
+.skcol.on{border-color:#fff;box-shadow:0 0 0 2px #000a,0 0 12px rgba(255,255,255,.5)}
+@media (orientation:landscape) and (max-height:500px){
+ .skbody{grid-template-columns:minmax(0,1fr) minmax(220px,48%);grid-template-rows:minmax(0,1fr);gap:14px}
+ .skc{min-height:48px;flex:1 1 40%;min-width:90px}.skcol{min-height:44px}.sk-cols{gap:5px}
+ #sk-note{display:none}
+}
+/* 3–6 игроков */
+#s-mp.on{display:flex}
+.mpbody{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"strip" "main" "ctl";gap:6px}
+.mpstrip{grid-area:strip;display:grid;grid-template-columns:repeat(var(--np,4),minmax(0,1fr));gap:4px}
+.mpmain{grid-area:main;display:flex;flex-direction:column;min-height:0;min-width:0}
+.mpctl{grid-area:ctl;display:flex;flex-direction:column;gap:6px;min-width:0}
+#mp-log{line-height:1.25;color:var(--paper);background:rgba(0,0,0,.34);border-radius:8px;padding:5px 8px;font-size:13px;height:3.9em;overflow:hidden;overflow-wrap:anywhere}
+#mp-stat{font-family:var(--hf);font-size:16px;color:var(--paper);flex:1;min-width:0;line-height:1.1;text-align:center}
+#mp-stat small{display:block;font-family:var(--bf);font-size:12px;color:var(--mute)}
+#mp-stat.me{color:#ffe08a;text-shadow:0 0 12px rgba(255,200,80,.6)}
+.mc{position:relative;min-width:0;min-height:68px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:3px 2px 2px;border-radius:10px;border:2px solid var(--ac,#888);background:rgba(4,26,38,.7);color:var(--paper);font-size:10.5px;line-height:1.1;overflow:hidden}
+.mc canvas{width:100%;aspect-ratio:1;border-radius:4px;max-height:72px}
+.mc .nm{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.mc .ft{color:var(--mute);font-size:10px;white-space:nowrap}
+.mc.sel{box-shadow:0 0 0 2px #fff,0 0 12px rgba(255,255,255,.5)}
+.mc.turn{box-shadow:0 0 0 3px #ffe08a,0 0 16px rgba(255,200,80,.7);animation:pulseb 1.2s ease-in-out infinite}
+.mc.out{filter:grayscale(1) brightness(.6)}
+.mc.mate{background:rgba(40,110,60,.45)}
+.mc .tm{position:absolute;right:3px;top:3px;font-size:9px;font-weight:700;background:#000a;border-radius:6px;padding:0 4px;color:#fff;z-index:1}
+@keyframes pulseb{50%{filter:brightness(1.25)}}
+#mpset-body .sec{font-family:var(--hf);font-size:13px;margin:8px 0 4px;color:#6d5016;letter-spacing:.5px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{flex:1;min-width:44px;min-height:46px;border-radius:10px;border:2px solid #8f6f2b;background:#fff8e4;color:#2a1c04;font-family:var(--hf);font-size:16px;padding:0 6px}
+.seg button.on{background:#d9b25f;box-shadow:inset 0 0 0 2px #6d5016}.seg button:disabled{opacity:.35}
+.seat{display:flex;gap:6px;align-items:center;margin-top:6px}
+.seat input{flex:1;min-width:0;min-height:46px;font-size:16px;border:2px solid #8f6f2b;border-radius:10px;padding:0 8px;background:#fffdf4;color:#2a1c04;-webkit-user-select:text;user-select:text;font-family:inherit}
+.seat button{min-height:46px;min-width:46px;border-radius:10px;border:2px solid #8f6f2b;background:#fff8e4;font-size:18px;padding:0 6px}
+.seat .sw{width:14px;height:34px;border-radius:5px;flex:0 0 14px}
+.mphelp{font-size:12.5px;color:#4a3a14;margin-top:6px;line-height:1.3}
+.rt{display:flex;gap:6px;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.07);margin-top:4px;font-size:14px}
+@media (orientation:landscape) and (max-height:500px){
+ .mpbody{grid-template-columns:var(--mcol,56%) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"main strip" "main ." "main ctl";gap:4px 12px;align-content:stretch}
+ .mpbody{grid-template-rows:auto minmax(0,1fr) auto}
+ .mpstrip{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .mc{min-height:64px}
+ .mc canvas{max-height:50px}
+ #mp-log{height:3.9em}
+ #ov-mpset .card{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr) auto;gap:6px 10px}
+ #ov-mpset .card h3,#ov-mpset .card .scroll{grid-column:1/-1}
+ #ov-mpset .card h3{font-size:20px}
+}
 </style>
 </head>
 <body>
@@ -148,6 +205,15 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
   <button class="btn" id="b-net">Играть вдвоём по сети</button>
   <button class="btn red" id="b-resume" style="display:none">Продолжить бой</button>
   <div class="row"><button class="btn dark sm" id="b-ai">Против компьютера</button><button class="btn dark sm" id="b-pass">Один телефон на двоих</button></div>
+  <div class="row"><button class="btn dark sm" id="b-party">👥 3–6 игроков</button><button class="btn dark sm" id="b-skins">🎨 Скины</button></div>
+ </div>
+</section>
+
+<section id="s-skins" class="scr">
+ <div class="hdr"><button class="icn" id="sk-back" aria-label="Назад">‹</button><h2>Скины флота<small id="sk-sub"></small></h2></div>
+ <div class="skbody">
+  <div class="stage"><div class="cbox" style="position:absolute;inset:0" id="skBox"><canvas id="cSkin"></canvas></div></div>
+  <div class="skctl"><div class="sk-cards" id="sk-cards"></div><div class="sk-cols" id="sk-cols"></div><div class="note" id="sk-note">Цвет и флажок видят все игроки. Если у двоих совпал цвет, тому, кто выбрал позже, он сдвинется на ближайший свободный.</div></div>
  </div>
 </section>
 
@@ -177,12 +243,31 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
  </div>
 </section>
 
+<section id="s-mp" class="scr">
+ <div class="hdr"><button class="icn" id="mp-menu" aria-label="Меню">☰</button><div id="mp-stat">…</div><button class="icn" id="mp-mute" aria-label="Звук">🔊</button></div>
+ <div class="toast" id="mp-toast"></div>
+ <div class="mpbody">
+  <div class="mpstrip" id="mp-strip"></div>
+  <div class="mpmain"><div class="lbl"><span id="mp-lbl"></span><span id="mp-sub"></span></div><div class="cbox" id="mpBox"><canvas id="cMp"></canvas></div></div>
+  <div class="mpctl"><div id="mp-log"></div><div class="btns"><button class="btn red" id="mp-fire" disabled>Огонь!</button></div></div>
+ </div>
+</section>
+
+<div class="ov" id="ov-mpset"><div class="card"><h3>3–6 игроков</h3><div class="scroll" id="mpset-body"></div><button class="btn" id="mpset-go">Начать игру</button><button class="btn dark" id="mpset-cancel">Назад</button></div></div>
+<div class="ov" id="ov-mpres"><div class="card" id="mpres-card"><h3 id="mpres-h"></h3><div class="scroll" id="mpres-body"></div><div class="rbtns"><button class="btn" id="mpres-again">Ещё раз</button><button class="btn dark" id="mpres-view">Посмотреть поля</button><button class="btn dark" id="mpres-home">В главное меню</button></div></div></div>
+<div class="ov" id="ov-mpmenu"><div class="card"><h3>Пауза</h3><div class="rbtns"><button class="btn" id="mpm-cont">Продолжить</button><button class="btn dark" id="mpm-help">Правила</button><button class="btn dark" id="mpm-skip" style="display:none">Пропустить ход игрока</button><button class="btn dark" id="mpm-home">В главное меню</button></div></div></div>
+
 <div class="ov" id="ov-result"><div class="card" id="res-card"><h3 id="res-h"></h3><p id="res-p"></p><div class="rbtns"><button class="btn" id="res-next">Следующий бой</button><button class="btn dark" id="res-again">Ещё раз</button><button class="btn dark" id="res-lv">К картам</button></div></div></div>
 <div class="ov" id="ov-curtain"><div class="card"><h3 id="cur-h"></h3><p id="cur-p"></p><button class="btn" id="cur-ok">Готов</button></div></div>
 <div class="ov" id="ov-lost"><div class="card"><h3>⚓ Партнёр отключился</h3><p>Ждём… Игра на паузе. Как только партнёр вернётся (с тем же кодом комнаты), бой продолжится с того же места.</p><button class="btn dark" id="lost-menu">В главное меню</button></div></div>
 <div class="ov" id="ov-menu"><div class="card"><h3>Пауза</h3><div class="rbtns"><button class="btn" id="m-cont">Продолжить</button><button class="btn dark" id="m-lv">К картам сражений</button><button class="btn dark" id="m-home">В главное меню</button></div></div></div>
 <div class="ov" id="ov-help"><div class="card"><h3>Как играть</h3><div class="scroll">
-<ul><li>Расставь корабли: тяни — переместить, тап — повернуть. Корабли не касаются друг друга.</li><li>Тап по клетке — прицел, ещё тап (или «Огонь!») — выстрел. В залпе тапай по нужным клеткам, потом «Залп»; в радаре — тап по центру квадрата. Если корабль не поворачивается — рядом нет места, тяни его или жми «Перемешать».</li><li>Попал — стреляешь снова. Мимо — ход соперника.</li><li>🏝 острова — суша, 💣 мина стоит ход, 📡 радар считает корабли в квадрате 3×3 (в некоторых боях его хватает на два раза), ⛈ шторм прячет часть моря (сильный шторм — больше), 🚀 залп — столько выстрелов, сколько у тебя живых кораблей (у ходящего первым первый залп вдвое короче; тап по выбранной клетке снимает прицел).</li><li>50 сражений в пяти главах. Победа открывает следующее сражение для обоих.</li><li>Бой по сети можно играть неспешно: закрой страницу и вернись по тому же коду комнаты.</li></ul>
+<ul><li>Расставь корабли: тяни — переместить, тап — повернуть. Корабли не касаются друг друга.</li><li>Тап по клетке — прицел, ещё тап (или «Огонь!») — выстрел. В залпе тапай по нужным клеткам, потом «Залп»; в радаре — тап по центру квадрата. Если корабль не поворачивается — рядом нет места, тяни его или жми «Перемешать».</li><li>Попал — стреляешь снова. Мимо — ход соперника.</li><li>🏝 острова — суша, 💣 мина стоит ход, 📡 радар считает корабли в квадрате 3×3 (в некоторых боях его хватает на два раза), ⛈ шторм прячет часть моря (сильный шторм — больше), 🚀 залп — столько выстрелов, сколько у тебя живых кораблей (у ходящего первым первый залп вдвое короче; тап по выбранной клетке снимает прицел).</li><li>50 сражений в пяти главах. Победа открывает следующее сражение для обоих.</li><li><b>🎨 Скины.</b> В меню «Скины»: 5 стилей (флот, пираты, стимпанк, неон, подлодки) и 8 цветов. Свой флот ты видишь в своём скине, чужой — в скине его хозяина. Совпал цвет — тому, кто выбрал позже, он сдвигается на ближайший свободный.</li>
+<li><b>👥 3–6 игроков.</b> У каждого своё поле; на твоём ходу тапни чужую мини-карту сверху (она увеличится), тапни клетку и жми «Огонь!». Попал — стреляешь ещё, но не больше 3 выстрелов за ход (1 + 2 бонусных), чтобы один игрок не выбил всех подряд. Потоплен весь флот — ты выбываешь, но можешь смотреть. Твой флот — тап по своей карте.</li>
+<li><b>Каждый сам за себя:</b> побеждает последний с кораблями. Чем больше игроков, тем меньше поле и флот: 3 игрока — 9×9, 6 кораблей; 4 — 8×8, 6; 5 — 7×7, 6; 6 — 6×6, 5. Партия около 10–20 минут.</li>
+<li><b>Команды</b> (2×2, 3×3, 2×2×2, 2+3): товарищи видят флоты и выстрелы друг друга, ходы чередуются между командами, внутри команды стреляют по очереди. Побеждает команда, враги которой потоплены полностью. Если команды неравные, меньшая получает бонус: до 4 выстрелов за ход и (в каждом втором ходу — или всегда, если команд 1 к 2) минимум 2 выстрела.</li>
+<li><b>Один телефон:</b> перед каждым ходом экран «Передай телефон: Имя» — тап, и видно только твои поля. Свободные места может занять компьютер (🤖). По сети: у каждого свой телефон, позиции кораблей знает только хост и не раскрывает до конца игры. Отключившегося игрока пропускают.</li>
+<li>Бой по сети можно играть неспешно: закрой страницу и вернись по тому же коду комнаты.</li></ul>
 <div class="tip">Для 120 Гц на iPhone: Настройки → Приложения → Safari → Дополнения → Feature Flags → выключить «Prefer Page Rendering Updates near 60fps».</div></div>
 <button class="btn" id="help-ok">Понятно</button></div></div>
 
@@ -449,6 +534,151 @@ if (typeof module !== 'undefined') module.exports = { LEVELS, rngf, islandsFor, 
 
 </script>
 <script src="../shared/duo.js"></script>
+<script src="../shared/party.js"></script>
+<script>
+// ===== Скины флота: стиль (силуэт) × цвет. Рисуются в спрайты кораблей (gfx.js: shipSpr) =====
+const SK_COLORS = [
+  { id: 'red', n: 'Красный', c: '#e5483a' }, { id: 'orange', n: 'Оранжевый', c: '#f08a24' }, { id: 'gold', n: 'Золотой', c: '#d9b25f' },
+  { id: 'green', n: 'Зелёный', c: '#4fcf7a' }, { id: 'cyan', n: 'Бирюзовый', c: '#2fc4d6' }, { id: 'blue', n: 'Синий', c: '#4d86f0' },
+  { id: 'violet', n: 'Фиолетовый', c: '#a566e8' }, { id: 'pink', n: 'Розовый', c: '#ee6aa7' },
+];
+const SK_STYLES = [
+  { id: 'navy', n: 'Флот', d: 'Серые броненосцы', miss: '#e6f8ff', fire: ['#d83a22', '#ff9a22', '#fff2a0'] },
+  { id: 'pirate', n: 'Пираты', d: 'Деревянные парусники', miss: '#f3e7c4', fire: ['#c8301a', '#ff8a1e', '#ffe08a'] },
+  { id: 'steam', n: 'Стимпанк', d: 'Латунные паровые барки', miss: '#d8d2c6', fire: ['#b8481a', '#f0a030', '#fff0b0'] },
+  { id: 'neon', n: 'Неон', d: 'Светящиеся фрегаты', miss: null, fire: null },
+  { id: 'wolf', n: 'Волчья стая', d: 'Подводные лодки', miss: '#9dffc0', fire: ['#2a1a14', '#8a3a12', '#ffb04a'] },
+];
+const SK_DEF = { style: 'navy', ci: 2 };
+function skStyle(id) { return SK_STYLES.find(s => s.id === id) || SK_STYLES[0]; }
+function skNorm(s) { s = s || {}; const st = SK_STYLES.some(x => x.id === s.style) ? s.style : 'navy', ci = Number.isInteger(s.ci) && s.ci >= 0 && s.ci < SK_COLORS.length ? s.ci : 2; return { style: st, ci }; }
+// ближайший свободный цвет (по кругу): тому, кто выбрал позже, цвет сдвигается
+function skFreeColor(ci, used) {
+  const n = SK_COLORS.length;
+  for (let d = 0; d < n; d++) for (const c of [(ci + d) % n, (ci - d + n) % n]) if (!used.includes(c)) return c;
+  return ci;
+}
+// список скинов -> те же скины, но с уникальными цветами (порядок = приоритет)
+function skUnique(list) {
+  const used = [], out = [];
+  for (const s of list) { const k = skNorm(s), ci = skFreeColor(k.ci, used); used.push(ci); out.push({ style: k.style, ci }); }
+  return out;
+}
+function mySkin() { return skNorm({ style: LS.get('skin.style', 'navy'), ci: LS.get('skin.color', 2) }); }
+function setMySkin(s) { LS.set('skin.style', s.style); LS.set('skin.color', s.ci); }
+const skKey = s => s ? s.style + s.ci : '';
+const skAcc = s => SK_COLORS[(s && s.ci) | 0].c;
+
+function skShade(hex, f) {
+  const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  if (f >= 0) { r += (255 - r) * f; g += (255 - g) * f; b += (255 - b) * f; } else { r *= 1 + f; g *= 1 + f; b *= 1 + f; }
+  return 'rgb(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ')';
+}
+function skPennant(c, x, y, s, col) {
+  c.fillStyle = col; c.beginPath(); c.moveTo(x, y); c.lineTo(x - s * 1.5, y - s * .35); c.lineTo(x - s * 1.1, y + s * .05); c.lineTo(x - s * 1.5, y + s * .45); c.closePath(); c.fill();
+  c.strokeStyle = 'rgba(0,0,0,.45)'; c.lineWidth = .8; c.stroke();
+}
+function skGrad(c, y0, y1, cols) { const g = c.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, cols[0]); g.addColorStop(.5, cols[1]); g.addColorStop(1, cols[2]); return g; }
+
+// общий каркас: рисует в центре спрайта; a — полудлина, b — полуширина
+const SK_DRAW = {
+  pirate(c, len, a, b, u, acc, cs) {
+    const hull = (sx, sy) => { c.beginPath(); c.moveTo((-a + b * .2) * sx, -b * .92 * sy); c.lineTo((-a - 0) * sx, -b * .55 * sy); c.lineTo(-a * sx, b * .55 * sy); c.lineTo((-a + b * .2) * sx, b * .92 * sy);
+      c.quadraticCurveTo((a * .35) * sx, b * 1.02 * sy, a * sx, 0); c.quadraticCurveTo((a * .35) * sx, -b * 1.02 * sy, (-a + b * .2) * sx, -b * .92 * sy); c.closePath(); };
+    hull(1, 1); c.fillStyle = skGrad(c, -b, b, ['#b7824a', '#7c4e27', '#432512']); c.fill(); c.lineWidth = Math.max(1.2, b * .12); c.strokeStyle = '#25140a'; c.stroke();
+    hull(.88, .64); c.fillStyle = skGrad(c, -b * .6, b * .6, ['#dba66a', '#bd8650', '#8e5e33']); c.fill(); c.lineWidth = 1; c.strokeStyle = 'rgba(0,0,0,.4)'; c.stroke();
+    c.save(); hull(.88, .64); c.clip(); c.strokeStyle = 'rgba(60,30,10,.35)'; c.lineWidth = 1; for (let y = -b; y <= b; y += Math.max(2.5, b * .25)) { c.beginPath(); c.moveTo(-a, y); c.lineTo(a, y); c.stroke(); } c.restore();
+    c.strokeStyle = acc; c.lineWidth = Math.max(1.4, b * .12); hull(.97, .9); c.globalAlpha = .9; c.stroke(); c.globalAlpha = 1;
+    // пушечные порты
+    if (len >= 3) { c.fillStyle = '#1b0f06'; const k = len >= 5 ? 5 : len + 1; for (let i = 0; i < k; i++) { const x = -a * .6 + (a * 1.1) * i / Math.max(1, k - 1); c.fillRect(x - 1.2, -b * .78, 2.4, 1.6); c.fillRect(x - 1.2, b * .78 - 1.6, 2.4, 1.6); } }
+    // кормовая надстройка
+    if (len >= 2) { c.fillStyle = '#5e3a1c'; c.fillRect(-a * .96, -b * .38, a * .3, b * .76); c.fillStyle = '#ffd36a'; c.fillRect(-a * .96, -b * .12, 1.6, b * .24); }
+    const masts = len === 1 ? [0] : len === 2 ? [.1] : len === 3 ? [-.1, .42] : len === 4 ? [-.28, .1, .5] : [-.4, 0, .4];
+    masts.forEach((m, i) => {
+      const x = a * m, sw = Math.max(3, u * (len === 1 ? .5 : .62)), sh = b * (len === 1 ? .8 : .98);
+      c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(x + 1.5, 1.5, sw * .4, sh, 0, 0, TAU); c.fill();
+      const g = c.createLinearGradient(x - sw * .5, 0, x + sw * .5, 0); g.addColorStop(0, '#fff8e2'); g.addColorStop(.6, '#efe2bd'); g.addColorStop(1, '#b8a67c');
+      c.fillStyle = g; c.beginPath(); c.moveTo(x - sw * .45, -sh); c.quadraticCurveTo(x + sw * .75, 0, x - sw * .45, sh); c.quadraticCurveTo(x - sw * .15, 0, x - sw * .45, -sh); c.fill();
+      c.strokeStyle = 'rgba(70,45,15,.7)'; c.lineWidth = .9; c.stroke();
+      c.fillStyle = acc; c.globalAlpha = .88; c.beginPath(); c.moveTo(x - sw * .38, -sh * .22); c.quadraticCurveTo(x + sw * .45, 0, x - sw * .38, sh * .22); c.quadraticCurveTo(x - sw * .1, 0, x - sw * .38, -sh * .22); c.fill(); c.globalAlpha = 1;
+      c.fillStyle = '#2b1808'; c.beginPath(); c.arc(x - sw * .3, 0, Math.max(1.2, b * .1), 0, TAU); c.fill();
+      if (i === masts.length - 1) skPennant(c, x - sw * .3, -b * .02, Math.max(3, b * .55), acc);
+    });
+    // бушприт
+    c.strokeStyle = '#3a2210'; c.lineWidth = 1.4; c.beginPath(); c.moveTo(a * .9, 0); c.lineTo(a + b * .35, 0); c.stroke();
+  },
+  steam(c, len, a, b, u, acc, cs) {
+    const hull = (sx, sy) => { const r = b * .75; c.beginPath(); c.moveTo((-a + b * .25) * sx, -b * sy); c.lineTo((a - r) * sx, -b * sy); c.quadraticCurveTo(a * sx, -b * sy, a * sx, 0); c.quadraticCurveTo(a * sx, b * sy, (a - r) * sx, b * sy); c.lineTo((-a + b * .25) * sx, b * sy); c.quadraticCurveTo(-a * sx, b * sy, -a * sx, b * .6 * sy); c.lineTo(-a * sx, -b * .6 * sy); c.quadraticCurveTo(-a * sx, -b * sy, (-a + b * .25) * sx, -b * sy); c.closePath(); };
+    // гребные колёса по бортам
+    if (len >= 2) { const px = -a * .3, pw = Math.max(5, u * 1.2); [-1, 1].forEach(sd => { c.fillStyle = '#3a2a1a'; c.fillRect(px - pw / 2, sd > 0 ? b * .78 : -b * 1.12, pw, b * .34); c.strokeStyle = '#c9a050'; c.lineWidth = .9; for (let k = 0; k < 4; k++) { const xx = px - pw / 2 + pw * k / 3; c.beginPath(); c.moveTo(xx, sd > 0 ? b * .78 : -b * 1.12); c.lineTo(xx, sd > 0 ? b * 1.12 : -b * .78); c.stroke(); } }); }
+    hull(1, 1); c.fillStyle = skGrad(c, -b, b, ['#e8b878', '#b2763a', '#5d3515']); c.fill(); c.lineWidth = Math.max(1.2, b * .1); c.strokeStyle = '#2d1708'; c.stroke();
+    hull(.86, .66); c.fillStyle = skGrad(c, -b * .6, b * .6, ['#7a5a3a', '#5e4128', '#3a2716']); c.fill(); c.strokeStyle = 'rgba(0,0,0,.5)'; c.lineWidth = 1; c.stroke();
+    c.strokeStyle = acc; c.lineWidth = Math.max(1.5, b * .13); hull(.94, .84); c.stroke();
+    c.fillStyle = '#f6d99a'; for (let x = -a + b * .5; x < a - b; x += Math.max(4, u * .55)) { c.beginPath(); c.arc(x, -b * .93, .9, 0, TAU); c.fill(); c.beginPath(); c.arc(x, b * .93, .9, 0, TAU); c.fill(); }
+    // трубы
+    const ch = len <= 2 ? [.05] : len === 3 ? [-.1, .35] : [-.3, .05, .4];
+    ch.forEach(m => { const x = a * m, r = Math.max(3, Math.min(b * .5, u * .55));
+      c.fillStyle = 'rgba(235,235,235,.28)'; c.beginPath(); c.arc(x - r * .7, -r * .5, r * .8, 0, TAU); c.fill();
+      c.fillStyle = '#262626'; c.beginPath(); c.arc(x, 0, r, 0, TAU); c.fill(); c.lineWidth = Math.max(1.4, r * .35); c.strokeStyle = acc; c.stroke();
+      c.fillStyle = '#0a0a0a'; c.beginPath(); c.arc(x, 0, r * .5, 0, TAU); c.fill(); c.fillStyle = 'rgba(255,255,255,.35)'; c.beginPath(); c.arc(x - r * .3, -r * .3, r * .22, 0, TAU); c.fill(); });
+    // котёл-купол и шестерня
+    if (len >= 3) { const x = a * (len === 3 ? .7 : .72); c.fillStyle = skGrad(c, -b * .4, b * .4, ['#ffe6a8', '#c08a42', '#6b4318']); c.beginPath(); c.arc(x, 0, b * .38, 0, TAU); c.fill(); c.strokeStyle = '#2d1708'; c.lineWidth = 1; c.stroke(); }
+    if (len >= 4) { const x = -a * .72, r = b * .34; c.fillStyle = '#3a2f22'; for (let k = 0; k < 8; k++) { const an = k * TAU / 8; c.fillRect(x + Math.cos(an) * r - 1.1, Math.sin(an) * r - 1.1, 2.2, 2.2); } c.beginPath(); c.arc(x, 0, r * .8, 0, TAU); c.fill(); c.fillStyle = acc; c.beginPath(); c.arc(x, 0, r * .3, 0, TAU); c.fill(); }
+    // мачта-антенна с флажком
+    const mx = a * .86; c.strokeStyle = '#2d1708'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(mx, 0); c.lineTo(mx, -b * .5); c.stroke(); skPennant(c, mx, -b * .5, Math.max(3, b * .5), acc);
+  },
+  neon(c, len, a, b, u, acc, cs) {
+    const hull = (sx, sy) => { c.beginPath(); c.moveTo(a * sx, 0); c.lineTo((a - b * 1.3) * sx, -b * .75 * sy); c.lineTo((a - b * 1.9) * sx, -b * sy); c.lineTo((-a + b * .4) * sx, -b * sy); c.lineTo(-a * sx, -b * .5 * sy); c.lineTo((-a + b * .35) * sx, 0); c.lineTo(-a * sx, b * .5 * sy); c.lineTo((-a + b * .4) * sx, b * sy); c.lineTo((a - b * 1.9) * sx, b * sy); c.lineTo((a - b * 1.3) * sx, b * .75 * sy); c.closePath(); };
+    hull(1, 1); c.fillStyle = skGrad(c, -b, b, ['#1d2a55', '#0e1530', '#070b1c']); c.fill();
+    c.save(); c.shadowColor = acc; c.shadowBlur = Math.max(4, cs * .22); c.strokeStyle = acc; c.lineWidth = Math.max(1.6, b * .14); hull(.98, .96); c.stroke(); c.restore();
+    c.strokeStyle = acc; c.globalAlpha = .55; c.lineWidth = 1;
+    const k = Math.max(1, len - 1); for (let i = 0; i < k; i++) { const x = -a * .55 + (a * 1.0) * i / Math.max(1, k - 0.5); c.beginPath(); c.moveTo(x - b * .35, -b * .6); c.lineTo(x + b * .15, 0); c.lineTo(x - b * .35, b * .6); c.stroke(); }
+    c.beginPath(); c.moveTo(-a + b * .6, 0); c.lineTo(a - b * .6, 0); c.stroke(); c.globalAlpha = 1;
+    // кокпит и двигатели
+    c.save(); c.shadowColor = acc; c.shadowBlur = Math.max(3, cs * .18); c.fillStyle = skShade(acc, .65);
+    const cx = a * (len === 1 ? .1 : .38), r = Math.max(2.4, b * .34); c.beginPath(); for (let i = 0; i < 6; i++) { const an = i * TAU / 6; c.lineTo(cx + Math.cos(an) * r * 1.2, Math.sin(an) * r); } c.closePath(); c.fill();
+    c.fillStyle = acc; c.fillRect(-a + b * .15, -b * .55, Math.max(2, b * .3), b * .3); c.fillRect(-a + b * .15, b * .25, Math.max(2, b * .3), b * .3);
+    if (len >= 3) { c.fillRect(-a * .05 - b * .2, -b * .12, b * .5, b * .24); }
+    c.restore();
+    skPennant(c, cx - r, -b * .6, Math.max(3, b * .5), acc);
+  },
+  wolf(c, len, a, b, u, acc, cs) {
+    const hull = (sx, sy) => { const r = Math.min(b * 1.1, a * .9); c.beginPath(); c.moveTo((-a + r) * sx, -b * .82 * sy); c.lineTo((a - r) * sx, -b * .82 * sy); c.quadraticCurveTo(a * sx, -b * .75 * sy, a * sx, 0); c.quadraticCurveTo(a * sx, b * .75 * sy, (a - r) * sx, b * .82 * sy); c.lineTo((-a + r) * sx, b * .82 * sy); c.quadraticCurveTo((-a - b * .1) * sx, b * .7 * sy, (-a + b * .15) * sx, 0); c.quadraticCurveTo((-a - b * .1) * sx, -b * .7 * sy, (-a + r) * sx, -b * .82 * sy); c.closePath(); };
+    // кильватер
+    c.fillStyle = 'rgba(255,255,255,.35)'; c.beginPath(); c.ellipse(-a - b * .05, 0, b * .5, b * .55, 0, 0, TAU); c.fill();
+    hull(1, 1); c.fillStyle = skGrad(c, -b, b, ['#7d98a4', '#43606c', '#1a2c35']); c.fill(); c.lineWidth = Math.max(1.2, b * .09); c.strokeStyle = '#0d181e'; c.stroke();
+    c.save(); hull(1, 1); c.clip(); c.strokeStyle = 'rgba(0,0,0,.28)'; c.lineWidth = 1; for (let x = -a; x < a; x += Math.max(4, u * .6)) { c.beginPath(); c.moveTo(x, -b); c.lineTo(x, b); c.stroke(); } c.restore();
+    c.fillStyle = acc; c.globalAlpha = .9; c.fillRect(a * .52, -b * .6, Math.max(2, b * .22), b * 1.2); if (len >= 3) c.fillRect(-a * .72, -b * .6, Math.max(2, b * .22), b * 1.2); c.globalAlpha = 1;
+    // рубка
+    const tw = Math.max(5, Math.min(a * .9, u * (len === 1 ? 1.1 : 1.5))), th = b * .78, tx = len === 1 ? 0 : a * .1;
+    c.fillStyle = 'rgba(0,0,0,.3)'; rrp(c, tx - tw / 2 + 1.5, -th / 2 + 1.5, tw, th, th * .4); c.fill();
+    c.fillStyle = skGrad(c, -th / 2, th / 2, ['#a8c0cb', '#5d7a86', '#2c424c']); rrp(c, tx - tw / 2, -th / 2, tw, th, th * .4); c.fill(); c.strokeStyle = '#0d181e'; c.lineWidth = 1; c.stroke();
+    c.fillStyle = acc; c.beginPath(); c.arc(tx + tw * .15, 0, Math.max(1.4, th * .2), 0, TAU); c.fill();
+    c.strokeStyle = '#10181c'; c.lineWidth = 1.3; c.beginPath(); c.moveTo(tx - tw * .3, 0); c.lineTo(tx - tw * .3, -b * .9); c.stroke(); skPennant(c, tx - tw * .3, -b * .9, Math.max(3, b * .45), acc);
+    if (len >= 3) { c.fillStyle = '#1e2d34'; c.beginPath(); c.ellipse(-a * .4, 0, Math.max(2.5, u * .5), b * .24, 0, 0, TAU); c.fill(); c.fillRect(-a * .4, -.7, u * .6, 1.4); }
+  },
+};
+const SK_TINT = { 2: 'rgba(12,8,6,.6)', 3: 'rgba(70,255,140,.38)', 4: 'rgba(255,70,50,.42)' };
+function skinSprite(bd, len, st, sk) {
+  const cs = bd.cs, d = bd.d, w = len * cs - 4, h = cs - 4, c0 = cv2(w * d, h * d), c = c0.getContext('2d');
+  c.scale(d, d); c.translate(w / 2, h / 2);
+  const a = w / 2, b = h / 2 * .92, u = cs * .3, acc = skAcc(sk);
+  SK_DRAW[sk.style](c, len, a, b, u, acc, cs);
+  c.globalAlpha = .2; c.fillStyle = '#fff'; c.beginPath(); c.ellipse(-a * .1, -b * .58, a * .7, b * .1, 0, 0, TAU); c.fill(); c.globalAlpha = 1;
+  if (SK_TINT[st]) { c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = 'source-atop'; c.fillStyle = SK_TINT[st]; c.fillRect(0, 0, c0.width, c0.height); c.globalCompositeOperation = 'source-over'; }
+  return c0;
+}
+// палитра огня/промаха под скин
+function skFire(sk) { const s = skStyle(sk && sk.style); if (s.fire) return s.fire; const a = skAcc(sk); return [a, skShade(a, .45), '#ffffff']; }
+function skMiss(sk) { const s = skStyle(sk && sk.style); return s.miss || skShade(skAcc(sk), .5); }
+// миниатюра для выбора: один корабль длины len
+function skThumb(sk, len, cs) {
+  const d = Math.min(window.devicePixelRatio || 1, 3), bd = { cs, d, spr: {}, sk }, spr = shipSpr(bd, len, 0), cv = document.createElement('canvas');
+  cv.width = spr.width + 8 * d; cv.height = spr.height + 8 * d; cv.style.width = cv.width / d + 'px'; cv.style.height = cv.height / d + 'px';
+  const c = cv.getContext('2d'); c.drawImage(spr, 4 * d, 4 * d); return cv;
+}
+
+</script>
 <script>
 // ===== Интерфейс, отрисовка, сеть =====
 const $ = id => document.getElementById(id);
@@ -488,8 +718,8 @@ const Snd = {
   win() { [523, 659, 784, 1047].forEach((f, i) => this.tone(f, .35, 'triangle', .2, f, i * 140)); },
   lose() { [392, 330, 262, 196].forEach((f, i) => this.tone(f, .45, 'sawtooth', .12, f * .98, i * 220)); },
 };
-function setMute(m) { muted = m; LS.set('mb:mute', m); ['b-mute1', 'b-mute2', 'b-mute3'].forEach(i => { $(i).textContent = m ? '🔇' : '🔊'; }); }
-['b-mute1', 'b-mute2', 'b-mute3'].forEach(i => $(i).onclick = () => { Snd.init(); setMute(!muted); Snd.click(); });
+function setMute(m) { muted = m; LS.set('mb:mute', m); ['b-mute1', 'b-mute2', 'b-mute3', 'mp-mute'].forEach(i => { $(i).textContent = m ? '🔇' : '🔊'; }); }
+['b-mute1', 'b-mute2', 'b-mute3', 'mp-mute'].forEach(i => $(i).onclick = () => { Snd.init(); setMute(!muted); Snd.click(); });
 document.addEventListener('pointerdown', () => Snd.init(), { passive: true });
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('dblclick', e => e.preventDefault());
@@ -500,7 +730,7 @@ function show(name) {
   if (name !== screen) { wipeEl.classList.remove('go'); void wipeEl.offsetWidth; wipeEl.classList.add('go'); }
   screen = name;
   document.querySelectorAll('.scr').forEach(s => s.classList.toggle('on', s.id === 's-' + name));
-  if (name === 'battle' || name === 'place') { layout(); setTimeout(layout, 60); }
+  if (name === 'battle' || name === 'place' || name === 'skins' || name === 'mp') { layout(); setTimeout(layout, 60); }
   if (name === 'levels') renderLevels();
   if (name === 'title') renderTitle();
 }
@@ -603,7 +833,7 @@ function cellAt(cv, e) {
   return { x: Math.floor((px - g.o) / g.cs), y: Math.floor((py - g.o) / g.cs), fx: (px - g.o) / g.cs, fy: (py - g.o) / g.cs };
 }
 cPlace.addEventListener('pointerdown', e => {
-  if (!G || (G.mode === 'net' && G.rdy)) return; e.preventDefault();
+  if (!G || ((G.mode === 'net' || G.mode === 'mp') && G.rdy)) return; e.preventDefault();
   const c = cellAt(cPlace, e), i = shipAt(c.x, c.y); if (i < 0) return;
   if (drag) return; cPlace.setPointerCapture(e.pointerId);
   const s = G.ships[i]; drag = { i, ox: c.x - s.x, oy: c.y - s.y, orig: { ...s }, moved: false, sx: e.clientX, sy: e.clientY, pid: e.pointerId };
@@ -793,7 +1023,7 @@ let lastP = null;
 Duo.init({ game: 'morskoy-boy', accent: '#d9b25f' });
 function netSync() {
   if (mode !== 'net') return;
-  const o = { sel: mySel, prog };
+  const o = { sel: mySel, prog, sk: [mySkin().style, mySkin().ci] };
   if (G && G.mode === 'net') { o.m = G.ep; o.rdy = G.rdy ? 1 : 0; o.mv = S[role].mv; o.an = S[role].an; o.rev = G.over ? G.ships : null; } else o.m = 0;
   Duo.set(o);
 }
@@ -811,6 +1041,16 @@ function processIncoming() {
   const opp = 1 - role, pm = S[opp].mv; let ch = false;
   while (S[role].an.length < pm.length) { S[role].an.push(resolveMove(G.board, pm[S[role].an.length])); ch = true; }
   if (ch) { netSyncBurst(); persist(); }
+}
+// скины двух сторон боя 1×1: [мой, соперника]; одинаковый цвет — позже выбравший (гость/игрок 2) сдвигается
+function skinsNow() {
+  const mine = mySkin(); let list, idx = 0;
+  if (!G) return [mine, mine];
+  if (G.mode === 'mp') { const k = typeof mpSkinOf === 'function' && typeof M !== 'undefined' && M ? mpSkinOf(G.pl) : mine; return [k, k]; }
+  if (G.mode === 'net') { const p = Duo.partner(), ps = skNorm(p && p.sk ? { style: p.sk[0], ci: p.sk[1] } : { style: 'pirate', ci: 0 }); list = role === 0 ? [mine, ps] : [ps, mine]; idx = role; }
+  else if (G.mode === 'ai') list = [mine, { style: SK_STYLES[(L ? L.id : 0) % 4 + 1].id, ci: 0 }];
+  else { list = [mine, { style: SK_STYLES[(SK_STYLES.findIndex(x => x.id === mine.style) + 1) % SK_STYLES.length].id, ci: (mine.ci + 4) % SK_COLORS.length }]; idx = screen === 'place' ? (G.pl | 0) : (G.view | 0); }
+  const u = skUnique(list); return [u[idx], u[1 - idx]];
 }
 let pSig = '';
 function onPartner(p, force) {
@@ -882,6 +1122,7 @@ const box = e => ({ width: e.offsetWidth, height: e.offsetHeight });
 function layoutOnce() {
   if (screen === 'place') {
     const r = box($('cPlace').parentElement); fitCanvas(cPlace, Math.min(r.width, r.height) - 2);
+  } else if (XLAYOUT && XLAYOUT(screen)) {
   } else if (screen === 'battle') {
     const body = document.querySelector('#s-battle .body');
     if (mqLand.matches) { if (body.style.getPropertyValue('--erow')) body.style.removeProperty('--erow'); const br = box(body), E = Math.floor(Math.min(br.height - 22, br.width * .6)); if (body.style.getPropertyValue('--ecol') !== E + 'px') body.style.setProperty('--ecol', E + 'px'); }
@@ -898,7 +1139,7 @@ function layoutOnce() {
 let layoutQ = 0;
 function layoutSoon() { if (layoutQ) return; layoutQ = requestAnimationFrame(() => { layoutQ = 0; layout(); }); }
 if (window.visualViewport) window.visualViewport.addEventListener('resize', layoutSoon);
-document.addEventListener('pointerdown', () => { if (screen === 'place' || screen === 'battle') layout(); }, true);  // размеры актуальны в момент касания (после поворота resize на iPhone приходит рано)
+document.addEventListener('pointerdown', () => { if (screen !== 'title' && screen !== 'levels') layout(); }, true);  // размеры актуальны в момент касания (после поворота resize на iPhone приходит рано)
 window.addEventListener('resize', layoutSoon); window.addEventListener('orientationchange', () => { layoutSoon(); setTimeout(layout, 250); });
 if (window.ResizeObserver) { const ro = new ResizeObserver(layoutSoon); ['eBox', 'mBox'].forEach(i => ro.observe($(i))); ro.observe($('cPlace').parentElement); ro.observe(document.querySelector('#s-battle .body')); ro.observe(document.body); ['.btns', '.hdr', '.lower'].forEach(q => { const e = document.querySelector('#s-battle ' + q); if (e) ro.observe(e); }); }
 // пинг связи: мелко, раз в секунду, только в сетевой игре
@@ -974,7 +1215,8 @@ function mkBD(cv, enemy) {
 }
 let BDe, BDm, BDp;
 function initBD() { BDe = mkBD($('cEn'), true); BDm = mkBD($('cMy'), false); BDp = mkBD($('cPlace'), false); }
-function bdOf(cv) { return cv === BDe.cv ? BDe : cv === BDm.cv ? BDm : BDp; }
+const BDX = [];
+function bdOf(cv) { for (let i = 0; i < BDX.length; i++) if (BDX[i].cv === cv) return BDX[i]; return cv === BDe.cv ? BDe : cv === BDm.cv ? BDm : BDp; }
 function kick(bd, i, v) { if (i >= 0 && i < 20) bd.sv[i] += v; }
 function stepSprings(bd) {
   for (let i = 0; i < 20; i++) { bd.spp[i] = bd.sp[i]; bd.sv[i] += (-190 * bd.sp[i] - 9.5 * bd.sv[i]) * STEP; bd.sp[i] += bd.sv[i] * STEP; }
@@ -983,7 +1225,7 @@ function stepSprings(bd) {
 function rrp(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
 
 function prepBD(bd) {
-  const cv = bd.cv, key = L.id + '|' + cv._s + '|' + cv._d + '|' + (bd.enemy ? 1 : 0) + '|' + (bd === BDp ? 1 : 0);
+  const cv = bd.cv, key = L.id + '|' + cv._s + '|' + cv._d + '|' + (bd.enemy ? 1 : 0) + '|' + (bd === BDp ? 1 : 0) + '|' + skKey(bd.sk);
   if (bd.key === key) return;
   bd.key = key; const g = geo(cv); bd.S = g.S; bd.cs = g.cs; bd.ox = g.o; bd.d = cv._d; bd.spr = {};
   bd.fMark = 'bold ' + (g.cs * .5) + 'px "Russo One",sans-serif'; bd.fQ = 'bold ' + (g.cs * .4) + 'px sans-serif'; bd.fFog = (g.cs * .9) + 'px sans-serif';
@@ -1077,7 +1319,8 @@ const PAL = [
 ];
 function shipSpr(bd, len, st) {
   const key = len * 8 + st; if (bd.spr[key]) return bd.spr[key];
-  const cs = bd.cs, d = bd.d, w = len * cs - 4, h = cs - 4, c0 = cv2(w * d, h * d), c = c0.getContext('2d'), P = PAL[st]; c.scale(d, d); c.translate(w / 2, h / 2);
+  const sk = bd.sk || SK_DEF; if (sk.style !== 'navy') return (bd.spr[key] = skinSprite(bd, len, st, sk));
+  const cs = bd.cs, d = bd.d, w = len * cs - 4, h = cs - 4, c0 = cv2(w * d, h * d), c = c0.getContext('2d'), P = st === 0 || st === 1 ? { ...PAL[st], ac: skAcc(sk) } : PAL[st]; c.scale(d, d); c.translate(w / 2, h / 2);
   const a = w / 2, b = h / 2 * .92;
   const hull = (sx, sy) => { c.beginPath(); c.moveTo((-a + b * .35) * sx, -b * sy); c.lineTo((a - b * 1.5) * sx, -b * sy); c.quadraticCurveTo((a - b * .25) * sx, -b * .8 * sy, a * sx, 0); c.quadraticCurveTo((a - b * .25) * sx, b * .8 * sy, (a - b * 1.5) * sx, b * sy); c.lineTo((-a + b * .35) * sx, b * sy); c.quadraticCurveTo(-a * sx, b * .7 * sy, -a * sx, 0); c.quadraticCurveTo(-a * sx, -b * .7 * sy, (-a + b * .35) * sx, -b * sy); c.closePath(); };
   let gr = c.createLinearGradient(0, -b, 0, b); gr.addColorStop(0, P.h[0]); gr.addColorStop(.5, P.h[1]); gr.addColorStop(1, P.h[2]);
@@ -1099,6 +1342,7 @@ function shipSpr(bd, len, st) {
     fun(-a * .18, u * .85); if (len >= 5) fun(-a * .38, u * .8); tur(-a * .68, u);
     c.strokeStyle = P.sh; c.lineWidth = 1.4; c.beginPath(); c.moveTo(a * .1, 0); c.lineTo(a * .1, -b * 1.0); c.moveTo(a * .1 - u * .5, -b * .55); c.lineTo(a * .1 + u * .5, -b * .55); c.stroke();
   }
+  if (st < 2) skPennant(c, len === 1 ? -u * .9 : len === 2 ? -u * .5 : a * .1, len === 1 ? -b * .5 : -b * .9, Math.max(3, b * .5), skAcc(sk));
   // светлое пятно сверху — «лак»
   c.globalAlpha = .22; c.fillStyle = '#fff'; c.beginPath(); c.ellipse(-a * .1, -b * .55, a * .75, b * .13, 0, 0, TAU); c.fill(); c.globalAlpha = 1;
   bd.spr[key] = c0; return c0;
@@ -1182,12 +1426,12 @@ function drawShip(bd, s, st, i, a, bobAmp) {
   c.restore();
 }
 function drawFlame(c, bd, x, y, k, a) {
-  const cs = bd.cs, f = Math.sin(Tr * 9 + k * 1.7) * .1, g = Math.sin(Tr * 13 + k) * .06;
+  const fp = skFire(bd.sk), cs = bd.cs, f = Math.sin(Tr * 9 + k * 1.7) * .1, g = Math.sin(Tr * 13 + k) * .06;
   c.globalCompositeOperation = 'lighter'; c.globalAlpha = .75 + g; const gs = cs * 1.5; c.drawImage(SPR.fireO, x - gs / 2, y - gs / 2, gs, gs); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
   c.fillStyle = 'rgba(25,16,14,.6)'; c.beginPath(); c.arc(x, y + cs * .08, cs * .28, 0, TAU); c.fill();
-  c.fillStyle = '#d83a22'; c.beginPath(); c.moveTo(x - cs * .22, y + cs * .26); c.quadraticCurveTo(x - cs * (.34 + f), y - cs * .05, x + g * cs, y - cs * (.42 + f)); c.quadraticCurveTo(x + cs * (.32 - f), y, x + cs * .22, y + cs * .26); c.closePath(); c.fill();
-  c.fillStyle = '#ff9a22'; c.beginPath(); c.moveTo(x - cs * .14, y + cs * .26); c.quadraticCurveTo(x - cs * .2, y, x + f * cs, y - cs * (.25 + f)); c.quadraticCurveTo(x + cs * .2, y + cs * .05, x + cs * .14, y + cs * .26); c.closePath(); c.fill();
-  c.fillStyle = '#fff2a0'; c.beginPath(); c.moveTo(x - cs * .06, y + cs * .26); c.quadraticCurveTo(x - cs * .08, y + cs * .08, x + f * cs * .5, y - cs * (.05 + f * .6)); c.quadraticCurveTo(x + cs * .1, y + cs * .12, x + cs * .06, y + cs * .26); c.closePath(); c.fill();
+  c.fillStyle = fp[0]; c.beginPath(); c.moveTo(x - cs * .22, y + cs * .26); c.quadraticCurveTo(x - cs * (.34 + f), y - cs * .05, x + g * cs, y - cs * (.42 + f)); c.quadraticCurveTo(x + cs * (.32 - f), y, x + cs * .22, y + cs * .26); c.closePath(); c.fill();
+  c.fillStyle = fp[1]; c.beginPath(); c.moveTo(x - cs * .14, y + cs * .26); c.quadraticCurveTo(x - cs * .2, y, x + f * cs, y - cs * (.25 + f)); c.quadraticCurveTo(x + cs * .2, y + cs * .05, x + cs * .14, y + cs * .26); c.closePath(); c.fill();
+  c.fillStyle = fp[2]; c.beginPath(); c.moveTo(x - cs * .06, y + cs * .26); c.quadraticCurveTo(x - cs * .08, y + cs * .08, x + f * cs * .5, y - cs * (.05 + f * .6)); c.quadraticCurveTo(x + cs * .1, y + cs * .12, x + cs * .06, y + cs * .26); c.closePath(); c.fill();
 }
 function drawBoard(bd, a) {
   const cv = bd.cv; if (!cv._s || !L) return; prepBD(bd);
@@ -1219,7 +1463,7 @@ function drawBoard(bd, a) {
   if (mk) {
     for (let k = 0; k < n * n; k++) {
       const v = mk.grid[k]; if (!v) continue; const x = k % n, y = Math.floor(k / n), cx = ox + (x + .5) * cs, cy = ox + (y + .5) * cs;
-      if (v === 1) { for (let q = 0; q < 2; q++) { const fr = ((Tr * .55 + k * .37 + q * .5) % 1); c.globalAlpha = (1 - fr) * .6; c.strokeStyle = '#e6f8ff'; c.lineWidth = 1.2; c.beginPath(); c.arc(cx, cy, cs * (.08 + fr * .26), 0, TAU); c.stroke(); } c.globalAlpha = .55; c.fillStyle = '#fff'; c.beginPath(); c.arc(cx, cy, cs * .045, 0, TAU); c.fill(); c.globalAlpha = 1; }
+      if (v === 1) { for (let q = 0; q < 2; q++) { const fr = ((Tr * .55 + k * .37 + q * .5) % 1); c.globalAlpha = (1 - fr) * .6; c.strokeStyle = skMiss(bd.sk); c.lineWidth = 1.2; c.beginPath(); c.arc(cx, cy, cs * (.08 + fr * .26), 0, TAU); c.stroke(); } c.globalAlpha = .55; c.fillStyle = skMiss(bd.sk); c.beginPath(); c.arc(cx, cy, cs * .045, 0, TAU); c.fill(); c.globalAlpha = 1; }
       else if (v === 5) { c.globalAlpha = .3; c.fillStyle = '#fff'; c.beginPath(); c.arc(cx, cy, cs * .06, 0, TAU); c.fill(); c.globalAlpha = 1; }
       else if (v === 4) { c.fillStyle = 'rgba(10,6,5,.4)'; c.beginPath(); c.arc(cx, cy, cs * .38, 0, TAU); c.fill(); c.drawImage(mineSpr(bd, true), cx - cs / 2, cy - cs / 2, cs, cs); }
       else if (v === 2) drawFlame(c, bd, cx, cy, k, a);
@@ -1354,6 +1598,7 @@ function drawBG(title) {
 }
 
 // ---------- главный цикл ----------
+let XSIM = null, XDRAW = null, XLAYOUT = null;
 function simStep() {
   simT += STEP;
   for (let i = 0; i < EF.length; i++) { const e = EF[i]; if (e.on) { if (!e.fired && simT >= e.t0) { e.fired = 1; fireEff(e); } if (simT > e.t0 + e.dur + .1) e.on = 0; } }
@@ -1362,6 +1607,7 @@ function simStep() {
     stepPool(BDe.pool); stepPool(BDm.pool); stepSprings(BDe); stepSprings(BDm);
     if (V.valid) { emit(BDe, V.hitE, V.nE, V.sunkE, V.nSE); emit(BDm, V.hitM, V.nM, V.sunkM, V.nSM); }
   } else if (sc === 'place') { stepPool(BDp.pool); stepSprings(BDp); }
+  else if (XSIM && XSIM(sc)) { /* экраны скинов / 3–6 игроков */ }
   else if (sc === 'title') {
     stepPool(BG.pool); if (BG.ftx && Math.random() < .18) spawn(BG.pool, 0, BG.ftx, BG.fty, 14 + Math.random() * 8, -8 - Math.random() * 6, -1, 3 + Math.random() * 2, 34, .5, 0);
   }
@@ -1375,6 +1621,8 @@ function gfxFrame(ts) {
     if (!BDe) return;
     const sc = screen;
     drawBG(sc === 'title');
+    if (XDRAW && XDRAW(sc)) return;
+    if (G && (sc === 'place' || sc === 'battle')) { const sn = skinsNow(); BDp.sk = BDm.sk = sn[0]; BDe.sk = sn[1]; }
     if (sc === 'place' && G && BDp.cv._s) {
       DO.ships = G.ships; DO.shipSt = 0; DO.mines = null; DO.marks = null; DO.sel = null; DO.fog = null; DO.ghost = ghost; DO.radar = false; DO.wr = null; drawBoard(BDp, aG);
     } else if (sc === 'battle' && G && G.phase === 'battle' && BDe.cv._s && BDm.cv._s && refreshV()) {
@@ -1392,6 +1640,605 @@ function gfxInit() {
   bgBuild(); requestAnimationFrame(gfxFrame);
 }
 gfxInit();
+
+</script>
+<script>
+// ===== Экран «Скины»: выбор стиля и цвета с живым предпросмотром =====
+const cSkin = $('cSkin'), BDs = mkBD(cSkin, false); BDX.push(BDs);
+const SKP = {
+  L: { id: 2001, name: 'Превью', n: 7, fleet: [4, 3, 2, 2, 1], isl: 0, mines: 0, radar: 0, fog: 0, salvo: 0, ai: 1 },
+  ships: [{ x: 0, y: 0, h: true, len: 4 }, { x: 1, y: 2, h: true, len: 3 }, { x: 5, y: 1, h: false, len: 2 }, { x: 0, y: 4, h: false, len: 2 }, { x: 3, y: 5, h: true, len: 1 }],
+  wr: [{ x: 4, y: 5, len: 2, h: true }],
+  marks: null,
+};
+(function () {
+  const n = 7, g = new Array(n * n).fill(0);
+  [[4, 0], [6, 0], [6, 4], [2, 4], [1, 6], [6, 6], [3, 3]].forEach(([x, y]) => { g[y * n + x] = 1; });
+  g[2 * n + 2] = 2; g[0 * n + 3] = 2; g[5 * n + 4] = 3; g[5 * n + 5] = 3;
+  SKP.marks = { grid: g, radar: [], sunk: [[[4, 5], [5, 5]]], pending: [] };
+})();
+let skPrevSk = null;
+function skTouchLayout() { return screen === 'skins'; }
+function renderSkins() {
+  const cur = mySkin(), cards = $('sk-cards'), cols = $('sk-cols');
+  cards.innerHTML = ''; cols.innerHTML = '';
+  SK_STYLES.forEach(st => {
+    const b = document.createElement('button'); b.className = 'skc' + (st.id === cur.style ? ' on' : '');
+    b.appendChild(skThumb({ style: st.id, ci: cur.ci }, 3, 20));
+    const t = document.createElement('b'); t.textContent = st.n; b.appendChild(t);
+    b.onclick = () => { Snd.click(); setMySkin({ style: st.id, ci: mySkin().ci }); skChanged(); };
+    cards.appendChild(b);
+  });
+  SK_COLORS.forEach((c, i) => {
+    const b = document.createElement('button'); b.className = 'skcol' + (i === cur.ci ? ' on' : ''); b.style.background = c.c; b.setAttribute('aria-label', c.n); b.textContent = i === cur.ci ? '✓' : '';
+    b.onclick = () => { Snd.click(); setMySkin({ style: mySkin().style, ci: i }); skChanged(); };
+    cols.appendChild(b);
+  });
+  const s = skStyle(cur.style); $('sk-sub').textContent = s.n + ' · ' + SK_COLORS[cur.ci].n;
+  BDs.sk = cur; BDs.key = '';
+}
+function skChanged() { renderSkins(); kickAll(); if (typeof netSync === 'function') netSync(); }
+function kickAll() { for (let i = 0; i < 5; i++) kick(BDs, i, 5 + i); }
+$('b-skins').onclick = () => { Snd.init(); Snd.click(); show('skins'); renderSkins(); };
+$('sk-back').onclick = () => { Snd.click(); show('title'); };
+XLAYOUT = (sc) => {
+  if (sc === 'skins') { const r = box($('skBox')); fitCanvas(cSkin, Math.min(r.width, r.height) - 2); return true; }
+  return mpLayout ? mpLayout(sc) : false;
+};
+let mpLayout = null, mpSim = null, mpDraw = null;
+XSIM = (sc) => {
+  if (sc === 'skins') { stepPool(BDs.pool); stepSprings(BDs); const sv = L; L = SKP.L; const hits = [2 * 7 + 2, 0 * 7 + 3]; emit(BDs, hits, 2, [5 * 7 + 4, 5 * 7 + 5], 2); L = sv; return true; }
+  return mpSim ? mpSim(sc) : false;
+};
+XDRAW = (sc) => {
+  if (sc === 'skins') {
+    if (!cSkin._s) return true;
+    const sv = L; L = SKP.L; BDs.sk = mySkin();
+    DO.ships = SKP.ships; DO.shipSt = 0; DO.mines = null; DO.shotSet = null; DO.marks = SKP.marks; DO.sel = null; DO.fog = null; DO.ghost = null; DO.radar = false; DO.wr = SKP.wr;
+    try { drawBoard(BDs, aG); } finally { L = sv; }
+    return true;
+  }
+  return mpDraw ? mpDraw(sc) : false;
+};
+
+</script>
+<script>
+// ===== 3–6 игроков: чистая логика (без DOM). Ходом, выстрелами и скрытыми флотами заведует «хост» =====
+// Правила по числу игроков: поле и флот уменьшаются, чтобы партия шла ~10–20 минут
+const MP_RULES = {
+  3: { n: 9, fleet: [4, 3, 3, 2, 2, 1] },
+  4: { n: 8, fleet: [3, 3, 2, 2, 1, 1] },
+  5: { n: 7, fleet: [3, 2, 2, 2, 1, 1] },
+  6: { n: 6, fleet: [3, 2, 2, 1, 1] },
+};
+const MP_MAXSHOTS = 3;           // выстрелов за ход: 1 + не более 2 бонусных за попадания
+function mpLevel(cnt) { const r = MP_RULES[Math.max(3, Math.min(6, cnt))]; return { id: 3000 + r.n, name: 'Большой флот', n: r.n, fleet: r.fleet.slice(), isl: 0, mines: 0, radar: 0, fog: 0, salvo: 0, ai: 1 }; }
+// players: [{slot,name,skin,team,ai}] ; mode 'ffa' | 'teams'
+function mpNew(players, mode) {
+  const L = mpLevel(players.length), pl = players.map((p, i) => ({ slot: p.slot, name: p.name, skin: p.skin, ai: !!p.ai, team: mode === 'teams' ? (p.team | 0) : i }));
+  const marks = {}, left = {};
+  pl.forEach(p => { marks[p.slot] = { grid: new Array(L.n * L.n).fill(0), sunk: [] }; left[p.slot] = L.fleet.length; });
+  const g = { L, mode, pl, marks, left, out: {}, ready: {}, phase: 'place', turn: null, tp: {}, over: false, winner: null, shots: 0, seq: 0 };
+  return g;
+}
+const mpP = (g, slot) => g.pl.find(p => p.slot === slot);
+const mpAlive = (g, slot) => !g.out[slot];
+const mpTeamOf = (g, slot) => mpP(g, slot).team;
+const mpFoes = (g, slot) => g.pl.filter(p => p.team !== mpP(g, slot).team && mpAlive(g, p.slot)).map(p => p.slot);
+function mpMax(g, slot) {
+  if (g.mode !== 'teams') return MP_MAXSHOTS;
+  const sz = {}; g.pl.forEach(p => { sz[p.team] = (sz[p.team] || 0) + 1; });
+  const mine = sz[mpTeamOf(g, slot)], big = Math.max(...Object.values(sz));
+  return MP_MAXSHOTS + (mine < big ? 1 : 0);   // меньшая команда получает +1 выстрел за ход
+}
+// в неравных командах меньшая в каждом втором своём ходу стреляет минимум дважды
+function mpMkTurn(g, shooter) {
+  if (shooter < 0) return { shooter, n: 0, min: 1 };
+  const t = mpTeamOf(g, shooter), sz = {}; g.pl.forEach(p => { sz[p.team] = (sz[p.team] || 0) + 1; });
+  g.tc = g.tc || {}; g.tc[t] = (g.tc[t] || 0) + 1;
+  return { shooter, n: 0, min: g.mode === 'teams' && sz[t] < Math.max(...Object.values(sz)) && (Math.max(...Object.values(sz)) >= 2 * sz[t] || g.tc[t] % 2 === 0) ? 2 : 1 };
+}
+// порядок команд: по первому игроку; внутри команды стреляют по очереди
+function mpTeams(g) { const o = []; g.pl.forEach(p => { if (!o.includes(p.team)) o.push(p.team); }); return o; }
+function mpAliveTeams(g) { return mpTeams(g).filter(t => g.pl.some(p => p.team === t && mpAlive(g, p.slot))); }
+function mpFirst(g, rnd) {
+  const ts = mpTeams(g), t = ts[Math.floor((rnd || Math.random)() * ts.length)];
+  return mpPickShooter(g, t);
+}
+function mpPickShooter(g, team) {
+  const mem = g.pl.filter(p => p.team === team && mpAlive(g, p.slot)); if (!mem.length) return -1;
+  const last = g.tp[team]; let i = last === undefined ? -1 : mem.findIndex(p => p.slot === last);
+  const s = mem[(i + 1) % mem.length].slot; g.tp[team] = s; return s;
+}
+function mpNextShooter(g, from) {
+  const ts = mpTeams(g), at = ts.indexOf(mpTeamOf(g, from));
+  for (let k = 1; k <= ts.length; k++) { const t = ts[(at + k) % ts.length]; const s = mpPickShooter(g, t); if (s >= 0) return s; }
+  return -1;
+}
+// победитель: ffa — последний с флотом; teams — единственная живая команда
+function mpCheckOver(g) {
+  const at = mpAliveTeams(g);
+  if (at.length <= 1) { g.over = true; g.phase = 'over'; g.turn = null; g.winner = at.length ? at[0] : null; return true; }
+  return false;
+}
+function mpStart(g, rnd) { g.phase = 'battle'; g.turn = mpMkTurn(g, mpFirst(g, rnd)); }
+// выстрел: возвращает {ok, r, cells, out, next, over}; ходом управляет только хост
+function mpFire(g, boards, sh, tg, x, y) {
+  if (g.phase !== 'battle' || !g.turn || g.turn.shooter !== sh) return { ok: false, why: 'turn' };
+  if (!mpAlive(g, sh) || !mpP(g, tg) || !mpFoes(g, sh).includes(tg)) return { ok: false, why: 'target' };
+  const L = g.L, b = boards[tg]; if (x < 0 || y < 0 || x >= L.n || y >= L.n || b.shot.has(y * L.n + x)) return { ok: false, why: 'cell' };
+  const o = shootAt(b, x, y), m = g.marks[tg], k = y * L.n + x; let out = false;
+  m.grid[k] = o.r === 0 ? 1 : 2;
+  if (o.r === 2) { m.sunk.push(o.cells); o.cells.forEach(([cx, cy]) => { m.grid[cy * L.n + cx] = 3; }); g.left[tg]--; if (g.left[tg] <= 0) { g.out[tg] = true; out = true; } }
+  g.seq++; const res = { ok: true, sh, tg, x, y, r: o.r, cells: o.cells || null, out, seq: g.seq };
+  const hit = o.r === 1 || o.r === 2;
+  g.turn.n++;
+  if (mpCheckOver(g)) res.over = true;
+  else if ((hit ? g.turn.n < mpMax(g, sh) : g.turn.n < g.turn.min) && mpAlive(g, sh) && mpFoes(g, sh).length) { /* ходит дальше */ }
+  else g.turn = mpMkTurn(g, mpNextShooter(g, sh));
+  res.turn = g.turn; res.winner = g.winner;
+  return res;
+}
+// применить результат на клиенте (публичные данные)
+function mpApply(g, r) {
+  const L = g.L, m = g.marks[r.tg], k = r.y * L.n + r.x; m.grid[k] = r.r === 0 ? 1 : 2;
+  if (r.r === 2 && r.cells) { m.sunk.push(r.cells); r.cells.forEach(([cx, cy]) => { m.grid[cy * L.n + cx] = 3; }); g.left[r.tg]--; }
+  if (r.out) g.out[r.tg] = true;
+  g.seq = r.seq; g.turn = r.turn;
+  if (r.over) { g.over = true; g.phase = 'over'; g.winner = r.winner; g.turn = null; }
+}
+// пропуск хода (игрок отключился / хост пропустил)
+function mpSkip(g) { if (g.phase !== 'battle' || !g.turn) return null; g.turn = mpMkTurn(g, mpNextShooter(g, g.turn.shooter)); g.seq++; return g.turn; }
+// ---------- ИИ: только публичные отметки ----------
+function mpAIFire(g, sh, rnd) {
+  rnd = rnd || Math.random; const L = g.L, n = L.n, foes = mpFoes(g, sh); if (!foes.length) return null;
+  // сначала добиваем раненых
+  let best = null;
+  for (const tg of foes) {
+    const gr = g.marks[tg].grid, cand = [];
+    for (let k = 0; k < n * n; k++) if (gr[k] === 2) {
+      const x = k % n, y = (k / n) | 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= n || Y >= n || gr[Y * n + X] !== 0) continue;
+        // продолжаем линию, если рядом уже есть попадание
+        const ax = x - dx, ay = y - dy, line = ax >= 0 && ay >= 0 && ax < n && ay < n && gr[ay * n + ax] === 2;
+        cand.push({ x: X, y: Y, w: line ? 4 : 1 });
+      }
+    }
+    if (cand.length) { const tot = cand.reduce((a, c) => a + c.w, 0); let t = rnd() * tot, c = cand[0]; for (const q of cand) { t -= q.w; if (t <= 0) { c = q; break; } } if (!best || c.w > best.w) best = { tg, x: c.x, y: c.y, w: c.w }; }
+  }
+  if (best) return best;
+  const tg = foes[Math.floor(rnd() * foes.length)], gr = g.marks[tg].grid, par = [], any = [];
+  for (let k = 0; k < n * n; k++) if (gr[k] === 0) { const x = k % n, y = (k / n) | 0; any.push({ x, y }); if ((x + y) % 2 === 0) par.push({ x, y }); }
+  const pool = par.length && rnd() < .8 ? par : any; if (!pool.length) return null;
+  const c = pool[Math.floor(rnd() * pool.length)]; return { tg, x: c.x, y: c.y };
+}
+function mpPlaceOk(L, ships) {
+  if (!Array.isArray(ships) || ships.length !== L.fleet.length) return false;
+  const lens = ships.map(s => s && s.len | 0).sort((a, b) => b - a), want = L.fleet.slice().sort((a, b) => b - a);
+  if (lens.join() !== want.join()) return false;
+  const isl = new Set();
+  for (let i = 0; i < ships.length; i++) { const s = ships[i]; if (typeof s.h !== 'boolean' || !Number.isInteger(s.x) || !Number.isInteger(s.y)) return false; if (!okShip(L, isl, ships, s, i)) return false; }
+  return true;
+}
+// «хост»: полная партия в одном объекте. out(to, type, data) — доставка: to = null (всем) или слот
+function mpHost(g, rnd, out) {
+  const H = { g, boards: {}, rnd, out };
+  H.setFleet = (slot, ships) => {
+    if (g.phase !== 'place' || g.ready[slot] || !mpPlaceOk(g.L, ships)) return false;
+    H.boards[slot] = makeBoard(g.L, ships.map(s => ({ x: s.x, y: s.y, h: s.h, len: s.len })), rnd); g.ready[slot] = true; out(null, 'rdy', { slot }); H.tryGo(); return true;
+  };
+  H.auto = slot => H.setFleet(slot, placeFleet(g.L, rnd));
+  H.tryGo = () => {
+    if (g.phase !== 'place' || !g.pl.every(p => g.ready[p.slot])) return false;
+    mpStart(g, rnd); out(null, 'go', { turn: g.turn, seq: g.seq });
+    // командам — флоты товарищей (приватно)
+    if (g.mode === 'teams') g.pl.forEach(p => { const mates = {}; g.pl.forEach(q => { if (q.team === p.team && q.slot !== p.slot) mates[q.slot] = H.boards[q.slot].ships.map(s => ({ x: s.x, y: s.y, h: s.h, len: s.len })); }); out(p.slot, 'mates', mates); });
+    return true;
+  };
+  H.fire = (sh, tg, x, y) => {
+    const r = mpFire(g, H.boards, sh, tg, x, y); if (!r.ok) return r;
+    if (r.over) r.fleets = {}, g.pl.forEach(p => { r.fleets[p.slot] = H.boards[p.slot].ships.map(s => ({ x: s.x, y: s.y, h: s.h, len: s.len })); });
+    out(null, 'res', { sh: r.sh, tg: r.tg, x: r.x, y: r.y, r: r.r, cells: r.cells, out: r.out, seq: r.seq, turn: r.turn, over: r.over, winner: r.winner, fleets: r.fleets });
+    return r;
+  };
+  H.skip = () => { const t = mpSkip(g); if (t) out(null, 'turn', { turn: t, seq: g.seq }); return t; };
+  H.snapFor = slot => {
+    const p = g.pl.find(q => q.slot === slot), s = { phase: g.phase, seq: g.seq, turn: g.turn, left: g.left, out: g.out, ready: g.ready, winner: g.winner, marks: {}, mine: H.boards[slot] ? H.boards[slot].ships.map(x => ({ x: x.x, y: x.y, h: x.h, len: x.len })) : null, mates: {} };
+    g.pl.forEach(q => { s.marks[q.slot] = { grid: g.marks[q.slot].grid, sunk: g.marks[q.slot].sunk }; });
+    if (g.mode === 'teams' && p) g.pl.forEach(q => { if (q.team === p.team && q.slot !== slot && H.boards[q.slot]) s.mates[q.slot] = H.boards[q.slot].ships.map(x => ({ x: x.x, y: x.y, h: x.h, len: x.len })); });
+    if (g.over) { s.fleets = {}; g.pl.forEach(q => { s.fleets[q.slot] = H.boards[q.slot].ships.map(x => ({ x: x.x, y: x.y, h: x.h, len: x.len })); }); }
+    return s;
+  };
+  return H;
+}
+function mpApplySnap(g, s) {
+  g.phase = s.phase; g.seq = s.seq; g.turn = s.turn; g.left = s.left; g.out = s.out; g.ready = s.ready; g.winner = s.winner;
+  for (const k in s.marks) g.marks[k] = { grid: s.marks[k].grid.slice(), sunk: s.marks[k].sunk };
+}
+if (typeof module !== 'undefined') module.exports = { MP_RULES, MP_MAXSHOTS, mpLevel, mpNew, mpStart, mpFire, mpApply, mpSkip, mpAIFire, mpHost, mpPlaceOk, mpFoes, mpAlive, mpApplySnap };
+
+</script>
+<script>
+// ===== 3–6 игроков: интерфейс (один телефон и сеть через Party) =====
+const cMp = $('cMp'), BDz = mkBD(cMp, true); BDX.push(BDz);
+const MPN = { team: ['А', 'Б', 'В'] };
+let M = null;      // состояние игры на этом устройстве
+function mpName(slot) { const p = M && mpP(M.g, slot); return p ? p.name : '?'; }
+const mpSkinOf = slot => { const p = M && mpP(M.g, slot); return p ? p.skin : SK_DEF; };
+const mpHuman = slot => { const p = mpP(M.g, slot); return !p.ai; };
+function mpCanSee(slot) {
+  if (!M) return false; const g = M.g; if (g.over) return true; const v = M.viewer; if (v < 0) return false;
+  return slot === v || (g.mode === 'teams' && mpTeamOf(g, slot) === mpTeamOf(g, v));
+}
+function mpShips(slot) {
+  if (!mpCanSee(slot)) return null;
+  if (M.H) return M.H.boards[slot] ? M.H.boards[slot].ships : null;
+  return M.ships[slot] || null;
+}
+const mpTeamName = t => 'Команда ' + (MPN.team[t] || (t + 1));
+
+// ---------- запуск ----------
+function mpMake(players, mode, opt) {
+  const sk = skUnique(players.map(p => p.skin)), pl = players.map((p, i) => ({ slot: p.slot, name: p.name, skin: sk[i], ai: !!p.ai, team: p.team }));
+  const g = mpNew(pl, mode);
+  M = { g, H: null, local: !!opt.local, net: !!opt.net, me: opt.me === undefined ? -1 : opt.me, viewer: -1, ships: {}, msel: -1, aim: null, hand: false, setup: opt.setup || null, busy: false, log: [], seat: 0, timers: [], gen: (M ? M.gen : 0) + 1, hostSlot: opt.hostSlot || 0 };
+  L = g.L; return M;
+}
+function mpClearTimers() { if (M) { M.timers.forEach(clearTimeout); M.timers = []; } }
+function mpLater(fn, ms) { const gen = M.gen, id = setTimeout(() => { if (M && M.gen === gen) fn(); }, ms); M.timers.push(id); }
+
+// ---------- один телефон ----------
+const MPS = LS.get('mb:mp', { cnt: 4, mode: 'ffa', lay: 0, seats: [] });
+function mpSeats(cnt) { while (MPS.seats.length < 6) MPS.seats.push({ name: 'Игрок ' + (MPS.seats.length + 1), ai: MPS.seats.length > 0 && MPS.seats.length > 1, team: MPS.seats.length % 2 }); return MPS.seats.slice(0, cnt); }
+const MP_LAYOUTS = { 4: [['2 × 2', [0, 1, 0, 1]]], 5: [['2 + 3', [0, 1, 0, 1, 0]]], 6: [['3 × 3', [0, 1, 0, 1, 0, 1]], ['2 × 2 × 2', [0, 1, 2, 0, 1, 2]]] };
+function mpSetLayout() { const l = MP_LAYOUTS[MPS.cnt]; if (!l) return; const a = l[Math.min(MPS.lay, l.length - 1)][1]; a.forEach((t, i) => { MPS.seats[i].team = t; }); }
+function mpSetupOpen() {
+  Snd.init(); Snd.click(); mode = 'mp'; mpSeats(6); renderMpSet(); ov('ov-mpset', 1);
+}
+function renderMpSet() {
+  const b = $('mpset-body'), cnt = MPS.cnt, seats = mpSeats(cnt), teamsOk = cnt >= 4;
+  if (MPS.mode === 'teams' && !teamsOk) MPS.mode = 'ffa';
+  let h = '<div class="sec">СКОЛЬКО ИГРОКОВ</div><div class="seg" id="sg-cnt">' + [3, 4, 5, 6].map(n => `<button data-v="${n}" class="${n === cnt ? 'on' : ''}">${n}</button>`).join('') + '</div>';
+  h += '<div class="sec">РЕЖИМ</div><div class="seg" id="sg-mode"><button data-v="ffa" class="' + (MPS.mode === 'ffa' ? 'on' : '') + '">Каждый сам за себя</button><button data-v="teams" ' + (teamsOk ? '' : 'disabled') + ' class="' + (MPS.mode === 'teams' ? 'on' : '') + '">Команды</button></div>';
+  if (MPS.mode === 'teams' && MP_LAYOUTS[cnt]) h += '<div class="seg" id="sg-lay" style="margin-top:6px">' + MP_LAYOUTS[cnt].map((l, i) => `<button data-v="${i}" class="${i === MPS.lay ? 'on' : ''}">${l[0]}</button>`).join('') + '</div><div class="mphelp">Нажми на букву команды у игрока, чтобы пересадить его.</div>';
+  const r = MP_RULES[cnt];
+  h += `<div class="mphelp">Поле ${r.n}×${r.n}, ${r.fleet.length} кораблей у каждого. 👤 — человек (телефон передаётся по кругу), 🤖 — компьютер.</div><div class="sec">ИГРОКИ</div>`;
+  const sk = skUnique(seats.map((s, i) => mpSeatSkin(i)));
+  seats.forEach((s, i) => { h += `<div class="seat"><span class="sw" style="background:${skAcc(sk[i])}"></span><input data-i="${i}" maxlength="12" value="${s.name.replace(/"/g, '&quot;')}" aria-label="Имя"><button data-t="${i}" aria-label="Человек или компьютер">${s.ai ? '🤖' : '👤'}</button>${MPS.mode === 'teams' ? `<button data-k="${i}">${MPN.team[s.team] || '?'}</button>` : ''}</div>`; });
+  b.innerHTML = h;
+  b.querySelectorAll('#sg-cnt button').forEach(e => e.onclick = () => { MPS.cnt = +e.dataset.v; MPS.lay = 0; if (MPS.mode === 'teams') mpSetLayout(); renderMpSet(); });
+  b.querySelectorAll('#sg-mode button').forEach(e => e.onclick = () => { MPS.mode = e.dataset.v; if (MPS.mode === 'teams') mpSetLayout(); renderMpSet(); });
+  b.querySelectorAll('#sg-lay button').forEach(e => e.onclick = () => { MPS.lay = +e.dataset.v; mpSetLayout(); renderMpSet(); });
+  b.querySelectorAll('input').forEach(e => e.oninput = () => { MPS.seats[+e.dataset.i].name = e.value; });
+  b.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const s = MPS.seats[+e.dataset.t]; s.ai = !s.ai; if (s.ai && /^Игрок \d$/.test(s.name)) s.name = 'Компьютер ' + (+e.dataset.t + 1); else if (!s.ai && /^Компьютер \d$/.test(s.name)) s.name = 'Игрок ' + (+e.dataset.t + 1); renderMpSet(); });
+  b.querySelectorAll('[data-k]').forEach(e => e.onclick = () => { const s = MPS.seats[+e.dataset.k], nt = MPS.lay === 1 && cnt === 6 ? 3 : 2; s.team = (s.team + 1) % nt; renderMpSet(); });
+}
+function mpSeatSkin(i) { const m = mySkin(); return i === 0 ? m : { style: SK_STYLES[(SK_STYLES.findIndex(x => x.id === m.style) + i) % SK_STYLES.length].id, ci: (m.ci + 3 * i) % SK_COLORS.length }; }
+$('mpset-cancel').onclick = () => { Snd.click(); ov('ov-mpset', 0); mode = null; };
+$('mpset-go').onclick = () => {
+  const cnt = MPS.cnt, seats = mpSeats(cnt);
+  if (seats.every(s => s.ai)) { toast('Нужен хотя бы один человек'); return; }
+  if (MPS.mode === 'teams') { const ts = new Set(seats.map(s => s.team)); if (ts.size < 2) { toast('Нужно минимум две команды'); return; } }
+  seats.forEach((s, i) => { if (!s.name.trim()) s.name = (s.ai ? 'Компьютер ' : 'Игрок ') + (i + 1); });
+  LS.set('mb:mp', MPS); ov('ov-mpset', 0); mpStartLocal();
+};
+function mpStartLocal() {
+  const seats = mpSeats(MPS.cnt), pls = seats.map((s, i) => ({ slot: i, name: s.name.trim().slice(0, 12), ai: s.ai, team: MPS.mode === 'teams' ? s.team : i, skin: mpSeatSkin(i) }));
+  mpClearTimers(); mpMake(pls, MPS.mode, { local: true });
+  M.H = mpHost(M.g, Math.random, mpDeliver); M.ships = {};
+  M.g.pl.filter(p => p.ai).forEach(p => M.H.auto(p.slot));
+  M.placeQ = M.g.pl.filter(p => !p.ai).map(p => p.slot);
+  mpPlaceNext();
+}
+function mpPlaceNext() {
+  if (!M.placeQ.length) return;
+  const slot = M.placeQ[0], p = mpP(M.g, slot);
+  curtain('Передай телефон: ' + p.name, 'Расставь флот. Остальные — отвернитесь!', 'Я — ' + p.name, () => { M.viewer = slot; mpOpenPlace(slot); });
+}
+function mpOpenPlace(slot) {
+  L = M.g.L; const ships = placeFleet(L);
+  G = { mode: 'mp', ships, board: makeBoard(L, ships), phase: 'place', rdy: false, over: false, pl: slot };
+  show('place'); const p = mpP(M.g, slot);
+  $('pl-title').firstChild.textContent = p.name + ': расстановка'; $('pl-sub').textContent = L.n + '×' + L.n + ' · ' + L.fleet.length + ' кораблей';
+  $('pl-ready').disabled = false; $('pl-shuf').disabled = false; $('pl-ready').textContent = 'Готов!'; $('pl-hint').textContent = 'Тяни корабль · тап по кораблю — повернуть';
+}
+const _plReady = $('pl-ready').onclick, _plBack = $('pl-back').onclick;
+$('pl-ready').onclick = () => { if (G && G.mode === 'mp') mpPlaceReady(); else _plReady(); };
+$('pl-back').onclick = () => { if (G && G.mode === 'mp') { Snd.click(); mpHome(); } else _plBack(); };
+function mpPlaceReady() {
+  Snd.click(); const slot = G.pl, ships = G.ships.map(s => ({ x: s.x, y: s.y, h: s.h, len: s.len }));
+  if (M.local) {
+    M.placeQ.shift(); M.viewer = -1; M.H.setFleet(slot, ships);
+    if (M.placeQ.length) mpPlaceNext(); else { /* 'go' уже вызван хостом */ }
+  } else {
+    G.rdy = true; $('pl-ready').disabled = true; $('pl-shuf').disabled = true; $('pl-ready').textContent = 'Ждём остальных…';
+    M.myShips = ships; M.ships[M.me] = ships;
+    if (M.H) M.H.setFleet(M.me, ships); else MPNet.send('fleet', ships, M.hostSlot);
+    mpPlaceHint();
+  }
+}
+function mpPlaceHint() {
+  if (!M || M.net === false || !G || G.mode !== 'mp' || screen !== 'place') return;
+  const w = M.g.pl.filter(p => !M.g.ready[p.slot]).map(p => p.name);
+  $('pl-hint').textContent = w.length ? 'Флот расставлен. Ждём: ' + w.join(', ') : 'Начинаем…';
+  if (M.H && M.net) $('pl-sub').textContent = w.length ? 'Хост может расставить за отстающих через ☰ в бою' : '';
+}
+
+// ---------- доставка сообщений ----------
+// хост/локально: события идут и в собственный интерфейс, и по сети
+function mpDeliver(to, type, data) {
+  if (M.net && MPNet.ok()) { if (to === null || to === undefined) MPNet.send(type, data); else if (to !== M.me) MPNet.send(type, data, to); }
+  if (to === null || to === undefined || to === M.me) mpOnMsg(type, data, M.me, true);
+}
+function mpOnMsg(type, d, from, own) {
+  if (!M) return; const g = M.g;
+  if (type === 'rdy') { g.ready[d.slot] = true; mpPlaceHint(); }
+  else if (type === 'go') { if (!own) { g.phase = 'battle'; g.turn = d.turn; g.seq = d.seq; } mpWentBattle(); }
+  else if (type === 'mates') { for (const k in d) M.ships[k] = d[k]; mpDirty(); }
+  else if (type === 'res') { if (!own) { if (d.seq <= g.seq) return; if (d.seq > g.seq + 1) { mpNeedSnap(); return; } mpApply(g, d); } if (d.fleets && !M.H) { for (const k in d.fleets) M.ships[k] = d.fleets[k]; } mpOnResult(d); }
+  else if (type === 'turn') { if (!own) { g.turn = d.turn; g.seq = d.seq; } mpOnTurn(); }
+  else if (type === 'snap') { if (M.H) return; mpApplySnap(g, d); if (d.mine) { M.ships[M.me] = d.mine; } for (const k in (d.mates || {})) M.ships[k] = d.mates[k]; for (const k in (d.fleets || {})) M.ships[k] = d.fleets[k]; if (g.phase === 'battle' || g.phase === 'over') mpWentBattle(true); else if (g.ready[M.me] && G && G.mode === 'mp') { G.rdy = true; if (d.mine) G.ships = d.mine; $('pl-ready').disabled = true; $('pl-shuf').disabled = true; $('pl-ready').textContent = 'Ждём остальных…'; mpPlaceHint(); } }
+}
+function mpNeedSnap() { if (M.net && !M.H && (!M.snapAt || Date.now() - M.snapAt > 1500)) { M.snapAt = Date.now(); MPNet.send('need', {}, M.hostSlot); } }
+
+// ---------- бой ----------
+function mpWentBattle(quiet) {
+  const g = M.g; if (screen !== 'mp') { show('mp'); renderStrip(); }
+  if (g.phase === 'over') { mpDirty(); mpUpdate(); mpOnOver(); return; }
+  if (!quiet || M.msel < 0) mpSelDefault(); mpDirty(); mpUpdate(); mpOnTurn(true);
+}
+function mpFoesOfViewer() { return M.viewer >= 0 ? mpFoes(M.g, M.viewer) : M.g.pl.filter(p => mpAlive(M.g, p.slot)).map(p => p.slot); }
+function mpSelDefault() {
+  const f = mpFoesOfViewer(); if (M.viewer >= 0 && M.g.turn && M.g.turn.shooter === M.viewer && f.length) M.msel = f.includes(M.msel) ? M.msel : f[0];
+  else if (M.viewer >= 0) M.msel = M.viewer; else M.msel = f.length ? f[0] : M.g.pl[0].slot;
+  M.aim = null;
+}
+function mpMyTurn() { const g = M.g; return !!(g.phase === 'battle' && g.turn && M.viewer >= 0 && g.turn.shooter === M.viewer && !M.hand && !M.busy); }
+let mpDirtyF = true;
+function mpDirty() { mpDirtyF = true; }
+function mpOnResult(r) {
+  const g = M.g, who = mpName(r.sh), tg = mpName(r.tg), cn = cname(r.x, r.y);
+  const txt = r.r === 2 ? 'потопил корабль!' : r.r === 1 ? 'попал!' : 'мимо';
+  mpLog(`${who} → ${tg}: ${cn} — ${txt}` + (r.out ? ` Флот «${tg}» уничтожен!` : ''));
+  if (M.msel === r.tg && screen === 'mp') { addEff(cMp, r.r === 0 ? 'splash' : r.r === 2 ? 'sunk' : 'boom', r.x, r.y, 0); }
+  if (r.r === 0) Snd.splash(); else if (r.r === 2) Snd.sunk(); else Snd.boom();
+  if (r.sh !== M.viewer && !M.hand && M.viewer >= 0 && !M.manual) { M.msel = r.tg; }
+  M.aim = null; M.busy = false; mpDirty();
+  if (r.over) { mpLater(() => { mpUpdate(); mpOnOver(); }, 1300); mpUpdate(); return; }
+  mpUpdate(); mpOnTurn();
+}
+function mpLog(t) { M.log.push(t); if (M.log.length > 3) M.log.shift(); $('mp-log').innerHTML = M.log.map(x => '<div>' + x.replace(/</g, '&lt;') + '</div>').join(''); }
+// после каждого изменения хода: ИИ стреляет, при смене человека — заставка передачи телефона
+function mpOnTurn(first) {
+  const g = M.g; if (!M || g.phase !== 'battle' || !g.turn) { mpUpdate(); return; }
+  const sh = g.turn.shooter, p = mpP(g, sh);
+  if (M.local && !M.hand) {
+    if (M.viewer >= 0 && M.viewer !== sh) {   // ход ушёл дальше: даём доглядеть результат, потом — заставка
+      if (!M.handPending) { const f = () => { M.viewer = -1; mpDirty(); mpOnTurn(); }; M.handPending = f; mpLater(() => { if (M.handPending === f) { M.handPending = null; f(); } }, 2400); }
+      mpUpdate(); return;
+    }
+    if (p.ai) {
+      M.viewer = -1; mpSelDefault(); mpUpdate();
+      if (!M.aiT) { M.aiT = true; mpLater(() => { M.aiT = false; mpAIStep(); }, first ? 700 : 850); }
+      return;
+    }
+    if (M.viewer !== sh) { mpHandOver(sh); return; }
+  } else if (M.net && M.H && !p.ai && p.off) { mpLater(() => { if (M.g.turn && M.g.turn.shooter === sh && mpP(M.g, sh).off) M.H.skip(); }, 800); }
+  mpSelDefault2(); mpUpdate();
+}
+function mpSelDefault2() {
+  const g = M.g; if (M.viewer >= 0 && g.turn && g.turn.shooter === M.viewer) { if (g.turn.n === 0) M.manual = false; const f = mpFoes(g, M.viewer); if (!f.includes(M.msel)) M.msel = f[0]; }
+}
+function mpAIStep() {
+  if (!M || !M.local || M.g.phase !== 'battle') return; const g = M.g, sh = g.turn.shooter, p = mpP(g, sh); if (!p.ai) { mpOnTurn(); return; }
+  const a = mpAIFire(g, sh); if (!a) { M.H.skip(); return; }
+  M.msel = a.tg; M.manual = false; const r = M.H.fire(sh, a.tg, a.x, a.y); if (!r.ok) M.H.skip();
+}
+function mpHandOver(slot) {
+  // прошлый игрок не должен подсмотреть: поля скрыты заставкой
+  M.hand = true; M.viewer = -1; mpDirty(); mpUpdate(); const p = mpP(M.g, slot);
+  const go = () => {
+    curtain('Передай телефон: ' + p.name, M.g.mode === 'teams' ? mpTeamName(p.team) + '. Твой ход!' : 'Твой ход!', 'Я — ' + p.name, () => { M.hand = false; M.viewer = slot; M.manual = false; M.msel = -1; mpSelDefault(); mpDirty(); mpUpdate(); });
+  };
+  go();
+}
+function mpOnOver() {
+  const g = M.g; if (M.overShown) return; M.overShown = true; mpClearTimers();
+  M.hand = false; if (M.local) M.viewer = -1;
+  const win = g.winner === null ? 'Ничья' : g.mode === 'teams' ? mpTeamName(g.winner) + ' победила!' : mpName(g.winner) + ' побеждает!';
+  const iWon = M.viewer >= 0 && g.winner !== null && mpTeamOf(g, M.viewer) === g.winner;
+  if (iWon) Snd.win(); else Snd.bell();
+  $('mpres-h').textContent = '🏆 ' + win;
+  $('mpres-body').innerHTML = g.pl.map(p => `<div class="rt"><span><b style="color:${skAcc(p.skin)}">■</b> ${p.name.replace(/</g, '&lt;')}${g.mode === 'teams' ? ' · ' + MPN.team[p.team] : ''}</span><span>${g.out[p.slot] ? 'флот потоплен' : 'кораблей: ' + g.left[p.slot]}</span></div>`).join('');
+  $('mpres-again').style.display = M.local || (M.net && M.H) ? '' : 'none';
+  ov('ov-mpres', 1);
+}
+$('mpres-view').onclick = () => { Snd.click(); ov('ov-mpres', 0); };
+$('mpres-home').onclick = () => { Snd.click(); mpHome(); };
+$('mpres-again').onclick = () => { Snd.click(); ov('ov-mpres', 0); if (M && M.net) { try { Party.end(); } catch (e) {} } else mpStartLocal(); };
+
+// ---------- выстрел игрока ----------
+function mpTapFire() {
+  if (!mpMyTurn() || !M.aim) return; const a = M.aim; M.busy = true; M.aim = null; M.manual = false;
+  if (M.H) { const r = M.H.fire(M.viewer, a.tg, a.x, a.y); if (!r.ok) { M.busy = false; toast('Так нельзя'); } }
+  else { MPNet.send('fire', { tg: a.tg, x: a.x, y: a.y }, M.hostSlot); M.busyT = setTimeout(() => { if (M) { M.busy = false; mpUpdate(); } }, 2500); }
+  mpUpdate();
+}
+$('mp-fire').onclick = () => {
+  Snd.click();
+  if (M.handPending) { const f = M.handPending; M.handPending = null; f(); return; }
+  mpTapFire();
+};
+cMp.addEventListener('pointerdown', e => {
+  if (!M || screen !== 'mp') return; e.preventDefault(); const c = cellAt(cMp, e), n = M.g.L.n;
+  if (c.x < 0 || c.y < 0 || c.x >= n || c.y >= n) return;
+  if (!mpMyTurn() || !mpFoes(M.g, M.viewer).includes(M.msel)) { return; }
+  const gr = M.g.marks[M.msel].grid; if (gr[c.y * n + c.x] !== 0) { toast('Сюда уже стреляли'); return; }
+  if (M.aim && M.aim.x === c.x && M.aim.y === c.y && M.aim.tg === M.msel) { mpTapFire(); return; }
+  M.aim = { tg: M.msel, x: c.x, y: c.y }; Snd.click(); mpUpdate();
+});
+
+// ---------- интерфейс боя ----------
+function mpToast(t) { const e = $('mp-toast'); e.textContent = t; e.style.display = 'block'; clearTimeout(mpToast.t); mpToast.t = setTimeout(() => { e.style.display = 'none'; }, 1800); }
+function renderStrip() {
+  const st = $('mp-strip'), g = M.g; st.innerHTML = ''; st.style.setProperty('--np', g.pl.length);
+  g.pl.forEach(p => {
+    const b = document.createElement('button'); b.className = 'mc'; b.dataset.s = p.slot; b.style.setProperty('--ac', skAcc(p.skin));
+    b.innerHTML = `${g.mode === 'teams' ? `<span class="tm">${MPN.team[p.team]}</span>` : ''}<canvas width="120" height="120"></canvas><span class="nm"></span><span class="ft"></span>`;
+    b.querySelector('.nm').textContent = p.name;
+    b.onclick = () => { Snd.click(); M.msel = p.slot; M.manual = true; M.aim = null; mpDirty(); mpUpdate(); };
+    st.appendChild(b);
+  });
+  mpDirty();
+}
+function mpUpdate() {
+  if (!M || screen !== 'mp') return; const g = M.g, v = M.viewer;
+  document.querySelectorAll('#mp-strip .mc').forEach(b => {
+    const s = +b.dataset.s, p = mpP(g, s); b.classList.toggle('sel', s === M.msel); b.classList.toggle('turn', !!(g.turn && g.turn.shooter === s && g.phase === 'battle'));
+    b.classList.toggle('out', !!g.out[s]); b.classList.toggle('mate', g.mode === 'teams' && v >= 0 && s !== v && p.team === mpTeamOf(g, v));
+    b.querySelector('.ft').textContent = g.out[s] ? 'потоплен' : (s === v ? 'ты · ' : '') + '⚓ ' + g.left[s] + (p.ai ? ' 🤖' : '');
+  });
+  const st = $('mp-stat'), t = g.turn;
+  if (g.phase === 'over') { st.className = ''; st.innerHTML = 'Игра окончена'; }
+  else if (t) {
+    const my = v >= 0 && t.shooter === v, p = mpP(g, t.shooter), mx = mpMax(g, t.shooter);
+    st.className = my ? 'me' : ''; st.innerHTML = (my ? 'Твой ход' : 'Ход: ' + p.name.replace(/</g, '&lt;')) + `<small>${g.mode === 'teams' ? mpTeamName(p.team) + ' · ' : ''}выстрел ${t.n + 1} (до ${mx}${t.min > 1 ? ', минимум ' + t.min : ''})</small>`;
+  }
+  const fb = $('mp-fire'), my = mpMyTurn();
+  if (M.handPending) { fb.disabled = false; fb.textContent = 'Передать телефон'; }
+  else if (my) { const ok = mpFoes(g, v).includes(M.msel); fb.disabled = !M.aim; fb.textContent = M.aim ? 'Огонь! ' + cname(M.aim.x, M.aim.y) : ok ? 'Тапни клетку' : 'Выбери чужое поле'; }
+  else { fb.disabled = true; fb.textContent = g.phase === 'over' ? 'Конец игры' : t ? (M.hand ? '…' : 'Ждём: ' + mpName(t.shooter)) : '…'; }
+  const sp = M.msel >= 0 ? mpP(g, M.msel) : null;
+  $('mp-lbl').textContent = sp ? (sp.slot === v ? 'Твой флот' : mpCanSee(sp.slot) ? 'Флот: ' + sp.name : 'Море: ' + sp.name) : '';
+  $('mp-sub').textContent = sp ? (g.out[sp.slot] ? 'потоплен' : 'кораблей: ' + g.left[sp.slot]) : '';
+  const sk = $('mpm-skip'); sk.style.display = M.net && M.H && g.phase === 'battle' ? '' : 'none';
+  mpDirty();
+}
+const miniCache = {};
+function drawMinis() {
+  const g = M.g, n = g.L.n;
+  document.querySelectorAll('#mp-strip .mc').forEach(b => {
+    const s = +b.dataset.s, cv = b.querySelector('canvas'), c = cv.getContext('2d'), S = cv.width, cs = (S - 6) / n, o = 3, p = mpP(g, s), m = g.marks[s].grid, ac = skAcc(p.skin);
+    c.clearRect(0, 0, S, S); const gr = c.createLinearGradient(0, 0, 0, S); gr.addColorStop(0, '#176a86'); gr.addColorStop(1, '#0b3a52'); c.fillStyle = gr; c.fillRect(0, 0, S, S);
+    c.strokeStyle = 'rgba(255,255,255,.14)'; c.lineWidth = 1; c.beginPath(); for (let i = 0; i <= n; i++) { c.moveTo(o + i * cs, o); c.lineTo(o + i * cs, o + n * cs); c.moveTo(o, o + i * cs); c.lineTo(o + n * cs, o + i * cs); } c.stroke();
+    const sh = mpShips(s);
+    if (sh) sh.forEach(q => { const w = (q.h ? q.len : 1) * cs - 3, h = (q.h ? 1 : q.len) * cs - 3; c.fillStyle = skShade(ac, -.1); c.strokeStyle = '#0a1a22'; c.lineWidth = 1.5; rrp(c, o + q.x * cs + 1.5, o + q.y * cs + 1.5, w, h, cs * .3); c.fill(); c.stroke(); c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(o + q.x * cs + 4, o + q.y * cs + 4, Math.max(2, w - 6), 2); });
+    for (let k = 0; k < n * n; k++) { const v = m[k]; if (!v) continue; const x = o + (k % n) * cs, y = o + ((k / n) | 0) * cs;
+      if (v === 1) { c.fillStyle = 'rgba(235,248,255,.8)'; c.beginPath(); c.arc(x + cs / 2, y + cs / 2, Math.max(2, cs * .13), 0, TAU); c.fill(); }
+      else if (v === 2) { c.fillStyle = '#ff7a2a'; c.fillRect(x + 1, y + 1, cs - 2, cs - 2); c.fillStyle = '#ffd25a'; c.fillRect(x + cs * .3, y + cs * .3, cs * .4, cs * .4); }
+      else if (v === 3) { c.fillStyle = '#5a1710'; c.fillRect(x + 1, y + 1, cs - 2, cs - 2); c.strokeStyle = '#ff5a3a'; c.lineWidth = 1.5; c.strokeRect(x + 1.5, y + 1.5, cs - 3, cs - 3); } }
+    if (g.out[s]) { c.strokeStyle = 'rgba(255,90,70,.9)'; c.lineWidth = 5; c.beginPath(); c.moveTo(6, 6); c.lineTo(S - 6, S - 6); c.moveTo(S - 6, 6); c.lineTo(6, S - 6); c.stroke(); }
+  });
+}
+// ---------- рисование основного поля ----------
+const Z = { hits: new Int16Array(200), nh: 0, sunkc: new Int16Array(200), ns: 0, key: '' };
+mpLayout = (sc) => {
+  if (sc !== 'mp') return false;
+  const body = document.querySelector('.mpbody');
+  if (mqLand.matches) { const br = box(body), E = Math.floor(Math.min(br.height - 24, br.width * .62)); if (body.style.getPropertyValue('--mcol') !== E + 'px') body.style.setProperty('--mcol', E + 'px'); }
+  else if (body.style.getPropertyValue('--mcol')) body.style.removeProperty('--mcol');
+  const r = box($('mpBox')); fitCanvas(cMp, Math.min(r.width, r.height) - 2); return true;
+};
+mpSim = (sc) => {
+  if (sc !== 'mp' || !M) return false; stepPool(BDz.pool); stepSprings(BDz);
+  if (M.msel >= 0 && Z.nh >= 0) { const sv = L; L = M.g.L; emit(BDz, Z.hits, Z.nh, Z.sunkc, Z.ns); L = sv; }
+  return true;
+};
+mpDraw = (sc) => {
+  if (sc !== 'mp' || !M) return false;
+  const g = M.g; L = g.L;
+  if (mpDirtyF) { mpDirtyF = false; drawMinis();
+    const n = L.n, gr = M.msel >= 0 ? g.marks[M.msel].grid : null; Z.nh = Z.ns = 0; if (gr) for (let k = 0; k < n * n; k++) { if (gr[k] === 2 && Z.nh < 200) Z.hits[Z.nh++] = k; if (gr[k] === 3 && Z.ns < 200) Z.sunkc[Z.ns++] = k; } }
+  if (!cMp._s || M.msel < 0) return true;
+  const sp = mpP(g, M.msel), n = L.n, mk = g.marks[M.msel];
+  BDz.sk = sp.skin;
+  const ships = mpShips(M.msel);
+  DO.ships = ships ? ships.map(s => ({ x: s.x, y: s.y, h: s.h, len: s.len })) : null; DO.shipSt = 0; DO.mines = null; DO.shotSet = null; DO.fog = null; DO.ghost = null; DO.radar = false;
+  DO.marks = { grid: mk.grid, radar: [], sunk: mk.sunk, pending: [] }; DO.wr = mk.sunk.map(wreck);
+  DO.sel = M.aim && M.aim.tg === M.msel && mpMyTurn() ? [[M.aim.x, M.aim.y]] : null;
+  drawBoard(BDz, aG); return true;
+};
+// ---------- меню, домой ----------
+$('mp-menu').onclick = () => { Snd.click(); ov('ov-mpmenu', 1); };
+$('mpm-cont').onclick = () => { Snd.click(); ov('ov-mpmenu', 0); };
+$('mpm-help').onclick = () => { Snd.click(); ov('ov-mpmenu', 0); ov('ov-help', 1); };
+$('mpm-home').onclick = () => { Snd.click(); ov('ov-mpmenu', 0); mpHome(); };
+$('mpm-skip').onclick = () => { Snd.click(); ov('ov-mpmenu', 0); if (M && M.H) { M.H.skip(); } };
+function mpHome() {
+  if (M) { mpClearTimers(); if (M.net && MPNet.ok()) MPNet.leave(); M.gen++; }
+  M = null; G = null; mode = null; ['ov-mpres', 'ov-mpmenu', 'ov-curtain', 'ov-mpset'].forEach(i => ov(i, 0)); show('title');
+}
+$('b-party').onclick = () => { Snd.init(); Snd.click(); mpEntry(); };
+// выбор: на одном телефоне или по сети (если есть Party)
+function mpEntry() {
+  if (typeof Party === 'undefined') { mpSetupOpen(); return; }
+  $('ov-mpwho') || mpBuildWho(); ov('ov-mpwho', 1);
+}
+function mpBuildWho() {
+  const d = document.createElement('div'); d.className = 'ov'; d.id = 'ov-mpwho';
+  d.innerHTML = '<div class="card"><h3>3–6 игроков</h3><p>Каждый играет на своём телефоне — или все вместе на одном.</p><div class="rbtns"><button class="btn" id="mpw-net">По сети (у каждого свой телефон)</button><button class="btn dark" id="mpw-loc">На одном телефоне</button><button class="btn dark" id="mpw-x">Назад</button></div></div>';
+  document.body.appendChild(d);
+  $('mpw-net').onclick = () => { Snd.click(); ov('ov-mpwho', 0); mpNetOpen(); };
+  $('mpw-loc').onclick = () => { Snd.click(); ov('ov-mpwho', 0); mpSetupOpen(); };
+  $('mpw-x').onclick = () => { Snd.click(); ov('ov-mpwho', 0); };
+}
+// ---------- сеть: Party (хост — авторитет) ----------
+const HAVE_PARTY = typeof Party !== 'undefined';
+const MPNet = {
+  ok: () => HAVE_PARTY && Party.status().state !== 'idle',
+  send: (t, d, to) => HAVE_PARTY && Party.send(t, d, to),
+  leave: () => { try { Party.leave(); } catch (e) {} },
+};
+function mpNetOpen() {
+  mode = 'mp';
+  Party.lobby().then(cfg => { if (!cfg && !M) mode = null; }, () => { if (!M) mode = null; });
+}
+function mpSyncOnline() {
+  if (!M || !M.net) return; let ch = false;
+  M.g.pl.forEach(p => { const q = Party.players.find(z => z.slot === p.slot), off = q ? q.online === false : false; if (!!p.off !== off) { p.off = off; ch = true; } });
+  if (ch && M.H) {
+    if (M.g.phase === 'place') M.g.pl.forEach(p => { if (p.off && !M.g.ready[p.slot]) M.H.auto(p.slot); });
+    else if (M.g.phase === 'battle' && M.g.turn && mpP(M.g, M.g.turn.shooter).off) mpLater(() => { if (M.g.turn && mpP(M.g, M.g.turn.shooter).off) M.H.skip(); }, 1200);
+  }
+}
+function mpNetStart(cfg) {
+  ['ov-mpres', 'ov-mpmenu', 'ov-curtain', 'ov-mpset'].forEach(i => ov(i, 0)); mpClearTimers();
+  const teams = cfg.mode === 'teams', ps = cfg.players.map((p, i) => ({ slot: p.slot, name: String(p.name || 'Игрок ' + (i + 1)).slice(0, 12), skin: skNorm(p.skin), team: p.team | 0, ai: false }));
+  if (teams && new Set(ps.map(p => p.team)).size < 2) ps.forEach((p, i) => { p.team = i % 2; });
+  mode = 'mp'; const me = Party.me.slot; mpMake(ps, teams ? 'teams' : 'ffa', { net: true, me, hostSlot: 0 }); M.viewer = me; M.overShown = false;
+  if (Party.isHost) M.H = mpHost(M.g, rngf(cfg.seed >>> 0 || 1), mpDeliver);
+  mpSyncOnline(); mpOpenPlace(me);
+  if (cfg.rejoin && !Party.isHost) mpNeedSnap();
+}
+if (HAVE_PARTY) {
+  Party.init({
+    game: 'morskoy-boy', title: 'Морской бой', min: 3, max: 6, accent: '#d9b25f',
+    modes: [{ id: 'ffa', name: 'Каждый сам за себя' }, { id: 'teams', name: 'Команды', teams: 2 }],
+    skin: () => { const s = mySkin(); return { style: s.style, ci: s.ci, color: skAcc(s) }; },
+    skinColor: s => (s && s.color) || skAcc(skNorm(s)),
+    resolveSkin: (skin, taken) => { const k = skNorm(skin), used = (taken || []).map(t => skNorm(t).ci), ci = used.includes(k.ci) ? skFreeColor(k.ci, used) : k.ci; return { style: k.style, ci, color: SK_COLORS[ci].c }; },
+    autoResume: true,
+  });
+  Party.on('start', mpNetStart);
+  Party.on('roster', () => { mpSyncOnline(); });
+  Party.on('join', slot => { if (M && M.net && M.H) { const p = mpP(M.g, slot); if (p) p.off = false; Party.send('snap', M.H.snapFor(slot), slot); } });
+  Party.on('leave', () => { mpSyncOnline(); });
+  Party.on('hostLost', () => {
+    if (!M || !M.net || M.H || M.g.over) return; mpClearTimers(); M.hand = true; M.over = true;
+    curtain('⚓ Хозяин вышел', 'Хозяин комнаты отключился — игра закончена.', 'В главное меню', () => mpHome());
+  });
+  Party.on('end', () => { if (M && M.net) { mpClearTimers(); M.gen++; M = null; G = null; ['ov-mpres', 'ov-mpmenu', 'ov-curtain'].forEach(i => ov(i, 0)); show('title'); mpNetOpen(); } });
+  Party.on('msg', (type, d, from) => {
+    if (!M || !M.net) return;
+    if (M.H) {
+      if (type === 'fleet') { M.H.setFleet(from, d); }
+      else if (type === 'fire') { const r = M.H.fire(from, d.tg | 0, d.x | 0, d.y | 0); if (!r.ok) Party.send('snap', M.H.snapFor(from), from); }
+      else if (type === 'need') Party.send('snap', M.H.snapFor(from), from);
+    } else if (from === 0) mpOnMsg(type, d, from, false);
+  });
+}
+if (window.ResizeObserver) { const ro = new ResizeObserver(layoutSoon); ro.observe($('mpBox')); }
 
 </script>
 </body>
