@@ -1043,7 +1043,7 @@
     if (!inRoom) view = 'main';
     ov.querySelectorAll('[data-v]').forEach(b => { b.hidden = b.dataset.v !== (inRoom ? 'room' : 'main'); });
     $('title').textContent = G.title;
-    $('sub').textContent = 'Игра для ' + G.min + '–' + G.max + ' игроков, у каждого свой телефон';
+    $('sub').textContent = (G.min === G.max ? (G.max === 2 ? 'Игра для двоих' : 'Игра для ' + G.max + ' игроков') : 'Игра для ' + G.min + '–' + G.max + ' игроков') + ', у каждого свой телефон';
     $('err0').textContent = error; $('err0').hidden = !error || inRoom;
     if (!inRoom) return;
     $('code').textContent = code || '····';

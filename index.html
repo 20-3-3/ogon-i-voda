@@ -47,8 +47,8 @@ button { font-family: inherit; }
 .pk.on { background: rgba(226,189,98,.38); border-color: var(--gold); transform: scale(.94); }
 #pad.solo .pk { width: 60px; height: 60px; font-size: 22px; border-radius: 18px; }
 #pad.solo .pk.j { width: 66px; height: 66px; }
-#pad.solo .p1 .pk { border-color: rgba(255,107,44,.6); }
-#pad.solo .p2 .pk { border-color: rgba(57,180,255,.6); }
+#pad.solo .p1 .pk { border-color: var(--pc, rgba(255,107,44,.6)); }
+#pad.solo .p2 .pk { border-color: var(--pc, rgba(57,180,255,.6)); }
 @media (orientation: portrait) { #pad.solo .pk, #pad.solo .pk.j { width: 50px; height: 50px; font-size: 20px; border-radius: 14px; } #pad.solo .grp { gap: 6px; } }
 @media (orientation: landscape) { .pk { background: rgba(20,17,12,.28); border-color: rgba(244,234,208,.22); } }
 @media (orientation: landscape) { #pad.solo .grp { display: grid; grid-template-columns: auto auto; gap: 6px; } #pad.solo .pk.j { order: -1; grid-column: 1 / -1; justify-self: center; width: 54px; height: 54px; border-radius: 18px; } }
@@ -82,6 +82,7 @@ h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin
 .help + .help { margin-top: 0; }
 
 #scrTitle .box { gap: 10px; }
+@media (orientation: portrait) { #scrTitle { align-items: flex-start; } #scrTitle .box { padding-top: 52px; } }
 #scrTitle .logo { display: flex; flex-direction: column; gap: 8px; }
 #scrTitle .menu { display: flex; flex-direction: column; gap: 10px; }
 @media (orientation: landscape) and (max-height: 520px) {
@@ -166,7 +167,21 @@ h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin
 .asEl:disabled { opacity: 1; }
 @media (orientation: landscape) and (max-height: 520px) { #scrAssign .box, #scrPick .box { width: min(860px, 100%); gap: 6px; } .asList { display: grid; grid-template-columns: 1fr 1fr; } #scrAssign h2, #scrPick h2 { font-size: 20px; } .asRow { min-height: 52px; } }
 #scrPick .box { width: min(640px, 100%); }
-#scrAssign, #scrPick, #scrSkins { align-items: flex-start; }
+#scrAssign, #scrPick, #scrSkins, #scrSolo2 { align-items: flex-start; }
+/* element tiles (free choice of heroes) */
+.elBoard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.elT { border: 2px solid var(--c); border-radius: 14px; background: rgba(0,0,0,.4); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; padding: 4px 2px 5px; min-height: 100px; min-width: 0; cursor: pointer; touch-action: manipulation; font-family: var(--font-ui); }
+.elT canvas { width: 54px; height: 54px; }
+.elT b { color: var(--c); font-size: 16px; line-height: 1.15; }
+.elT small { font-size: 11px; font-weight: 800; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 3px; min-height: 14px; }
+.elT.mine { background: rgba(226,189,98,.2); box-shadow: 0 0 0 2px var(--gold); } .elT.mine small { color: var(--gold-hi); }
+.elT.taken { opacity: .5; }
+.elSide { display: flex; flex-direction: column; gap: 4px; }
+.elSide h3 { margin: 0; font-size: 15px; color: var(--ink); text-align: center; }
+.elRow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.elRow .elT { min-height: 84px; padding: 3px 0 4px; border-radius: 11px; } .elRow .elT canvas { width: 42px; height: 42px; } .elRow .elT b { font-size: 12px; } .elRow .elT small { font-size: 10px; }
+@media (orientation: landscape) { .elBoard { grid-template-columns: repeat(6, 1fr); } .elT { min-height: 90px; } #scrSolo2 .box { width: min(860px, 100%); } }
+@media (orientation: landscape) and (max-height: 430px) { #scrSolo2 .box, #scrEl2 .box { gap: 6px; } .elRow .elT { min-height: 72px; } .elRow .elT canvas { width: 34px; height: 34px; } #scrSolo2 h2 { font-size: 20px; } #scrAssign .status { padding: 4px 8px; font-size: 12px; } }
 
 /* modal */
 #ovl { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: max(12px, var(--sat)) max(16px, var(--sar)) max(12px, var(--sab)) max(16px, var(--sal)); background: rgba(10,9,6,.62); opacity: 0; visibility: hidden; transition: opacity .25s, visibility 0s linear .25s; }
@@ -219,6 +234,7 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
       <div class="menu">
         <button class="btn hot" id="btnNet">Играть вдвоём по сети<small>Два айфона, у каждого свой герой</small></button>
         <button class="btn" id="btnSolo">Вдвоём на одном телефоне<small>Слева огонь, справа вода</small></button>
+        <button class="btn" id="btnEl2">Стихии вдвоём<small>Любые две из шести стихий · сеть или один телефон</small></button>
         <button class="btn" id="btnParty">Стихии: 3–6 игроков<small>Земля, Воздух, Свет и Тень · у каждого свой телефон</small></button>
         <div class="row"><button class="btn ghost" id="btnSkins">🎨 Скины</button><button class="btn ghost" id="btnSet">Настройки и помощь</button></div>
         <a class="btn ghost" id="btnSave" href="games/#save">💾 Сохранение прогресса</a>
@@ -265,11 +281,34 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
     </div>
   </section>
 
+  <section class="scr" id="scrEl2">
+    <div class="box">
+      <h2>Стихии вдвоём</h2>
+      <p class="sub">Каждый выбирает любую стихию из шести (одинаковых нельзя) и проходит 50 уровней «Стихий».</p>
+      <button class="btn hot" id="el2Net">По сети<small>Два телефона, у каждого свой герой</small></button>
+      <button class="btn" id="el2Solo">На одном телефоне<small>Левая половина экрана и правая</small></button>
+      <button class="btn ghost" id="el2Back">Назад</button>
+    </div>
+  </section>
+
+  <section class="scr" id="scrSolo2">
+    <div class="box">
+      <h2>Кто за кого?</h2>
+      <div class="elSide"><h3>◀ Левая половина</h3><div class="elRow" id="so0"></div></div>
+      <div class="elSide"><h3>Правая половина ▶</h3><div class="elRow" id="so1"></div></div>
+      <div class="status" id="soInfo"></div>
+      <button class="btn hot" id="soGo">К уровням</button>
+      <button class="btn ghost" id="soBack">Назад</button>
+    </div>
+  </section>
+
   <section class="scr" id="scrAssign">
     <div class="box">
       <h2>Герои стихий</h2>
       <div class="status" id="asInfo"></div>
+      <div class="elBoard" id="asBoard"></div>
       <div class="asList" id="asList"></div>
+      <div class="row"><button class="btn ghost" id="asAuto">Раздать автоматически</button></div>
       <button class="btn hot" id="asGo">К уровням</button>
       <button class="btn ghost" id="asBack">Выйти из комнаты</button>
     </div>
@@ -304,8 +343,9 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
           <div class="help"><h3>Как играть</h3><p>Огонь безопасно ходит по лаве, вода — по воде. Зелёная жижа опасна обоим. Собирайте кристаллы своего цвета, нажимайте кнопки и рычаги, помогайте друг другу и вместе дойдите до своих дверей.</p></div>
         </div>
         <div class="box wide" style="gap:10px">
-          <div class="help"><h3>Стихии: 3–6 игроков</h3>
-            <p>Кнопка «Стихии» на главном экране: один создаёт комнату (4 цифры), остальные входят по коду. Хозяин раздаёт героев и выбирает уровень. Играют только по сети, у каждого свой телефон.</p>
+          <div class="help"><h3>Стихии: вдвоём и 3–6 игроков</h3>
+            <p><b>Стихии вдвоём</b> — любые две стихии из шести. «По сети»: один создаёт комнату (4 цифры), второй входит по коду. «На одном телефоне»: левая половина экрана (кнопки слева) — первый герой, правая — второй. Уровни — те же 50 уровней «Стихий»: если героев мало, часть механизмов упрощается (например, у «печати трёх замков» остаётся два замка), но пройти можно любой парой. Прогресс общий для всех режимов «Стихий».</p>
+            <p><b>Стихии: 3–6 игроков</b> — один создаёт комнату, остальные входят по коду. На экране героев каждый сам тапает свободную стихию (занятые показывают имя игрока, свою можно сменить или отпустить повторным тапом). Хозяин может назначить стихию любому игроку (строка игрока) или нажать «Раздать автоматически»; «К уровням» включается, когда у всех своя стихия. Любой игрок потом выбирает уровень. Играют по сети, у каждого свой телефон.</p>
             <p>У каждой стихии свой бассейн: он безопасен для хозяина и смертелен для остальных. Зелёная жижа убивает всех. Свои кристаллы и своя дверь у каждого, к дверям нужно дойти всем.</p>
             <p><b>Огонь</b> — лава. <b>Вода</b> — вода. <b>Земля</b> — зыбучий ил; идя в камень, толкает его (остальные не могут). <b>Воздух</b> — вихрь; в воздухе прыгает второй раз. <b>Свет</b> — световое поле; зажигает световые датчики рядом. <b>Тень</b> — тьма; проходит сквозь тёмные врата.</p>
             <p><b>Таймерные ворота</b> (с песочными часами) открываются, пока кто-то стоит на кнопке, и остаются открытыми ещё несколько секунд после того, как кнопку отпустили: успей добежать. <b>Паромы</b> плывут над жижей сами — прыгай на них вовремя. <b>Подъёмники</b> ездят, пока держат кнопку или после рычага. В поздних уровнях порядок действий важен: камень на кнопку, потом лампа, потом тёмные врата.</p>
@@ -1706,7 +1746,7 @@ const LEVELS_EL = [];
   // «печать»: ворота (x+9) открываются навсегда, только когда одновременно заняты три замка: (1) камень Земли на кнопке (x+3) — без Земли там кнопка, (2) лампа Света (x+5) — без Света кнопка, (3) кнопка (x+7). Ширина 10.
   function sealSt(b, F, x, d, g) {
     if (b.has('e')) b.stone(x, F.s, [[x + 3 * d, F.s]]);
-    b.button(x + 3 * d, F.s, g);
+    if (b.has('e') || b.n > 2) b.button(x + 3 * d, F.s, g);   // вдвоём без Земли замков два (кнопки держат оба героя): первый замок убран
     if (b.has('l')) b.sensor(x + 5 * d, F.s - 1, g); else b.button(x + 5 * d, F.s, g);
     b.button(x + 7 * d, F.s, g);
     if (b.has('e')) b.box(x + 4 * d, F.s, x + 4 * d, F.s);
@@ -2640,7 +2680,7 @@ const S = {
   keys: new Set(), padKeys: new Set(), pkey: '',
   snd: store.get('snd', true), fx: store.get('fx', 1),
   netLost: false, lastSend: 0, lastKey: '', sendN: 0, theme: 0, introT: 0, frames: 0,
-  party: false, proles: [], RL: [], skin: {}, unE: store.get('unE', 1), bestE: store.get('bestE', {}),
+  party: false, soloEl: false, soloR: [null, null], elm: false, proles: [], RL: [], skin: {}, unE: store.get('unE', 1), bestE: store.get('bestE', {}),
 };
 // progress repair: every level with a record unlocks the next one; progress is capped by the number of levels, never reduced
 (function () {
@@ -2707,6 +2747,7 @@ function effectiveSel() {
 }
 function choose(l) {
   if (P.on) { partyChoose(l); return; }
+  if (S.soloEl && l === -2) { show('solo2'); return; }
   const ps = !S.solo ? partnerSel() : null;
   S.sel = { l, ep: Math.max(Date.now(), ps ? ps.ep + 1 : 0) };
   pset({ sel: [S.sel.l, S.sel.ep] });
@@ -2718,18 +2759,21 @@ function syncSelection() {
   const e = effectiveSel();
   if (e.ep === S.cur.ep && e.l === S.cur.l) return;
   S.cur = { l: e.l, ep: e.ep };
-  if (e.l < 0) { S.lv = null; show('levels'); } else loadLevel(e.l, e.ep);
+  if (e.l < 0) { S.lv = null; show(S.soloEl ? 'pick' : 'levels'); } else loadLevel(e.l, e.ep);
 }
 
 // ---------- level lifecycle ----------
 function newRemote() { return { role: null, x: 0, y: 0, vx: 0, vy: 0, face: 1, gr: true, dead: false, door: false, gm: 0, lv: null, active: false, rx: 0, ry: 0, an: newAnim(), sk: null, lt: 0, sc: null }; }
 function newAnim() { return { sx: 1, sy: 1, fl: 1, lean: 0, ph: 0, blink: 0, nextBlink: 2, wasGr: true, landV: 0 }; }
 function loadLevel(i, ep) {
-  S.party = P.on; if (S.party) { S.proles = partyRoles(); S.role = P.myRole; }
-  S.lv = S.party ? buildLevel(EL_LEVELS[i], S.proles) : buildLevel(LEVELS[i]); S.lvDemo = false;
-  S.world = newWorld(S.lv); S.theme = S.party ? Math.min(THEMES.length - 1, Math.floor(i / 5)) : Math.min(THEMES.length - 1, Math.floor(i / PER_WORLD));
+  S.party = P.on; S.elm = P.on || S.soloEl;
+  if (S.party) { S.proles = partyRoles(); S.role = P.myRole; }
+  else if (S.soloEl) { S.proles = S.soloR.slice(); S.role = null; }
+  S.lv = S.elm ? buildLevel(EL_LEVELS[i], S.proles) : buildLevel(LEVELS[i]); S.lvDemo = false;
+  S.world = newWorld(S.lv); S.theme = S.elm ? Math.min(THEMES.length - 1, Math.floor(i / 5)) : Math.min(THEMES.length - 1, Math.floor(i / PER_WORLD));
   S.pl = {}; S.plist.length = 0;
-  const roles = S.solo ? ['f', 'w'] : [S.role];
+  const roles = S.solo ? (S.soloEl ? S.soloR : ['f', 'w']) : [S.role];
+  padColors(S.soloEl ? S.soloR : null);
   for (const r of roles) { const p = newPlayer(S.lv, r); p.px = p.x; p.py = p.y; p.rx = p.x; p.ry = p.y; p.an = newAnim(); p.dead = false; p.sk = skinArr(r); S.pl[r] = p; S.plist.push(p); }
   S.R = (S.solo || S.party) ? null : newRemote();
   S.RL = S.party ? partyRemotes() : S.R ? [S.R] : [];
@@ -2753,7 +2797,7 @@ const lvLen = (lv) => lv.lev.length;
 function levelClock() { return S.solo ? S.simT : (Date.now() - S.cur.ep) / 1000; }
 
 // ---------- screens ----------
-const SCREENS = { title: 'scrTitle', role: 'scrRole', levels: 'scrLevels', set: 'scrSet', skins: 'scrSkins', assign: 'scrAssign', pick: 'scrPick' };
+const SCREENS = { title: 'scrTitle', role: 'scrRole', levels: 'scrLevels', set: 'scrSet', skins: 'scrSkins', assign: 'scrAssign', pick: 'scrPick', el2: 'scrEl2', solo2: 'scrSolo2' };
 function show(scr) {
   const was = S.scr; S.scr = scr;
   for (const k in SCREENS) $(SCREENS[k]).classList.toggle('on', k === scr);
@@ -2762,8 +2806,10 @@ function show(scr) {
   $('pad').classList.toggle('solo', S.solo);
   $('pkJ1').hidden = !S.solo; $('pkJ').hidden = S.solo;
   $('pk2L').hidden = !S.solo; $('pk2R').hidden = !S.solo; $('pk2J').hidden = !S.solo;
-  if (scr === 'title' || scr === 'levels' || scr === 'role' || scr === 'set' || scr === 'skins' || scr === 'assign' || scr === 'pick') demoLevel();
+  if (scr === 'title') S.soloEl = false;
+  if (scr !== 'play') demoLevel();
   if (scr === 'pick') partyPickRefresh();
+  if (scr === 'solo2') solo2Render();
   if (scr === 'assign') assignRender();
   if (scr === 'skins') skinsRender();
   if (scr === 'levels' && was !== 'levels') S.tab = Math.max(0, Math.min(NWORLD - 1, Math.floor((was === 'play' && S.cur.l >= 0 ? S.cur.l : Math.min(S.unlocked, NLEV) - 1) / PER_WORLD)));
@@ -2832,7 +2878,7 @@ $('btnNet').addEventListener('click', () => {
   if (Duo.linked()) { show('role'); return; }
   Duo.pair().then(() => { S.solo = false; if (S.scr === 'title') show('role'); }).catch(() => {});
 });
-$('btnSolo').addEventListener('click', () => { beep('click'); S.solo = true; S.sel = { l: -1, ep: 0 }; S.cur = { l: -1, ep: 0 }; show('levels'); });
+$('btnSolo').addEventListener('click', () => { beep('click'); S.solo = true; S.soloEl = false; S.sel = { l: -1, ep: 0 }; S.cur = { l: -1, ep: 0 }; show('levels'); });
 $('btnSet').addEventListener('click', () => { beep('click'); show('set'); });
 $('setBack').addEventListener('click', () => { beep('click'); show('title'); });
 $('setSnd').addEventListener('click', () => { S.snd = !S.snd; store.set('snd', S.snd); unlockAudio(); beep('click'); refreshMenus(); });
@@ -2860,8 +2906,8 @@ function hideOverlay() { $('ovl').classList.remove('on'); $('app').classList.rem
 function openPause() {
   if (S.end) return;
   S.paused = true;
-  overlay('<div class="big full">Пауза</div>' + (S.lv && S.lv.hint ? '<div class="hintbox full">' + S.lv.hint + '</div>' : '') + '<div class="acts"><button class="btn" id="oRes">Продолжить</button><button class="btn ghost" id="oRe">Начать уровень заново</button></div><div class="acts"><button class="btn ghost" id="oLv">К списку уровней</button>' + (P.on ? '<button class="btn ghost" id="oQuit">Выйти из комнаты</button>' : '') + (S.solo ? '' : '<p class="sub" style="font-size:13px">Заново и выход к уровням сработают на ' + (P.on ? 'всех' : 'обоих') + ' телефонах.</p>') + '</div>',
-    { oRes: () => { S.paused = false; hideOverlay(); }, oRe: () => choose(S.cur.l), oLv: () => choose(-1), oQuit: () => { if (P.on) partyQuit(); } });
+  overlay('<div class="big full">Пауза</div>' + (S.lv && S.lv.hint ? '<div class="hintbox full">' + S.lv.hint + '</div>' : '') + '<div class="acts"><button class="btn" id="oRes">Продолжить</button><button class="btn ghost" id="oRe">Начать уровень заново</button></div><div class="acts"><button class="btn ghost" id="oLv">К списку уровней</button>' + (P.on ? '<button class="btn ghost" id="oQuit">Выйти из комнаты</button>' : S.soloEl ? '<button class="btn ghost" id="oQuit">Главное меню</button>' : '') + (S.solo ? '' : '<p class="sub" style="font-size:13px">Заново и выход к уровням сработают на ' + (P.on ? 'всех' : 'обоих') + ' телефонах.</p>') + '</div>',
+    { oRes: () => { S.paused = false; hideOverlay(); }, oRe: () => choose(S.cur.l), oLv: () => choose(-1), oQuit: () => { if (P.on) partyQuit(); else if (S.soloEl) soloElQuit(); } });
 }
 const DEATH = { f: 'Огонь погас', w: 'Вода испарилась', e: 'Земля увязла', a: 'Воздух развеяло', l: 'Свет погас', s: 'Тень рассеялась' };
 function showDeath(role) {
@@ -2878,14 +2924,14 @@ function showWin() {
   const i = S.cur.l, t = S.tNow;
   const got = collected().size, total = S.lv.gems.length;
   const rank = rankOf(t, got, total, S.lv.par);
-  const bm = S.party ? S.bestE : S.best, prev = bm[i], NL = S.party ? NEL : NLEV;
-  if (!prev || 'ABC'.indexOf(rank) < 'ABC'.indexOf(prev.rank) || (rank === prev.rank && t < prev.t)) { bm[i] = { t, rank, gems: got }; store.set(S.party ? 'bestE' : 'best', bm); }
-  if (S.party) { if (S.unE < Math.min(NEL, i + 2)) { S.unE = Math.min(NEL, i + 2); store.set('unE', S.unE); } }
+  const bm = S.elm ? S.bestE : S.best, prev = bm[i], NL = S.elm ? NEL : NLEV;
+  if (!prev || 'ABC'.indexOf(rank) < 'ABC'.indexOf(prev.rank) || (rank === prev.rank && t < prev.t)) { bm[i] = { t, rank, gems: got }; store.set(S.elm ? 'bestE' : 'best', bm); }
+  if (S.elm) { if (S.unE < Math.min(NEL, i + 2)) { S.unE = Math.min(NEL, i + 2); store.set('unE', S.unE); } }
   else if (S.unlocked < Math.min(NLEV, i + 2)) { S.unlocked = Math.min(NLEV, i + 2); store.set('un', S.unlocked); pset({ un: S.unlocked }); }
   const last = i >= NL - 1;
   setTimeout(() => {
     if (S.end !== 'win') return;
-    overlay('<div class="big full" style="color:var(--gold)">' + (last ? (S.party ? 'Стихии покорены!' : 'Храм пройден!') : 'Уровень пройден!') + '</div><div><div class="rank">' + rank + '</div><div class="stats"><span>⏱ ' + fmtT(t) + '</span><span>◆ ' + got + '/' + total + '</span></div></div>' +
+    overlay('<div class="big full" style="color:var(--gold)">' + (last ? (S.elm ? 'Стихии покорены!' : 'Храм пройден!') : 'Уровень пройден!') + '</div><div><div class="rank">' + rank + '</div><div class="stats"><span>⏱ ' + fmtT(t) + '</span><span>◆ ' + got + '/' + total + '</span></div></div>' +
       '<div class="acts">' + (last ? '<p class="sub">Все ' + NL + ' уровней пройдены!</p>' : '<button class="btn hot" id="oNx">Следующий уровень</button>') +
       '<div class="row"><button class="btn ghost" id="oRe">Ещё раз</button><button class="btn ghost" id="oLv">К уровням</button></div></div>',
       { oNx: () => choose(i + 1), oRe: () => choose(i), oLv: () => choose(-1) });
@@ -2930,7 +2976,7 @@ const INP = { l: false, r: false, j: false };
 function inputFor(role) {
   const P = S.padKeys, K = S.keys;
   if (S.solo) {
-    if (role === 'f') { INP.l = P.has('L') || K.has('2L'); INP.r = P.has('R') || K.has('2R'); INP.j = P.has('J') || K.has('2J'); }
+    if (S.soloEl ? role === S.soloR[0] : role === 'f') { INP.l = P.has('L') || K.has('2L'); INP.r = P.has('R') || K.has('2R'); INP.j = P.has('J') || K.has('2J'); }
     else { INP.l = P.has('2L') || K.has('L'); INP.r = P.has('2R') || K.has('R'); INP.j = P.has('2J') || K.has('J'); }
     return INP;
   }
@@ -3063,7 +3109,7 @@ function tick() {
     }
   }
   if (S.party) { if (partyAllHome()) showWin(); }
-  else if (S.solo) { if (S.pl.f.door && S.pl.w.door) showWin(); }
+  else if (S.solo) { if (S.soloEl ? pls.every((q) => q.door) : S.pl.f.door && S.pl.w.door) showWin(); }
   else if (S.role && S.pl[S.role] && S.pl[S.role].door && R && R.active && R.door) showWin();
   if (S.party) partyNetSend(); else if (!S.solo) netSend();
 }
@@ -3938,12 +3984,14 @@ function updateHud(dt) {
   if (r !== hudR) { hudR = r; $('hudR').textContent = r; }
   if (b !== hudB) { hudB = b; $('hudB').textContent = b; }
   if (tm !== hudT) { hudT = tm; $('hudT').textContent = tm; }
-  if (S.party) {
+  if (S.elm) {
     // one chip per hero in the game: fire/water use the usual two chips, the other elements their own
     let key = '';
     for (const e of ['e', 'a', 'l', 's']) { const on = S.proles.indexOf(e) >= 0; if (on) key += e + gemCount(e) + '/' + (tot[e] || 0) + ' '; const el = $('hud' + e.toUpperCase()); if (el.hidden === on) el.hidden = !on; }
     for (const e of ['f', 'w']) { const el = $(e === 'f' ? 'hudR' : 'hudB'); const on = S.proles.indexOf(e) >= 0; if (el.hidden === on) el.hidden = !on; }
-    if (key !== hudX) { hudX = key; for (const e of ['e', 'a', 'l', 's']) if (S.proles.indexOf(e) >= 0) $('hud' + e.toUpperCase()).textContent = '◆ ' + gemCount(e) + '/' + (tot[e] || 0); }
+    if (key !== hudX) { hudX = key; for (const e of ['e', 'a', 'l', 's']) if (S.proles.indexOf(e) >= 0) $('hud' + e.toUpperCase()).textContent = '◆ ' + gemCount(e) + '/' + (tot[e] || 0); }  } else if (hudX !== '-') {   // classic level: only fire and water chips
+    hudX = '-'; for (const e of ['e', 'a', 'l', 's']) $('hud' + e.toUpperCase()).hidden = true;
+    $('hudR').hidden = false; $('hudB').hidden = false;
   }
   let pg = '';
   const pe = $('hudPing');
@@ -4011,7 +4059,7 @@ function frame(now) {
     for (let k = 0; k < S.RL.length; k++) { const R = S.RL[k]; if (R.active && R.dead && !S.end) showDeath(R.role); }
     updateHud(dt);
   }
-  if (S.scr === 'role') drawAvatars(dt, now / 1000); else if (S.scr === 'skins' || S.scr === 'assign') previewTick(dt, now / 1000);
+  if (S.scr === 'role') drawAvatars(dt, now / 1000); else if (S.scr === 'skins' || S.scr === 'assign' || S.scr === 'solo2') previewTick(dt, now / 1000);
   draw(alpha, dt, now / 1000);
 }
 
@@ -4035,7 +4083,7 @@ let pvAcc = 0;
 function previewTick(dt, t) {
   pvAcc += dt; if (pvAcc < 1 / 30) return; const d = pvAcc; pvAcc = 0;
   if (S.scr === 'skins') pvDraw($('skCv'), SK.el, skinArr(SK.el), t, d, true);
-  else if (S.scr === 'assign') document.querySelectorAll('#asList canvas').forEach((c) => pvDraw(c, c.dataset.r, c._sk || [0, 0], t, d, false));
+  else if (S.scr === 'assign' || S.scr === 'solo2') $(SCREENS[S.scr]).querySelectorAll('canvas[data-r]').forEach((c) => pvDraw(c, c.dataset.r, c._sk || [0, 0], t, d, false));
 }
 
 // ---------- skins screen ----------
@@ -4079,7 +4127,7 @@ $('btnSkins').addEventListener('click', () => { beep('click'); show('skins'); sk
 $('skBack').addEventListener('click', () => { beep('click'); show('title'); });
 
 // ---------- «Стихии»: room, roles, level choice ----------
-const P = { on: false, inited: false, roles: {}, myRole: null, lost: false, lastLvl: 0 };
+const P = { on: false, inited: false, min: 3, roles: {}, myRole: null, lost: false, lastLvl: 0, pend: null };
 function partyRoles() { const v = Object.keys(P.roles).map((k) => P.roles[k]); return ELS.filter((r) => v.indexOf(r) >= 0); }
 function applyMyRole() { P.myRole = P.roles[Party.me.slot] || null; S.role = P.myRole; }
 const partyLinked = () => P.on && !P.lost;
@@ -4090,11 +4138,16 @@ function partySkinObj() {
 }
 function partySkinPush() { try { Party.setSkin(partySkinObj()); } catch (e) {} }
 function pName(slot) { const q = Party.players.find((x) => x.slot === slot); return q ? (q.name || ('Игрок ' + (slot + 1))) : 'Игрок'; }
-function partyInit() {
-  if (P.inited) return true;
+// min = 2: «Стихии вдвоём» по сети (комната ровно на двоих), min = 3: «Стихии: 3–6 игроков». Комнаты общие (один game id), режим задаёт хозяин.
+function partyInit(min) {
   if (typeof Party === 'undefined') return false;
+  if (P.inited && P.min === min) return true;
+  if (P.inited && Party.code) { try { Party.leave(); } catch (e) {} }
+  const first = !P.inited; P.min = min;
+  if (!first) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }   // не входить повторно по #room=
+  Party.init({ game: 'ogon-i-voda-stihii', title: min === 2 ? 'Огонь и Вода: Стихии вдвоём' : 'Огонь и Вода: Стихии', min, max: min === 2 ? 2 : 6, accent: '#e2bd62', skin: partySkinObj, skinColor: (s) => (s && s.c) || '#e2bd62', autoResume: first });
+  if (!first) return true;
   P.inited = true;
-  Party.init({ game: 'ogon-i-voda-stihii', title: 'Огонь и Вода: Стихии', min: 3, max: 6, accent: '#e2bd62', skin: partySkinObj, skinColor: (s) => (s && s.c) || '#e2bd62' });
   Party.on('start', onPartyStart);
   Party.on('msg', onPartyMsg);
   Party.on('roster', () => {
@@ -4116,9 +4169,7 @@ function partyQuit() {
   S.cur = { l: -1, ep: 0 }; S.lvDemo = false; hideOverlay(); show('title');
 }
 function onPartyStart(cfg) {
-  P.on = true; P.lost = false; P.roles = {};
-  const list = cfg.players.slice().sort((a, b) => a.slot - b.slot);
-  list.forEach((q, i) => { P.roles[q.slot] = ELS[i % 6]; });
+  P.on = true; P.lost = false; P.roles = {}; P.pend = null;
   applyMyRole();
   S.solo = false; S.party = true; S.netLost = false; S.paused = false; S.end = null; S.cur = { l: -2, ep: 0 };
   S.lvDemo = false; hideOverlay();
@@ -4128,18 +4179,24 @@ function onPartyStart(cfg) {
 const syncObj = () => ({ roles: P.roles, l: S.cur.l, ep: S.cur.ep, unE: S.unE });
 function onPartyMsg(type, d, from) {
   if (!P.on) return;
-  if (type === 'assign' && from === 0) { P.roles = d.roles; applyMyRole(); if (S.scr === 'assign') assignRender(); }
+  if (type === 'assign' && from === 0) {
+    P.roles = d.roles || {}; applyMyRole();
+    if (P.pend && P.myRole !== P.pend) { const o = ownerOf(P.pend); if (o >= 0 && o !== Party.me.slot) toast('«' + ROLE_NAME[P.pend] + '» уже взял ' + pName(o)); }
+    P.pend = null; if (S.scr === 'assign') assignRender();
+  }
+  else if (type === 'pick' && Party.isHost) { if (d && (d.el === null || ELS.indexOf(d.el) >= 0) && !hostSet(from, d.el)) Party.send('assign', { roles: P.roles }, from); }
   else if (type === 'lvl' && from === 0) { if (d.roles) { P.roles = d.roles; applyMyRole(); } applyLvl(d); }
   else if (type === 'sync' && from === 0) { P.roles = d.roles; applyMyRole(); if (d.l !== S.cur.l || d.ep !== S.cur.ep) applyLvl(d); }
   else if (type === 'needSync' && Party.isHost) Party.send('sync', syncObj(), from);
   else if (type === 'req' && Party.isHost) {
     const l = d && d.l;
-    if (!Number.isInteger(l) || l < -1 || l >= NEL || (l >= 0 && l >= S.unE)) return;
+    if (!Number.isInteger(l) || l < -1 || l >= NEL || (l >= 0 && l >= S.unE) || !partyReady()) return;
     if (performance.now() - P.lastLvl < 1500) return;     // two phones asked for the same thing at once
     partyChoose(l);
   }
 }
 function applyLvl(d) {
+  if (d.l >= 0 && !P.myRole) { S.cur = { l: -2, ep: 0 }; show('assign'); toast('Сначала выбери стихию'); return; }
   if (typeof d.unE === 'number' && d.unE > S.unE) { S.unE = Math.min(NEL, d.unE); store.set('unE', S.unE); }
   S.cur = { l: d.l, ep: d.ep || Date.now() };
   S.end = null; S.paused = false; S.party = true;
@@ -4149,55 +4206,131 @@ function applyLvl(d) {
 }
 function partyChoose(l) {
   if (!Party.isHost) { if (l !== -2) Party.send('req', { l }, 0); return; }
+  if (l !== -2 && !partyReady()) { toast('У каждого игрока должна быть своя стихия'); return; }
   P.lastLvl = performance.now();
   const d = { l, ep: Date.now(), unE: S.unE };
   Party.send('lvl', d); applyLvl(d);
 }
 
-// ---------- hero list (host reassigns elements) ----------
+// ---------- choice of heroes: every player taps a free element; the host decides races, can reassign and auto-fill ----------
+function ownerOf(r) { for (const k in P.roles) if (P.roles[k] === r) return +k; return -1; }
+function partyReady() { const ps = Party.players.filter((q) => q.online !== false); return ps.length >= 2 && ps.every((q) => ELS.indexOf(P.roles[q.slot]) >= 0); }
+// host only: give element r (or nothing) to slot; false if somebody else already has it
+function hostSet(slot, r) {
+  if (!Party.players.some((q) => q.slot === slot)) return false;
+  if (r) { const o = ownerOf(r); if (o >= 0 && o !== slot) return false; P.roles[slot] = r; } else delete P.roles[slot];
+  applyMyRole(); Party.send('assign', { roles: P.roles }); assignRender(); return true;
+}
+function assignPick(r) {
+  const me = Party.me.slot, mine = P.roles[me] === r, o = ownerOf(r);
+  if (o >= 0 && !mine) { toast('«' + ROLE_NAME[r] + '» уже занял ' + pName(o)); return; }
+  if (Party.isHost) hostSet(me, mine ? null : r);
+  else { P.pend = mine ? null : r; Party.send('pick', { el: mine ? null : r }, 0); }
+}
+function elTile(r, label, cls, sk, onTap) {
+  const b = document.createElement('button'); b.className = 'elT ' + cls; b.style.setProperty('--c', ROLE_COL[r]); b.dataset.r = r;
+  const c = document.createElement('canvas'); c.width = 64; c.height = 64; c.dataset.r = r; c._sk = sk; b.appendChild(c);
+  const n = document.createElement('b'); n.textContent = ROLE_NAME[r]; b.appendChild(n);
+  const l = document.createElement('small'); l.textContent = label; b.appendChild(l);
+  b.addEventListener('click', () => { beep('click'); onTap(); });
+  return b;
+}
 function assignRender() {
-  const box = $('asList'); const ps = Party.players.slice().sort((a, b) => a.slot - b.slot);
-  const key = ps.map((q) => q.slot + ':' + (P.roles[q.slot] || '') + (q.online === false ? 'x' : '')).join(',');
-  const host = Party.isHost;
-  $('asInfo').innerHTML = host ? 'Нажми на героя игрока, чтобы поменять стихию. Потом — «К уровням».' : 'Хозяин распределяет героев. Свой герой: <b>' + (P.myRole ? ROLE_NAME[P.myRole] : '?') + '</b>';
-  $('asGo').hidden = !host; $('asGo').disabled = ps.length < 3;
-  if (box.dataset.key === key && box.dataset.host === String(host)) return;
-  box.dataset.key = key; box.dataset.host = String(host); box.innerHTML = '';
+  const ps = Party.players.slice().sort((a, b) => a.slot - b.slot), host = Party.isHost, me = Party.me.slot;
+  const ready = partyReady();
+  $('asInfo').innerHTML = (host ? 'Тапни свободную стихию, чтобы взять её (ещё тап — отпустить). Хозяин назначает стихии строками игроков или кнопкой «Раздать автоматически». ' : 'Тапни свободную стихию, чтобы взять её (ещё тап — отпустить). ')
+    + (P.myRole ? 'Твой герой: <b>' + ROLE_NAME[P.myRole] + '</b>.' : '<b>Выбери героя.</b>') + (ready ? '' : ' Ждём, пока у всех будет своя стихия.');
+  $('asGo').hidden = !host; $('asGo').disabled = !ready;
+  $('asAuto').parentNode.hidden = !host; $('asAuto').disabled = ps.every((q) => P.roles[q.slot]);
+  const key = ps.map((q) => q.slot + ':' + (P.roles[q.slot] || '') + ':' + (q.name || '') + (q.online === false ? 'x' : '')).join(',') + '|' + host + '|' + me;
+  const box = $('asList'), board = $('asBoard');
+  if (box.dataset.key === key) return;
+  box.dataset.key = key; box.innerHTML = ''; board.innerHTML = '';
+  const nameOf = (q) => (q.host ? '👑 ' : '') + (q.name || ('Игрок ' + (q.slot + 1)));
+  ELS.forEach((r) => {
+    const o = ownerOf(r), q = o >= 0 ? ps.find((x) => x.slot === o) : null;
+    const sk = q && q.skin && q.skin.s && q.skin.s[r];
+    board.appendChild(elTile(r, o < 0 ? 'Свободно' : o === me ? 'Ты' : (q ? nameOf(q) : 'Занято'), o < 0 ? '' : o === me ? 'mine' : 'taken', Array.isArray(sk) ? sk : skinArr(r), () => assignPick(r)));
+  });
   ps.forEach((q) => {
-    const r = P.roles[q.slot]; if (!r) return;
-    const row = document.createElement('div'); row.className = 'asRow' + (q.slot === Party.me.slot ? ' me' : '');
-    const c = document.createElement('canvas'); c.width = 72; c.height = 72; c.dataset.r = r;
-    const sk = q.skin && q.skin.s && q.skin.s[r]; c._sk = Array.isArray(sk) ? sk : [0, 0]; row.appendChild(c);
+    const r = P.roles[q.slot];
+    const row = document.createElement('div'); row.className = 'asRow' + (q.slot === me ? ' me' : '');
+    const c = document.createElement('canvas'); c.width = 72; c.height = 72;
+    if (r) { c.dataset.r = r; const sk = q.skin && q.skin.s && q.skin.s[r]; c._sk = Array.isArray(sk) ? sk : [0, 0]; }
+    row.appendChild(c);
     const nm = document.createElement('div'); nm.className = 'asNm';
-    nm.textContent = (q.host ? '👑 ' : '') + (q.name || ('Игрок ' + (q.slot + 1))) + (q.slot === Party.me.slot ? ' (ты)' : '') + (q.online === false ? ' · нет связи' : '');
+    nm.textContent = nameOf(q) + (q.slot === me ? ' (ты)' : '') + (q.online === false ? ' · нет связи' : '');
     row.appendChild(nm);
-    const b = document.createElement('button'); b.className = 'asEl'; b.style.setProperty('--c', ROLE_COL[r]); b.disabled = !host;
-    b.innerHTML = '<b>' + ROLE_NAME[r] + '</b><small>' + ROLE_DESC[r] + '</small>';
+    const b = document.createElement('button'); b.className = 'asEl'; b.style.setProperty('--c', r ? ROLE_COL[r] : '#888'); b.disabled = !host;
+    b.innerHTML = r ? '<b>' + ROLE_NAME[r] + '</b><small>' + ROLE_DESC[r] + '</small>' : '<b>—</b><small>' + (host ? 'тапни: назначить' : 'ещё не выбрал') + '</small>';
     b.addEventListener('click', () => { beep('click'); assignCycle(q.slot); });
     row.appendChild(b); box.appendChild(row);
   });
 }
+// host: next element for a player (taken by another → they swap; a swap partner left without anything stays unassigned)
 function assignCycle(slot) {
   if (!Party.isHost) return;
-  const cur = P.roles[slot]; const nxt = ELS[(ELS.indexOf(cur) + 1) % ELS.length];
-  const other = Object.keys(P.roles).find((k) => P.roles[k] === nxt);
-  if (other !== undefined) P.roles[other] = cur;      // taken → swap
+  const cur = P.roles[slot], nxt = ELS[(ELS.indexOf(cur) + 1) % ELS.length];
+  const o = ownerOf(nxt);
+  if (o >= 0 && o !== slot) { if (cur) P.roles[o] = cur; else delete P.roles[o]; }
   P.roles[slot] = nxt; applyMyRole();
   Party.send('assign', { roles: P.roles }); assignRender();
 }
+function assignAuto() {
+  if (!Party.isHost) return;
+  const ps = Party.players.slice().sort((a, b) => a.slot - b.slot);
+  ps.forEach((q) => { if (P.roles[q.slot]) return; const f = ELS.find((r) => ownerOf(r) < 0); if (f) P.roles[q.slot] = f; });
+  applyMyRole(); Party.send('assign', { roles: P.roles }); assignRender();
+}
 $('asGo').addEventListener('click', () => { beep('click'); partyChoose(-1); });
+$('asAuto').addEventListener('click', () => { beep('click'); assignAuto(); });
 $('asBack').addEventListener('click', () => { beep('click'); partyQuit(); });
+
+// ---------- «Стихии вдвоём» на одном телефоне: левая и правая половина экрана ----------
+const SO = { r: [null, null] };
+(function () { const v = store.get('el2', null); if (Array.isArray(v) && v.length === 2 && v[0] !== v[1] && ELS.indexOf(v[0]) >= 0 && ELS.indexOf(v[1]) >= 0) SO.r = v; })();
+function solo2Render() {
+  for (let side = 0; side < 2; side++) {
+    const row = $('so' + side); row.innerHTML = '';
+    ELS.forEach((r) => {
+      const mine = SO.r[side] === r, taken = SO.r[1 - side] === r;
+      row.appendChild(elTile(r, mine ? 'выбран' : taken ? 'занят' : '', mine ? 'mine' : taken ? 'taken' : '', skinArr(r), () => { if (taken) return; SO.r[side] = mine ? null : r; solo2Render(); }));
+    });
+  }
+  const ok = !!(SO.r[0] && SO.r[1]);
+  $('soGo').disabled = !ok;
+  $('soInfo').innerHTML = ok ? 'Слева — <b>' + ROLE_NAME[SO.r[0]] + '</b>, справа — <b>' + ROLE_NAME[SO.r[1]] + '</b>. У каждого свои кнопки на своей половине экрана.' : 'Выберите по одной стихии для каждой половины экрана (одинаковых нельзя).';
+}
+function padColors(roles) {
+  const g = document.querySelectorAll('#pad .grp');
+  g.forEach((el, i) => { if (roles && roles[i]) el.style.setProperty('--pc', ROLE_COL[roles[i]]); else el.style.removeProperty('--pc'); });
+}
+function soloElQuit() { S.soloEl = false; S.solo = false; S.elm = false; S.end = null; S.paused = false; S.cur = { l: -1, ep: 0 }; S.sel = { l: -1, ep: 0 }; S.lvDemo = false; padColors(null); hideOverlay(); show('title'); }
+$('btnEl2').addEventListener('click', () => { beep('click'); show('el2'); });
+$('el2Back').addEventListener('click', () => { beep('click'); show('title'); });
+$('el2Net').addEventListener('click', () => {
+  beep('click');
+  if (!partyInit(2)) { toast('Сетевой модуль недоступен'); return; }
+  S.solo = false; S.soloEl = false; partySkinPush(); Party.lobby();
+});
+$('el2Solo').addEventListener('click', () => { beep('click'); S.solo = true; S.soloEl = true; S.sel = { l: -1, ep: 0 }; S.cur = { l: -1, ep: 0 }; show('solo2'); });
+$('soBack').addEventListener('click', () => { beep('click'); S.solo = false; S.soloEl = false; show('el2'); });
+$('soGo').addEventListener('click', () => {
+  if (!(SO.r[0] && SO.r[1])) return;
+  beep('click'); store.set('el2', SO.r); S.soloR = SO.r.slice(); S.proles = S.soloR.slice();
+  S.sel = { l: -1, ep: 0 }; S.cur = { l: -1, ep: 0 }; show('pick');
+});
 
 // ---------- level choice ----------
 function partyPickRefresh() {
-  if (!P.on) return;
+  if (!P.on && !S.soloEl) return;
   const grid = $('plGrid');
   if (grid.childElementCount !== NEL) {
     grid.innerHTML = '';
     EL_LEVELS.forEach((L, i) => {
       const b = document.createElement('button'); b.className = 'lv'; b.id = 'pl' + i;
       b.innerHTML = '<span class="n">' + (i + 1) + '</span><span class="t"></span><span class="s"></span>';
-      b.addEventListener('click', () => { beep('click'); partyChoose(i); });
+      b.addEventListener('click', () => { beep('click'); choose(i); });
       grid.appendChild(b);
     });
   }
@@ -4207,16 +4340,21 @@ function partyPickRefresh() {
     b.querySelector('.t').textContent = i >= S.unE ? '🔒' : L.name;
     b.querySelector('.s').textContent = best ? best.rank + ' · ' + fmtT(best.t) : '';
   });
+  if (S.soloEl) {
+    $('plStatus').innerHTML = 'На одном телефоне: слева — <b>' + ROLE_NAME[S.soloR[0]] + '</b>, справа — <b>' + ROLE_NAME[S.soloR[1]] + '</b>.';
+    $('plHeroes').hidden = false; $('plBack').textContent = 'Главное меню';
+    return;
+  }
   const names = partyRoles().map((r) => ROLE_NAME[r]).join(', ');
   $('plStatus').innerHTML = '<b>●</b> ' + Party.players.length + ' ' + plural(Party.players.length, 'игрок', 'игрока', 'игроков') + ': ' + names + '. Ты — ' + (P.myRole ? ROLE_NAME[P.myRole] : '?') + '. Уровень может выбрать любой.';
-  $('plHeroes').hidden = !Party.isHost;
+  $('plHeroes').hidden = !Party.isHost; $('plBack').textContent = 'Выйти из комнаты';
 }
-$('plHeroes').addEventListener('click', () => { beep('click'); partyChoose(-2); });
-$('plBack').addEventListener('click', () => { beep('click'); partyQuit(); });
+$('plHeroes').addEventListener('click', () => { beep('click'); if (P.on) partyChoose(-2); else show('solo2'); });
+$('plBack').addEventListener('click', () => { beep('click'); if (P.on) partyQuit(); else soloElQuit(); });
 $('btnParty').addEventListener('click', () => {
   beep('click');
-  if (!partyInit()) { toast('Сетевой модуль недоступен'); return; }
-  S.solo = false; partySkinPush();
+  if (!partyInit(3)) { toast('Сетевой модуль недоступен'); return; }
+  S.solo = false; S.soloEl = false; partySkinPush();
   Party.lobby();
 });
 
