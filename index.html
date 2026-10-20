@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="ru"><head><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="games/icons/ogon-i-voda-180.png"><link rel="stylesheet" href="games/shared/fonts/fonts.css"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Огонь и Вода"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#15130e"></head><body>
-<script src="games/shared/duo.js"></script>
+<html lang="ru"><head><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="games/icons/ogon-i-voda-180.png"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Огонь и Вода"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#15130e"><link rel="stylesheet" href="games/shared/fonts/fonts.css"></head><body>
+<script src="games/shared/duo.js"></script><script src="games/shared/party.js"></script>
 <title>Огонь и Вода</title>
 <style>
 /* One full-screen stage: the live canvas is always behind; menus are screens that fade over it. */
@@ -30,7 +30,7 @@ button { font-family: inherit; }
 #hud .hchips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; order: 3; flex-basis: 100%; }
 #hud .chip { background: rgba(10,8,4,.55); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 14px; line-height: 1.3; white-space: nowrap; font-variant-numeric: tabular-nums; }
 #hud .ping { font-size: 12px; color: var(--goo); } #hud .ping.slow { color: #ffb4a0; }
-#hud .gr { color: var(--fire-hi); } #hud .gb { color: var(--water-hi); }
+#hud .gr { color: var(--fire-hi); } #hud .gb { color: var(--water-hi); } #hud .ge { color: #e0b878; } #hud .ga { color: #dff6ff; } #hud .gl { color: #fff3a0; } #hud .gs { color: #c9a8ff; }
 #hud .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #777; }
 #hud .dot.on { background: var(--goo); box-shadow: 0 0 8px var(--goo); }
 #hud button { pointer-events: auto; }
@@ -135,7 +135,38 @@ h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin
 #scrSet > .box { max-height: 100%; min-height: 0; }
 #scrSet .cols { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior: contain; padding: 2px; }
 #scrSet h2, #scrSet #setBack { flex: none; }
-@media (orientation: landscape) and (max-height: 520px) { #scrSet .box { width: min(860px, 100%); } #scrSet .cols { flex-direction: row; align-items: flex-start; } #scrSet .cols > * { flex: 1 1 0; min-width: 0; } }
+@media (orientation: landscape) and (max-height: 520px) { #scrSet .box { width: min(860px, 100%); } #scrSet .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; } #scrSet .cols > .box { width: auto; min-width: 0; margin: 0; } #scrSet .cols > .wide { grid-column: 1 / -1; } }
+
+
+/* skins / elements */
+.skTabs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+.skTab { min-height: 44px; border-radius: 12px; border: 2px solid var(--line); background: rgba(0,0,0,.4); color: var(--muted); font-weight: 900; font-size: 12px; padding: 2px; cursor: pointer; touch-action: manipulation; }
+.skTab.on { color: var(--ink); border-color: var(--c); background: rgba(255,255,255,.1); box-shadow: 0 0 10px -2px var(--c); }
+.skMain { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+#skCv { width: min(200px, 30vh); height: min(200px, 30vh); }
+.skCtl { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+.skLbl { font-size: 13px; font-weight: 800; color: var(--muted); }
+.skRow { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.skOpt { width: 74px; min-height: 84px; border-radius: 12px; border: 2px solid var(--line); background: rgba(0,0,0,.4); color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 0; padding: 2px; cursor: pointer; touch-action: manipulation; font-size: 11px; font-weight: 800; font-family: var(--font-ui); }
+.skOpt canvas { width: 56px; height: 56px; }
+.skOpt.on { border-color: var(--gold); background: rgba(226,189,98,.18); }
+.skSw { width: 46px; height: 46px; border-radius: 50%; border: 3px solid rgba(255,255,255,.25); cursor: pointer; touch-action: manipulation; padding: 0; }
+.skSw.on { border-color: #fff; box-shadow: 0 0 0 2px var(--gold); }
+@media (orientation: landscape) and (max-height: 520px) {
+  #scrSkins .box { width: min(860px, 100%); gap: 6px; } #scrSkins .skMain { flex-direction: row; align-items: center; } #scrSkins .skCtl { flex: 1; }
+  #skCv { width: 150px; height: 150px; } .skOpt { min-height: 80px; } #scrSkins .sub { font-size: 12px !important; }
+}
+.asList { display: flex; flex-direction: column; gap: 8px; }
+.asRow { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,.35); border: 1px solid var(--line); border-radius: 14px; padding: 4px 8px; min-height: 60px; }
+.asRow.me { border-color: var(--gold); }
+.asRow canvas { width: 52px; height: 52px; flex: none; }
+.asNm { flex: 1 1 0; min-width: 0; font-weight: 800; font-size: 15px; overflow-wrap: anywhere; }
+.asEl { flex: none; width: 46%; min-height: 48px; border-radius: 12px; border: 2px solid var(--c); background: rgba(255,255,255,.07); color: var(--ink); font-family: var(--font-ui); cursor: pointer; touch-action: manipulation; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3px 6px; line-height: 1.15; }
+.asEl b { font-size: 16px; color: var(--c); } .asEl small { font-size: 10px; color: var(--muted); font-weight: 700; text-align: center; }
+.asEl:disabled { opacity: 1; }
+@media (orientation: landscape) and (max-height: 520px) { #scrAssign .box, #scrPick .box { width: min(860px, 100%); gap: 6px; } .asList { display: grid; grid-template-columns: 1fr 1fr; } #scrAssign h2, #scrPick h2 { font-size: 20px; } .asRow { min-height: 52px; } }
+#scrPick .box { width: min(640px, 100%); }
+#scrAssign, #scrPick, #scrSkins { align-items: flex-start; }
 
 /* modal */
 #ovl { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: max(12px, var(--sat)) max(16px, var(--sar)) max(12px, var(--sab)) max(16px, var(--sal)); background: rgba(10,9,6,.62); opacity: 0; visibility: hidden; transition: opacity .25s, visibility 0s linear .25s; }
@@ -170,7 +201,7 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
   <div id="banner"><div class="bn-n" id="bnN"></div><div class="bn-t" id="bnT"></div></div>
   <div id="hud" hidden>
     <div class="hname"><span class="dot" id="netDot" title="Связь"></span><span class="lvl" id="hudLvl"></span></div>
-    <div class="hchips"><span class="chip gr" id="hudR">◆ 0/0</span><span class="chip gb" id="hudB">◆ 0/0</span><span class="chip" id="hudT">0:00</span><span class="chip ping" id="hudPing" hidden></span></div>
+    <div class="hchips"><span class="chip gr" id="hudR">◆ 0/0</span><span class="chip gb" id="hudB">◆ 0/0</span><span class="chip ge" id="hudE" hidden>◆ 0/0</span><span class="chip ga" id="hudA" hidden>◆ 0/0</span><span class="chip gl" id="hudL" hidden>◆ 0/0</span><span class="chip gs" id="hudS" hidden>◆ 0/0</span><span class="chip" id="hudT">0:00</span><span class="chip ping" id="hudPing" hidden></span></div>
     <button class="iconbtn" id="btnPause" aria-label="Пауза">❚❚</button>
   </div>
   <div id="pad" hidden>
@@ -183,12 +214,13 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
       <div class="logo">
         <h1><span class="f">Огонь</span> <span class="and">и</span> <span class="w">Вода</span></h1>
         <p class="sub" id="subTitle">Храм на двоих</p>
-        <div class="status" id="netStatus">Играйте вдвоём: по сети или на одном телефоне.</div>
+        <div class="status" id="netStatus">Играйте вдвоём или компанией до шести человек.</div>
       </div>
       <div class="menu">
         <button class="btn hot" id="btnNet">Играть вдвоём по сети<small>Два айфона, у каждого свой герой</small></button>
         <button class="btn" id="btnSolo">Вдвоём на одном телефоне<small>Слева огонь, справа вода</small></button>
-        <button class="btn ghost" id="btnSet">Настройки и помощь</button>
+        <button class="btn" id="btnParty">Стихии: 3–6 игроков<small>Земля, Воздух, Свет и Тень · у каждого свой телефон</small></button>
+        <div class="row"><button class="btn ghost" id="btnSkins">🎨 Скины</button><button class="btn ghost" id="btnSet">Настройки и помощь</button></div>
         <a class="btn ghost" id="btnSave" href="games/#save">💾 Сохранение прогресса</a>
         <a class="allg" id="btnAll" href="games/">← Все игры</a>
       </div>
@@ -216,6 +248,42 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
     </div>
   </section>
 
+  <section class="scr" id="scrSkins">
+    <div class="box">
+      <h2>Скины</h2>
+      <div class="skTabs" id="skEl"></div>
+      <div class="skMain">
+        <canvas id="skCv" width="240" height="240"></canvas>
+        <div class="skCtl">
+          <div class="skLbl">Форма</div><div class="skRow" id="skShapes"></div>
+          <div class="skLbl">Оттенок</div><div class="skRow" id="skShades"></div>
+        </div>
+      </div>
+      <p class="sub" id="skName"></p>
+      <p class="sub" style="font-size:13px">Скин виден другим игрокам. Стихию всегда видно сразу: оттенки не выходят за её цвета.</p>
+      <button class="btn ghost" id="skBack">Назад</button>
+    </div>
+  </section>
+
+  <section class="scr" id="scrAssign">
+    <div class="box">
+      <h2>Герои стихий</h2>
+      <div class="status" id="asInfo"></div>
+      <div class="asList" id="asList"></div>
+      <button class="btn hot" id="asGo">К уровням</button>
+      <button class="btn ghost" id="asBack">Выйти из комнаты</button>
+    </div>
+  </section>
+
+  <section class="scr" id="scrPick">
+    <div class="box">
+      <h2>Стихии</h2>
+      <div class="grid" id="plGrid"></div>
+      <div class="status" id="plStatus"></div>
+      <div class="row"><button class="btn ghost" id="plHeroes">Сменить героев</button><button class="btn ghost" id="plBack">Выйти из комнаты</button></div>
+    </div>
+  </section>
+
   <section class="scr" id="scrSet">
     <div class="box">
       <h2>Настройки и помощь</h2>
@@ -224,6 +292,7 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
           <div class="setrow"><div class="set"><span>Звук</span><button class="btn ghost" id="setSnd">Вкл</button></div>
           <div class="set"><span>Эффекты</span><button class="btn ghost" id="setFx">Полные</button></div></div>
           <div class="help"><h3>Для 120 Гц на iPhone</h3><p>Настройки → Приложения → Safari → Дополнения → Feature Flags → выключить «Prefer Page Rendering Updates near 60fps».</p></div>
+          <div class="help"><h3>Скины</h3><p>«Скины» на главном экране: у каждой стихии несколько форм и оттенков. Выбор сохраняется, и другие игроки видят тебя в твоём скине.</p></div>
         </div>
         <div class="box" style="gap:10px">
           <div class="help"><h3>Как подключить второй айфон</h3>
@@ -233,6 +302,13 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
               <li>Второй вводит этот код. Без интернета можно подключиться рядом, по Wi-Fi или точке доступа.</li>
             </ol></div>
           <div class="help"><h3>Как играть</h3><p>Огонь безопасно ходит по лаве, вода — по воде. Зелёная жижа опасна обоим. Собирайте кристаллы своего цвета, нажимайте кнопки и рычаги, помогайте друг другу и вместе дойдите до своих дверей.</p></div>
+        </div>
+        <div class="box wide" style="gap:10px">
+          <div class="help"><h3>Стихии: 3–6 игроков</h3>
+            <p>Кнопка «Стихии» на главном экране: один создаёт комнату (4 цифры), остальные входят по коду. Хозяин раздаёт героев и выбирает уровень. Играют только по сети, у каждого свой телефон.</p>
+            <p>У каждой стихии свой бассейн: он безопасен для хозяина и смертелен для остальных. Зелёная жижа убивает всех. Свои кристаллы и своя дверь у каждого, к дверям нужно дойти всем.</p>
+            <p><b>Огонь</b> — лава. <b>Вода</b> — вода. <b>Земля</b> — зыбучий ил; идя в камень, толкает его (остальные не могут). <b>Воздух</b> — вихрь; в воздухе прыгает второй раз. <b>Свет</b> — световое поле; зажигает световые датчики рядом. <b>Тень</b> — тьма; проходит сквозь тёмные врата.</p>
+            <p>Если какой-то стихии нет в комнате, её бассейны становятся камнем, а камни и датчики заменяются обычными рычагами и кнопками.</p></div>
         </div>
       </div>
       <button class="btn ghost" id="setBack">Назад</button>
@@ -247,27 +323,41 @@ a.allg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:calc(en
 // ===== ENGINE (shared by game page and level checker) =====
 const COLS = 32, ROWS = 18;
 const PH = { G: 48, JUMP: 16.4, MOVE: 7.2, ACC_G: 70, ACC_A: 45, MAXF: 24, W: 0.7, H: 1.25, PSPD: 3.2, COYOTE: 0.09, BUFFER: 0.12 };
-const HAZ = { L: 'lava', W: 'water', G: 'goo' };
+const HAZ = { L: 'lava', W: 'water', G: 'goo', M: 'mud', V: 'wind', B: 'beam', D: 'dark' };
+// Heroes: f fire, w water, e earth, a air, l light, s shadow. Each element has its own pool (safe for the owner, deadly for all others);
+// G (poison) kills everybody. T = shadow gate (solid for everybody except the shadow hero).
+const ELS = ['f', 'w', 'e', 'a', 'l', 's'];
+const POOL_OWNER = { L: 'f', W: 'w', M: 'e', V: 'a', B: 'l', D: 's' };
+const LIGHT_R = 2.6, PUSH_T = 0.25, AIR_JUMP = 0.92;
 
-function isSolidCh(c) { return c === '#' || c === 'L' || c === 'W' || c === 'G'; }
-function killsRole(c, role) { return c === 'G' || (c === 'L' && role === 'w') || (c === 'W' && role === 'f'); }
+function isSolidCh(c) { return c === '#' || c === 'L' || c === 'W' || c === 'G' || c === 'M' || c === 'V' || c === 'B' || c === 'D'; }
+function killsRole(c, role) { return c === 'G' || (POOL_OWNER[c] !== undefined && POOL_OWNER[c] !== role); }
 
 // Level builder: levels are written as code so they stay readable and editable.
-function buildLevel(def) {
+function buildLevel(def, roles) {
+  const has = roles ? (r) => roles.indexOf(r) >= 0 : () => true;
   const g = [];
   for (let y = 0; y < ROWS; y++) { const r = []; for (let x = 0; x < COLS; x++) r.push((y === 0 || y === ROWS - 1 || x === 0 || x === COLS - 1) ? '#' : '.'); g.push(r); }
-  const lv = { name: def.name, hint: def.hint || '', grid: g, gems: [], doors: {}, start: {}, btn: [], lev: [], plat: [], par: def.par || 90 };
+  const lv = { name: def.name, hint: def.hint || '', grid: g, gems: [], doors: {}, start: {}, btn: [], lev: [], plat: [], stones: [], par: def.par || 90, roles: roles || ['f', 'w'] };
   const b = {
-    box(x1, y1, x2, y2, c = '#') { for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) g[y][x] = c; },
+    has, n: roles ? roles.length : 2,
+    // an absent element's pool becomes plain stone floor
+    box(x1, y1, x2, y2, c = '#') { if (POOL_OWNER[c] && !has(POOL_OWNER[c])) c = '#'; for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) g[y][x] = c; },
     clear(x1, y1, x2, y2) { b.box(x1, y1, x2, y2, '.'); },
     fire(x, y) { lv.start.f = { x: x + 0.5 - PH.W / 2, y: y + 1 - PH.H }; },
     water(x, y) { lv.start.w = { x: x + 0.5 - PH.W / 2, y: y + 1 - PH.H }; },
     doorF(x, y) { lv.doors.f = { x, y }; },
     doorW(x, y) { lv.doors.w = { x, y }; },
+    start(r, x, y) { if (has(r)) lv.start[r] = { x: x + 0.5 - PH.W / 2, y: y + 1 - PH.H }; },
+    door(r, x, y) { if (has(r)) lv.doors[r] = { x, y }; },
+    gem(r, x, y) { if (has(r)) lv.gems.push({ id: lv.gems.length, t: r, x: x + 0.5, y: y + 0.5 }); },
+    gate(x1, y1, x2, y2) { if (has('s')) b.box(x1, y1, x2, y2, 'T'); },   // shadow gate (no shadow in the game: open passage)
+    stone(x, y, to) { if (has('e')) lv.stones.push({ x, y, to: to || [] }); },   // to = cells the stone is meant to be pushed to (used by check6.js)
+    sensor(x, y, grp) { if (has('l')) lv.btn.push({ x, y, g: grp, lt: true }); },
     red(x, y) { lv.gems.push({ id: lv.gems.length, t: 'f', x: x + 0.5, y: y + 0.5 }); },
     blue(x, y) { lv.gems.push({ id: lv.gems.length, t: 'w', x: x + 0.5, y: y + 0.5 }); },
     button(x, y, grp) { lv.btn.push({ x, y, g: grp }); },
-    lever(x, y, grp) { lv.lev.push({ x, y, g: grp }); },
+    lever(x, y, grp, inv) { lv.lev.push(inv ? { x, y, g: grp, inv: true } : { x, y, g: grp }); },
     // moving block: rest rect (x,y,w,h); when its group is active it slides to (x+dx, y+dy)
     plat(x, y, w, h, dx, dy, grp, opt) { lv.plat.push({ x, y, w, h, dx, dy, g: grp, ...(opt || {}) }); },
     // platform that moves back and forth on its own; sec = time for one pass
@@ -277,12 +367,12 @@ function buildLevel(def) {
   return lv;
 }
 
-function newWorld(lv) { return { lv, pt: lv.plat.map(() => 0), latch: lv.plat.map(() => false), clock: 0 }; }
+function newWorld(lv) { return { lv, pt: lv.plat.map(() => 0), latch: lv.plat.map(() => false), clock: 0, who: null, bodies: null, st: (lv.stones || []).map((s) => ({ cx: s.x, cy: s.y, vx: s.x, vy: s.y, ft: 0 })) }; }
 // which groups are on: buttons pressed by any body, levers set to 1
-function groupState(lv, bodies, levState) {
+function groupState(lv, bodies, levState, st) {
   const any = {}, all = {}, seen = {};
   lv.btn.forEach((b) => {
-    const pr = bodies.some(p => p && !p.dead && onButton(b, p));
+    const pr = bodies.some(p => p && !p.dead && onButton(b, p)) || (!b.lt && !!st && st.some(s => s.cx === b.x && s.cy === b.y));
     b.pressed = pr;
     if (pr) any[b.g] = true;
     all[b.g] = (seen[b.g] ? all[b.g] : true) && pr; seen[b.g] = true;
@@ -299,9 +389,12 @@ function overlapsSolid(world, x, y, w, h) {
   const e = 1e-6;
   for (let ty = Math.floor(y + e); ty <= Math.floor(y + h - e); ty++)
     for (let tx = Math.floor(x + e); tx <= Math.floor(x + w - e); tx++)
-      if (isSolidCh(tileAt(world.lv, tx, ty))) return { x: tx, y: ty, w: 1, h: 1, tile: true };
+      { const c = tileAt(world.lv, tx, ty); if (isSolidCh(c) || (c === 'T' && world.who !== 's')) return { x: tx, y: ty, w: 1, h: 1, tile: true }; }
+  const st = world.st;
+  if (st) for (let i = 0; i < st.length; i++) { const s = st[i]; if (x < s.cx + 1 - e && x + w > s.cx + e && y < s.cy + 1 - e && y + h > s.cy + e) return { x: s.cx, y: s.cy, w: 1, h: 1, stone: i }; }
   const pl = world.lv.plat;
   for (let i = 0; i < pl.length; i++) {
+    if (pl[i].sh && world.who === 's') continue;   // shade gate: the shadow hero passes through it
     const r = platPos(pl[i], world.pt[i]);
     if (x < r.x + r.w - e && x + w > r.x + e && y < r.y + r.h - e && y + h > r.y + e) return { ...r, plat: i };
   }
@@ -314,6 +407,7 @@ function moveX(world, p, dx) {
   let hit = false, s;
   for (let k = 0; k < 4 && (s = overlapsSolid(world, p.x, p.y, PH.W, PH.H)); k++) {
     hit = true;
+    if (s.stone !== undefined) p.pushS = { i: s.stone, d: dx > 0 ? 1 : -1 };
     if (dx > 0) p.x = s.x - PH.W; else p.x = s.x + s.w;
   }
   if (hit) p.vx = 0;
@@ -332,7 +426,7 @@ function moveY(world, p, dy) {
 
 function newPlayer(lv, role) {
   const s = lv.start[role];
-  return { role, x: s.x, y: s.y, vx: 0, vy: 0, gr: false, on: -1, coy: 0, buf: 0, face: 1, dead: false, door: false, jh: false, cut: false };
+  return { role, x: s.x, y: s.y, vx: 0, vy: 0, gr: false, on: -1, coy: 0, buf: 0, face: 1, dead: false, door: false, jh: false, cut: false, dj: false, pt: 0, pushS: null };
 }
 
 // is player standing on platform i (feet on its top, horizontal overlap)
@@ -376,6 +470,7 @@ function stepPlatforms(world, active, players, dt) {
     world.pt[i] = t1;
     let ok = true;
     for (const m of moves) {
+      world.who = m[0].role;
       if (!overlapsSolid(world, m[1], m[2], PH.W, PH.H)) continue;
       if (m[3] && !overlapsSolid(world, m[0].x, m[2], PH.W, PH.H)) { m[1] = m[0].x; continue; }
       ok = false;
@@ -388,18 +483,26 @@ function stepPlatforms(world, active, players, dt) {
 // One physics tick for one player. inp = {l,r,j}
 function stepPlayer(world, p, inp, dt) {
   if (p.dead) return;
+  world.who = p.role; p.pushS = null;
   const dir = (inp.r ? 1 : 0) - (inp.l ? 1 : 0);
   if (dir) p.face = dir;
   const target = dir * PH.MOVE, acc = p.gr ? PH.ACC_G : PH.ACC_A;
   if (p.vx < target) p.vx = Math.min(target, p.vx + acc * dt); else if (p.vx > target) p.vx = Math.max(target, p.vx - acc * dt);
   if (p.gr) p.coy = PH.COYOTE; else p.coy -= dt;
   if (inp.j && !p.jh) p.buf = PH.BUFFER; else p.buf -= dt;
+  const press = !!inp.j && !p.jh;
   p.jh = !!inp.j;
+  if (p.gr) p.dj = false;
   if (p.buf > 0 && p.coy > 0) { p.vy = -PH.JUMP; p.buf = 0; p.coy = 0; p.gr = false; p.cut = false; }
+  else if (press && p.role === 'a' && !p.dj && !p.gr) { p.vy = -PH.JUMP * AIR_JUMP; p.dj = true; p.buf = 0; p.cut = false; }   // air: one extra jump in mid-air
   if (!inp.j && p.vy < -6 && !p.cut) { p.vy *= 0.55; p.cut = true; }
   p.vy = Math.min(PH.MAXF, p.vy + PH.G * dt);
   moveX(world, p, p.vx * dt);
   const hit = moveY(world, p, p.vy * dt);
+  if (p.role === 'e') {   // earth: pushes a stone block one cell every PUSH_T seconds while walking into it
+    const ps = p.pushS;
+    if (ps && p.gr && dir === ps.d) { p.pt = (p.pt || 0) + dt; if (p.pt >= PUSH_T) { p.pt = 0; pushStone(world, ps.i, ps.d); } } else p.pt = 0;
+  }
   p.gr = false; p.on = -1;
   if (hit) { if (p.vy > 0) { p.gr = true; p.on = hit.plat ?? -1; } p.vy = 0; }
   else if (p.vy >= 0) {
@@ -407,6 +510,33 @@ function stepPlayer(world, p, inp, dt) {
     if (overlapsSolid(world, p.x, p.y + 0.02, PH.W, PH.H)) p.gr = true;
   }
   if (p.y > ROWS + 2) p.dead = 'fall';
+}
+
+// ---- stone blocks (earth hero pushes them; they fall one cell at a time) ----
+function blockedCell(world, cx, cy, self) {
+  const c = tileAt(world.lv, cx, cy);
+  if (isSolidCh(c) || c === 'T') return true;
+  const st = world.st;
+  if (st) for (let j = 0; j < st.length; j++) if (j !== self && st[j].cx === cx && st[j].cy === cy) return true;
+  const bs = world.bodies, e = 1e-6;
+  if (bs) for (let j = 0; j < bs.length; j++) { const q = bs[j]; if (q && !q.dead && q.x < cx + 1 - e && q.x + PH.W > cx + e && q.y < cy + 1 - e && q.y + PH.H > cy + e) return true; }
+  const pl = world.lv.plat;
+  for (let j = 0; j < pl.length; j++) { const r = platPos(pl[j], world.pt[j]); if (cx < r.x + r.w - e && cx + 1 > r.x + e && cy < r.y + r.h - e && cy + 1 > r.y + e) return true; }
+  return false;
+}
+function pushStone(world, i, d) {
+  if (world.nopush) return false;
+  const s = world.st[i];
+  if (blockedCell(world, s.cx + d, s.cy, i)) return false;
+  s.cx += d; s.ft = 0; return true;
+}
+function stepStones(world, dt) {
+  const st = world.st; if (!st) return;
+  for (let i = 0; i < st.length; i++) {
+    const s = st[i];
+    if (!blockedCell(world, s.cx, s.cy + 1, i)) { s.ft = (s.ft || 0) + dt; if (s.ft >= 0.09) { s.ft = 0; s.cy++; } } else s.ft = 0;
+    const k = Math.min(1, dt * 16); s.vx += (s.cx - s.vx) * k; s.vy += (s.cy - s.vy) * k;
+  }
 }
 
 // Hazard / gem / door checks after a tick
@@ -436,13 +566,14 @@ function atDoor(lv, p) {
   return Math.abs(cx - (d.x + 0.5)) < 0.55 && Math.abs(p.y + PH.H - (d.y + 1)) < 0.1;
 }
 function onButton(b, p) {
+  if (b.lt) return p.role === 'l' && Math.hypot(p.x + PH.W / 2 - (b.x + 0.5), p.y + PH.H / 2 - (b.y + 0.5)) < LIGHT_R;   // light sensor: works from a distance, only for the light hero
   return p.x < b.x + 0.9 && p.x + PH.W > b.x + 0.1 && p.y + PH.H > b.y + 0.6 && p.y + PH.H <= b.y + 1.05;
 }
 function inLever(l, p) {
   return p.x < l.x + 0.85 && p.x + PH.W > l.x + 0.15 && p.y < l.y + 1 && p.y + PH.H > l.y + 0.2;
 }
 
-// module.exports = { newWorld, groupState, COLS, ROWS, PH, buildLevel, tileAt, isSolidCh, killsRole, platPos, overlapsSolid, newPlayer, stepPlatforms, stepPlayer, hazardUnder, gemsTouched, atDoor, onButton, inLever, ridingPlat };
+// module.exports = { ELS, POOL_OWNER, LIGHT_R, blockedCell, pushStone, stepStones, newWorld, groupState, COLS, ROWS, PH, buildLevel, tileAt, isSolidCh, killsRole, platPos, overlapsSolid, newPlayer, stepPlatforms, stepPlayer, hazardUnder, gemsTouched, atDoor, onButton, inLever, ridingPlat };
 
 // ===== LEVELS =====
 // Grid 32 x 18 (x 0..31, y 0..17). Border is wall. A tile row y is "floor" for a
@@ -1427,13 +1558,362 @@ const LEVELS_P3 = [
 
 LEVELS.push(...LEVELS_P3);
 
+// ===== Кампания «Стихии» (3–6 героев): Огонь f, Вода w, Земля e, Воздух a, Свет l, Тень s =====
+// Сетка 32x18 как в основной кампании. Пол — ряды 15–16 (герой стоит на ряду 14, ноги на y=15), бассейны вкопаны в ряд 17.
+// build(b) получает b.has(стихия): бассейн отсутствующего элемента превращается в камень, врата Тени — в проход,
+// камни/датчики/рычаги элемента ставятся только если он в игре, иначе есть запасной нейтральный вариант.
+// Ядро кооперации (кнопка-«держи и догоняй», лифт, рычаги) не зависит от стихий, поэтому уровень проходим любым набором из 3–6 героев.
+// Комментарий «Решение» описывает задуманный порядок действий. Порядок по умолчанию в комнате: Ф Огонь, В Вода, З Земля, Х Воздух, С Свет, Т Тень.
+// Кристаллов в уровне не больше 30 (битовая маска синхронизации).
+const LEVELS_EL = [];
+(function () {
+  // ---- общие кирпичики ----
+  const ST = [1.6, 2.1, 2.6, 3.1, 3.6, 4.1];                 // старты героев (по порядку f w e a l s), ряд 14
+  function base(b, d1, d2) {
+    b.box(1, 15, 30, 16);                                    // пол
+    [d1, d2].forEach((d) => { if (d) b.box(d, 1, d, 11); });  // перегородки, проём — ряды 12..14
+    ['f', 'w', 'e', 'a', 'l', 's'].forEach((r, i) => b.start(r, ST[i], 14));
+  }
+  const gate = (b, d, g, opt) => b.plat(d, 12, 1, 3, 0, -3, g, opt);        // ворота в проёме перегородки: уходят вверх в камень
+  const holdFollow = (b, d, g) => { b.button(d - 3, 14, g); gate(b, d, g); b.lever(d + 1, 14, g); };   // кнопка слева держит ворота, рычаг справа закрепляет
+  // каменный блок: Земля толкает его к стенке (x0+5..x0+6), остальные по нему забираются
+  function stoneWall(b, x0) {
+    if (!b.has('e')) return;
+    b.stone(x0, 14, [[x0 + 4, 14]]); b.box(x0 + 5, 12, x0 + 6, 14);
+  }
+  // воздушный уступ (подъём 4): рычаг наверху; host — на уступе ещё и дверь Воздуха. Без Воздуха рычаг стоит на полу.
+  function airLedge(b, x0, g, host) {
+    if (b.has('a')) { b.box(x0, 11, x0 + (host ? 4 : 2), 11); b.lever(x0 + 1, 10, g); if (host) b.door('a', x0 + 3, 10); }
+    else b.lever(x0 + 1, 14, g);
+  }
+  // лифт на кнопке (кто-то держит кнопку), наверху световой датчик (Свет) или рычаг на лифте (если Света нет); ворота g2 закрепляются.
+  // host — слева от лифта площадка с дверью Света, куда лифт подвозит.
+  function lightLift(b, x0, g1, g2, host) {
+    b.button(x0, 14, g1); b.plat(x0 + 2, 14, 2, 1, 0, -7, g1);
+    if (b.has('l')) b.sensor(x0 + 2, 5, g2); else b.lever(x0 + 2, 6, g2);
+    if (host) { b.box(x0 - 1, 7, x0 + 1, 7); b.door('l', x0, 6); }
+  }
+  // «теневые» ворота: проходит только Тень, рычаг за ними закрепляет ворота для всех. Без Тени — обычная кнопка-«держи и догоняй».
+  function shadeGate(b, d, g) {
+    if (b.has('s')) { b.plat(d, 12, 1, 3, 0, -3, g, { sh: true }); b.lever(d + 1, 14, g); } else holdFollow(b, d, g);
+  }
+  // каморка Тени в конце зала: врата T (только Тень), внутри дверь Тени
+  function closet(b, x) { b.box(x, 10, x, 14, 'T'); b.door('s', x + 1.2, 14); }
+  // две кнопки одновременно (два героя) открывают ворота d навсегда
+  function andGate(b, d, g) {
+    b.button(d - 4, 14, g); b.button(d - 2, 14, g); gate(b, d, g, { and: true, latch: true });
+  }
+  // камень на кнопке держит ворота d (упор за кнопкой не даёт перетолкнуть). Без Земли — рычаг на месте кнопки.
+  function stoneButton(b, x0, g, d) {
+    if (b.has('e')) { b.stone(x0, 14, [[x0 + 4, 14]]); b.button(x0 + 4, 14, g); b.box(x0 + 5, 14, x0 + 5, 14); }
+    else { b.lever(x0 + 4, 14, g); b.box(x0 + 5, 14, x0 + 5, 14); }
+    gate(b, d, g);
+  }
+  // яма с бассейном стихии X шириной xa..xb: чужие гибнут, хозяин переходит и рычагом (lx) поднимает мост
+  function pit(b, xa, xb, X, g, lx) {
+    b.box(xa, 15, xb, 16, '.'); b.box(xa, 17, xb, 17, X);
+    b.plat(xa, 17, xb - xa + 1, 1, 0, -2, g);
+    b.lever(lx, 14, g);
+  }
+  // зал: двери по очереди f w e a l s (кроме тех, что стоят в станциях); x0 — первая свободная колонка, шаг подбирается по ширине
+  function hall(b, x0, skip, cl) {
+    const order = ['f', 'w', 'e', 'a', 'l', 's'].filter((r) => !(skip && skip.indexOf(r) >= 0) && !(cl && r === 's'));
+    if (cl) closet(b, cl);
+    const n = order.length, step = Math.min(2, ((cl ? cl - 2.4 : 29.6) - x0 - 0.6) / Math.max(1, n - 1));
+    order.forEach((r, i) => b.door(r, Math.round((x0 + 0.6 + i * step) * 10) / 10, 14));
+  }
+
+  // вспомогательно: кристаллы по списку [роль, x, y]
+  const gems = (b, list) => list.forEach((q) => b.gem(q[0], q[1], q[2]));
+  // зеркало: переворачивает уровень слева направо (старт справа). Режим задаётся полем mirror в описании уровня.
+  function mirrorB(b0) {
+    const X = (x) => 31 - x, M = Object.create(b0);
+    M.box = (x1, y1, x2, y2, c) => b0.box(X(x2), y1, X(x1), y2, c);
+    M.gate = (x1, y1, x2, y2) => b0.gate(X(x2), y1, X(x1), y2);
+    M.start = (r, x, y) => b0.start(r, 31 - x - 0.0, y);
+    M.door = (r, x, y) => b0.door(r, Math.round((31 - x) * 10) / 10, y);
+    M.gem = (r, x, y) => b0.gem(r, X(x), y);
+    M.stone = (x, y, to) => b0.stone(X(x), y, (to || []).map((c) => [X(c[0]), c[1]]));
+    M.sensor = (x, y, g) => b0.sensor(X(x), y, g);
+    M.button = (x, y, g) => b0.button(X(x), y, g);
+    M.lever = (x, y, g) => b0.lever(X(x), y, g, true);   // в зеркальном уровне рычаг включается движением влево
+    M.plat = (x, y, w, h, dx, dy, g, o) => b0.plat(X(x + w - 1), y, w, h, -dx, dy, g, o);
+    return M;
+  }
+  const add = (def) => { const bf = def.build; if (def.mirror) def.build = (b) => bf(mirrorB(b)); LEVELS_EL.push(def); };
+
+  add({
+    name: 'Каменный порог', par: 70,
+    hint: 'Земля толкает каменные блоки — остальным их не сдвинуть. Подтолкни камень к стене и сделай ступеньку для всех.',
+    build(b) {
+      // Решение: 1) Земля идёт вправо и толкает камень (6,14) к стене (11..12): камень встаёт на x=10.
+      //  2) все забираются на камень, затем на стену (верх y=12) и спрыгивают вправо, по пути собирая кристаллы на стене.
+      //  3) один встаёт на кнопку (14,14) — ворота (17) открыты; другой проходит и дёргает рычаг (18,14) вправо — ворота закреплены; первый идёт следом.
+      //  4) все — к своим дверям в зале.
+      // 3 героя (Ф В З): шаги 1–4. 4–6 героев: добавляются только их двери и кристаллы; без Земли стены и камня нет.
+      base(b, 0, 17);
+      stoneWall(b, 6); holdFollow(b, 17, 0);
+      hall(b, 19);
+      gems(b, [['f', 11, 11], ['w', 12, 11], ['e', 11, 11], ['a', 12, 11], ['l', 11, 11], ['s', 12, 11], ['f', 14, 14], ['w', 15, 14], ['e', 21, 14], ['a', 24, 14], ['l', 27, 14], ['s', 29, 14]]);
+    },
+  });
+  add({
+    name: 'Выше облаков', par: 80,
+    hint: 'Воздух прыгает второй раз прямо в воздухе. Рычаг на высоком уступе — только для него.',
+    build(b) {
+      // Решение: 1) один держит кнопку (7,14) — ворота (10) открыты; другой проходит и дёргает рычаг (11,14) вправо — ворота закреплены; первый идёт следом.
+      //  2) Воздух двойным прыжком забирается на уступ (12..14, ряд 11) и дёргает рычаг (13,10): ворота (17) открыты. Без Воздуха рычаг стоит на полу.
+      //  3) все — к дверям в зале.
+      base(b, 10, 17);
+      holdFollow(b, 10, 0); airLedge(b, 12, 1); gate(b, 17, 1);
+      hall(b, 18);
+      gems(b, [['a', 13, 9], ['f', 6, 14], ['w', 15, 14], ['e', 20, 14], ['l', 23, 14], ['s', 26, 14], ['f', 22, 14], ['w', 24, 14]]);
+    },
+  });
+  add({
+    name: 'Лампа', par: 90,
+    hint: 'Свет включает лампы. Один держит кнопку лифта, Свет едет вверх и зажигает лампу — ворота открываются навсегда.',
+    build(b) {
+      // Решение: 1) один держит кнопку (7,14) — ворота (10) открыты; другой дёргает рычаг (11,14) — закреплены.
+      //  2) один встаёт на кнопку лифта (12,14); Свет заезжает на лифт (14..15), едет к y=7 и зажигает лампу (14,5): ворота (16) открыты навсегда. Без Света на лифте рычаг (14,6).
+      //  3) Свет с лифта идёт на площадку слева (11..13, ряд 7) к своей двери (12,6); остальные — по залу.
+      base(b, 10, 16);
+      holdFollow(b, 10, 0); lightLift(b, 12, 1, 2, true); gate(b, 16, 2, { latch: true });
+      hall(b, 17, ['l']);
+      gems(b, [['l', 13, 5], ['f', 5, 14], ['w', 14, 14], ['e', 18, 14], ['a', 20, 14], ['s', 22, 14], ['f', 24, 14], ['w', 26, 14]]);
+    },
+  });
+  add({
+    name: 'Тень на стене', par: 90,
+    hint: 'Тёмные ворота пропускают только Тень. Она дёрнет рычаг за ними, и ворота откроются для всех.',
+    build(b) {
+      // Решение: 1) кнопка (6,14) держит ворота (9); другой проходит и дёргает рычаг (10,14) — закреплены.
+      //  2) Тень проходит сквозь тёмные ворота (16), дёргает рычаг (17,14) — ворота открыты навсегда. (Без Тени ворота обычные: кнопка (13,14) + рычаг (17,14).)
+      //  3) остальные — к дверям в зале; дверь Тени — в каморке справа (врата T, только Тень).
+      base(b, 9, 16);
+      holdFollow(b, 9, 0); shadeGate(b, 16, 1);
+      hall(b, 18, [], 28);
+      gems(b, [['s', 29, 14], ['s', 30, 14], ['f', 12, 14], ['w', 14, 14], ['e', 20, 14], ['a', 22, 14], ['l', 24, 14], ['f', 26, 14], ['w', 27, 14]]);
+    },
+  });
+  add({
+    name: 'Камень на кнопке', par: 100,
+    hint: 'Камень тяжёлый — он сам нажмёт кнопку и будет держать ворота. А у вторых ворот нужны две кнопки сразу.',
+    build(b) {
+      // Решение: 1) Земля толкает камень (6,14) вправо до кнопки (10,14): камень на кнопке держит ворота (13). Упор (11,13..14) — перепрыгнуть.
+      //  2) все проходят ворота; двое встают одновременно на кнопки (13,14)? нет — на (13,14) и (15,14) -> ворота (17) открыты навсегда (две кнопки сразу).
+      //  3) все — к дверям. Без Земли вместо камня на кнопке рычаг (10,14).
+      base(b, 13, 17);
+      stoneButton(b, 6, 0, 13); andGate(b, 17, 1);
+      hall(b, 18);
+      gems(b, [['f', 8, 14], ['w', 9, 14], ['e', 8, 13], ['a', 10, 12], ['l', 12, 12], ['s', 15, 14], ['f', 21, 14], ['w', 24, 14]]);
+    },
+  });
+  add({
+    name: 'Лавовый брод', par: 90,
+    hint: 'В лаве может ходить только Огонь. Он переходит яму, дёргает рычаг, и появляется мост для остальных.',
+    build(b) {
+      // Решение: 1) Огонь идёт по дну ямы (6..10) сквозь лаву, выпрыгивает на правый край и дёргает рычаг (12,14) вправо: мост поднимается.
+      //  2) остальные по мосту; один держит кнопку (14,14), другой проходит и дёргает рычаг (18,14), ворота (17) закреплены.
+      //  Без Огня лавы нет: яма — просто ямка глубиной 2.
+      base(b, 0, 17);
+      pit(b, 6, 10, 'L', 0, 12); holdFollow(b, 17, 1);
+      hall(b, 19);
+      gems(b, [['f', 7, 16], ['f', 9, 16], ['w', 12, 13], ['e', 13, 13], ['a', 15, 13], ['l', 16, 13], ['s', 21, 14], ['w', 23, 14], ['e', 25, 14]]);
+    },
+  });
+  add({
+    name: 'Глубокая вода', par: 100,
+    hint: 'В воде ходит только Вода. А лампа загорится, когда рядом пройдёт Свет.',
+    build(b) {
+      // Решение: 1) Вода идёт по дну ямы (6..10), дёргает рычаг (12,14): мост.
+      //  2) остальные по мосту; один держит кнопку лифта (13,14); Свет едет на лифте (15..16), зажигает лампу (15,5): ворота (17) открыты навсегда.
+      //  3) Свет с лифта идёт на площадку (12..14, ряд 7) к двери (13,6).
+      base(b, 0, 17);
+      pit(b, 6, 10, 'W', 0, 11); lightLift(b, 13, 1, 2, true); gate(b, 17, 2, { latch: true });
+      hall(b, 18, ['l']);
+      gems(b, [['w', 7, 16], ['w', 9, 16], ['f', 12, 13], ['e', 15, 13], ['a', 19, 14], ['s', 22, 14], ['l', 14, 5], ['f', 25, 14]]);
+    },
+  });
+  add({
+    name: 'Зыбучий ил', par: 100,
+    hint: 'В иле не тонет только Земля. Рычаг на высоком уступе — для Воздуха.',
+    build(b) {
+      // Решение: 1) Земля идёт по илу (6..10), дёргает рычаг (11,14): мост. 2) все по мосту.
+      //  3) Воздух двойным прыжком на уступ (13..15, ряд 11), дёргает рычаг (14,10): ворота (17) открыты. 4) к дверям.
+      base(b, 0, 17);
+      pit(b, 6, 10, 'M', 0, 11); airLedge(b, 13, 1); gate(b, 17, 1);
+      hall(b, 18);
+      gems(b, [['e', 7, 16], ['e', 9, 16], ['a', 14, 9], ['f', 12, 13], ['w', 16, 13], ['l', 20, 14], ['s', 22, 14], ['f', 24, 14]]);
+    },
+  });
+  add({
+    name: 'Ветровой вихрь', par: 90, mirror: true,
+    hint: 'Вихрь для всех опасен, кроме Воздуха. Уровень зеркальный: идём справа налево.',
+    build(b) {
+      // Решение: 1) Воздух идёт по вихрю (6..10), дёргает рычаг (11,14): мост. 2) остальные по мосту.
+      //  3) один на кнопку (14,14), другой проходит и дёргает рычаг (18,14): ворота (17). 4) к дверям. (Уровень отзеркален: всё это справа налево.)
+      base(b, 0, 17);
+      pit(b, 6, 10, 'V', 0, 11); holdFollow(b, 17, 1);
+      hall(b, 19);
+      gems(b, [['a', 7, 16], ['a', 9, 16], ['f', 12, 13], ['w', 13, 13], ['e', 15, 13], ['l', 16, 13], ['s', 21, 14], ['f', 24, 14], ['w', 27, 14]]);
+    },
+  });
+  add({
+    name: 'Свет и мрак', par: 100, mirror: true,
+    hint: 'Световое поле опасно для всех, кроме Света, а тёмные ворота пропускают только Тень.',
+    build(b) {
+      // Решение: 1) Свет идёт по световому полю (6..10), дёргает рычаг (11,14): мост. 2) остальные по мосту.
+      //  3) Тень проходит тёмные ворота (16), дёргает рычаг (17,14): ворота открыты. 4) остальные — по залу, Тень — в каморку.
+      //  (Уровень зеркальный: всё идёт справа налево.)
+      base(b, 0, 16);
+      pit(b, 6, 10, 'B', 0, 11); shadeGate(b, 16, 1);
+      hall(b, 18, [], 28);
+      gems(b, [['l', 7, 16], ['l', 9, 16], ['s', 29, 14], ['f', 13, 14], ['w', 14, 14], ['e', 21, 14], ['a', 23, 14], ['f', 25, 14]]);
+    },
+  });
+  add({
+    name: 'Тяни-толкай', par: 100,
+    hint: 'Две кнопки сразу открывают первые ворота. Дальше — камень и ступенька.',
+    build(b) {
+      // Решение: 1) двое встают одновременно на кнопки (6,14) и (8,14): ворота (10) открыты навсегда. 2) все проходят.
+      //  3) Земля толкает камень (11,14) к стене (16..17): камень на x=15; все забираются на камень и стену, спрыгивают. 4) к дверям.
+      base(b, 10, 0);
+      andGate(b, 10, 0); stoneWall(b, 11);
+      hall(b, 18);
+      gems(b, [['f', 7, 14], ['w', 16, 11], ['e', 17, 11], ['a', 16, 11], ['l', 17, 11], ['s', 17, 11], ['f', 19, 14], ['w', 21, 14]]);
+    },
+  });
+  add({
+    name: 'Свет по кругу', par: 110,
+    hint: 'Лифт со светом, а потом яма с водой: Вода строит мост для остальных.',
+    build(b) {
+      // Решение: 1) один держит кнопку (5,14); Свет на лифте (7..8) зажигает лампу (7,5): ворота (11) открыты навсегда; Свет идёт к двери на площадке (4..6, ряд 7).
+      //  2) Вода идёт по дну ямы (13..17), дёргает рычаг (19,14): мост. 3) остальные по мосту. 4) к дверям зала.
+      base(b, 9, 0);
+      lightLift(b, 5, 0, 1, true); gate(b, 9, 1, { latch: true }); pit(b, 12, 16, 'W', 2, 18);
+      hall(b, 19, ['l']);
+      gems(b, [['l', 8, 5], ['w', 13, 16], ['w', 15, 16], ['f', 11, 14], ['e', 12, 13], ['a', 17, 13], ['s', 21, 14], ['f', 23, 14], ['e', 25, 14]]);
+    },
+  });
+  add({
+    name: 'Камень и тень', par: 110,
+    hint: 'Камень держит кнопку вместо героя, а за тёмными воротами рычаг тянет Тень.',
+    build(b) {
+      // Решение: 1) Земля толкает камень (5,14) на кнопку (9,14): ворота (12) держатся. Упор (10) — перепрыгнуть.
+      //  2) Тень проходит тёмные ворота (17), дёргает рычаг (18,14): ворота открыты навсегда. 3) все — к дверям.
+      base(b, 12, 17);
+      stoneButton(b, 5, 0, 12); shadeGate(b, 17, 1);
+      hall(b, 19);
+      gems(b, [['e', 7, 14], ['s', 15, 14], ['s', 16, 14], ['f', 11, 11], ['w', 10, 11], ['a', 21, 14], ['l', 23, 14], ['f', 25, 14], ['w', 27, 14]]);
+    },
+  });
+  add({
+    name: 'Воздушный мост', par: 110, mirror: true,
+    hint: 'Воздух забирается на свой уступ, а Огонь — единственный, кто пройдёт через лавовую яму.',
+    build(b) {
+      // Решение: 1) Воздух двойным прыжком на уступ (5..9, ряд 11), дёргает рычаг (6,10): ворота (11) открыты; идёт к двери (8,10).
+      //  2) остальные проходят; Огонь идёт по лаве (13..17), дёргает рычаг (19,14): мост. 3) остальные по мосту. 4) в зал.
+      base(b, 11, 0);
+      airLedge(b, 5, 0, true); gate(b, 11, 0); pit(b, 13, 17, 'L', 1, 19);
+      hall(b, 20, ['a']);
+      gems(b, [['a', 7, 9], ['f', 14, 16], ['f', 16, 16], ['w', 12, 13], ['e', 18, 13], ['l', 22, 14], ['s', 24, 14], ['w', 26, 14]]);
+    },
+  });
+  add({
+    name: 'Лифт и лампа', par: 110,
+    hint: 'Сначала две кнопки сразу, потом лифт для Света.',
+    build(b) {
+      // Решение: 1) двое встают на кнопки (6,14) и (8,14): ворота (10) открыты навсегда.
+      //  2) один держит кнопку лифта (11,14); Свет зажигает лампу (13,5): ворота (15) открыты навсегда; Свет идёт к двери на площадке (10..12, ряд 7).
+      //  3) все — к дверям в зале.
+      base(b, 10, 16);
+      andGate(b, 10, 0); lightLift(b, 11, 1, 2, true); gate(b, 15, 2, { latch: true });
+      hall(b, 17, ['l']);
+      gems(b, [['l', 12, 5], ['f', 7, 14], ['w', 9, 14], ['e', 19, 14], ['a', 21, 14], ['s', 23, 14], ['f', 25, 14], ['w', 27, 14]]);
+    },
+  });
+  add({
+    name: 'Тёмный коридор', par: 140,
+    hint: 'Три ворота подряд: за Тенью — Свет, потом Воздух. Каждый открывает путь всем и заходит к своей двери.',
+    build(b) {
+      // Решение: 1) Тень проходит тёмные ворота (9), дёргает рычаг (10,14): ворота открыты навсегда. (Без Тени — кнопка (6,14) + рычаг.)
+      //  2) один держит кнопку лифта (11,14); Свет едет на лифте (13..14), зажигает лампу (13,5): ворота (15) открыты навсегда; Свет — на площадку (10..12, ряд 7) к двери (11,6).
+      //  3) Воздух двойным прыжком на уступ (16..20, ряд 11), дёргает рычаг (17,10): ворота (22) открыты; идёт к двери (19,10).
+      //  4) Огонь, Вода, Земля и Тень — к дверям в зале (23..30).
+      // 3–5 героев: те же шаги; отсутствующий элемент заменён нейтрально (кнопка вместо тёмных ворот / рычаг на лифте / рычаг на полу).
+      base(b, 0, 0); b.box(9, 1, 9, 11); b.box(15, 1, 15, 11); b.box(22, 1, 22, 11);
+      shadeGate(b, 9, 0); lightLift(b, 11, 1, 2, true); gate(b, 15, 2, { latch: true });
+      airLedge(b, 16, 3, true); gate(b, 22, 3);
+      hall(b, 23, ['l', 'a']);
+      gems(b, [['s', 8, 14], ['l', 12, 5], ['a', 18, 9], ['f', 7, 14], ['w', 14, 12], ['e', 21, 14], ['f', 25, 14], ['w', 27, 14], ['s', 29, 14]]);
+    },
+  });
+  add({
+    name: 'Три ключа', par: 140,
+    hint: 'Воздух на уступе, потом тёмные ворота, потом лифт со светом. Помогайте друг другу по очереди.',
+    build(b) {
+      // Решение: 1) Воздух двойным прыжком на уступ (5..9, ряд 11), дёргает рычаг (6,10): ворота (11) открыты; идёт к двери (8,10).
+      //  2) Тень проходит тёмные ворота (16), дёргает рычаг (17,14): ворота открыты навсегда. (Без Тени — кнопка (13,14) + рычаг.)
+      //  3) один держит кнопку лифта (18,14); Свет едет на лифте (20..21), зажигает лампу (20,5): ворота (22) открыты; Свет — на площадку (17..19, ряд 7) к двери (18,6).
+      //  4) остальные — по залу (23..30).
+      base(b, 0, 0); b.box(11, 1, 11, 11); b.box(16, 1, 16, 11); b.box(22, 1, 22, 11);
+      airLedge(b, 5, 0, true); gate(b, 11, 0); shadeGate(b, 16, 1); lightLift(b, 18, 2, 3, true); gate(b, 22, 3, { latch: true });
+      hall(b, 23, ['l', 'a']);
+      gems(b, [['a', 7, 9], ['s', 14, 14], ['l', 19, 5], ['f', 10, 14], ['w', 13, 14], ['e', 21, 14], ['f', 25, 14], ['w', 27, 14], ['s', 29, 14]]);
+    },
+  });
+  add({
+    name: 'Ил и ветер', par: 130, mirror: true,
+    hint: 'Земля идёт по илу, Воздух — по вихрю, а камень сам нажмёт кнопку у ворот.',
+    build(b) {
+      // Решение: 1) Воздух идёт по вихрю (6..10), дёргает рычаг (11,14): мост. 2) остальные по мосту.
+      //  3) Земля толкает камень (12,14) на кнопку (16,14): ворота (18) держатся. Упор (17) — перепрыгнуть. 4) в зал. (Зеркально: справа налево.)
+      base(b, 0, 18);
+      pit(b, 6, 10, 'V', 0, 11); stoneButton(b, 12, 1, 18);
+      hall(b, 19);
+      gems(b, [['a', 7, 16], ['a', 9, 16], ['e', 14, 14], ['f', 13, 13], ['w', 16, 13], ['l', 21, 14], ['s', 23, 14], ['f', 25, 14], ['w', 27, 14]]);
+    },
+  });
+  add({
+    name: 'Две реки', par: 130,
+    hint: 'Две кнопки сразу — и первые ворота открыты. Потом Земля идёт по илу и строит мост для всех.',
+    build(b) {
+      // Решение: 1) двое встают на кнопки (6,14) и (8,14): ворота (10) открыты навсегда. 2) Земля идёт по илу (12..16), дёргает рычаг (18,14): мост.
+      //  3) остальные по мосту. 4) в зал.
+      base(b, 10, 0);
+      andGate(b, 10, 0); pit(b, 12, 16, 'M', 1, 18);
+      hall(b, 19);
+      gems(b, [['e', 13, 16], ['e', 15, 16], ['f', 7, 14], ['w', 9, 14], ['a', 11, 13], ['l', 17, 13], ['s', 21, 14], ['f', 23, 14], ['w', 25, 14]]);
+    },
+  });
+  add({
+    name: 'Храм шести стихий', par: 170,
+    hint: 'Свет, Воздух и Тень открывают три ворота по очереди. Все шестеро — к своим дверям!',
+    build(b) {
+      // Решение: 1) один держит кнопку лифта (5,14); Свет едет на лифте (7..8), зажигает лампу (7,5): ворота (9) открыты навсегда; Свет — на площадку (4..6, ряд 7) к двери (5,6).
+      //  2) Воздух двойным прыжком на уступ (10..14, ряд 11), дёргает рычаг (11,10): ворота (16) открыты; идёт к двери (13,10).
+      //  3) Тень проходит тёмные ворота (21), дёргает рычаг (22,14): ворота открыты навсегда. (Без Тени — кнопка (18,14) + рычаг.)
+      //  4) Огонь, Вода, Земля и Тень — к дверям в зале (23..30). 
+      base(b, 0, 0); b.box(9, 1, 9, 11); b.box(16, 1, 16, 11); b.box(21, 1, 21, 11);
+      lightLift(b, 5, 0, 1, true); gate(b, 9, 1, { latch: true });
+      airLedge(b, 10, 2, true); gate(b, 16, 2); shadeGate(b, 21, 3);
+      hall(b, 24, ['l', 'a']);
+      gems(b, [['l', 8, 5], ['a', 12, 9], ['s', 19, 14], ['f', 12, 14], ['w', 14, 14], ['e', 18, 14], ['f', 26, 14], ['w', 28, 14], ['e', 29, 14]]);
+    },
+  });
+})();
+// module.exports = { LEVELS_EL };
+
+
 (function () {
 // ===== GAME part 1: state, audio, network (Duo), screens, input =====
 const $ = (id) => document.getElementById(id);
 const cv = $('cv'); let ctx = cv.getContext('2d');
 const STEP = 1 / 60;                      // fixed simulation step (the checker relies on 60 Hz)
 const GROUP_COL = ['#b48cff', '#ffd75e', '#5ee6c8', '#ff8fc8', '#9fe870'];
-const ROLE_NAME = { f: 'Огонь', w: 'Вода' };
+const ROLE_NAME = { f: 'Огонь', w: 'Вода', e: 'Земля', a: 'Воздух', l: 'Свет', s: 'Тень' };
+const EL_LEVELS = (typeof LEVELS_EL !== 'undefined') ? LEVELS_EL : [];
 const NLEV = LEVELS.length, PER_WORLD = 10, NWORLD = Math.ceil(NLEV / PER_WORLD);
 const WORLD_NAMES = ['Храм', 'Склеп', 'Грот', 'Кузня', 'Небо'];
 const store = {
@@ -1450,6 +1930,7 @@ const S = {
   keys: new Set(), padKeys: new Set(), pkey: '',
   snd: store.get('snd', true), fx: store.get('fx', 1),
   netLost: false, lastSend: 0, lastKey: '', sendN: 0, theme: 0, introT: 0, frames: 0,
+  party: false, proles: [], RL: [], skin: {}, unE: store.get('unE', 1), bestE: store.get('bestE', {}),
 };
 // progress repair: every level with a record unlocks the next one; progress is capped by the number of levels, never reduced
 (function () {
@@ -1476,9 +1957,9 @@ document.addEventListener('pointerdown', unlockAudio);
 // ---------- network: thin layer over the shared Duo module ----------
 const hasDuo = () => typeof Duo !== 'undefined';
 const partnerSt = () => (!S.solo && hasDuo() ? Duo.partner() : null);
-function pset(patch) { if (!S.solo && hasDuo()) Duo.set(patch); }
+function pset(patch) { if (!S.solo && !P.on && hasDuo()) Duo.set(patch); }
 function netLinked() { return !S.solo && hasDuo() && Duo.linked(); }
-function basePresence() { return { id: hasDuo() ? Duo.myId : '', r: S.role, sc: S.scr, sel: [S.sel.l, S.sel.ep], un: S.unlocked }; }
+function basePresence() { return { id: hasDuo() ? Duo.myId : '', r: S.role, sc: S.scr, sel: [S.sel.l, S.sel.ep], un: S.unlocked, sk: skinArr(S.role) }; }
 function initNet() {
   if (!hasDuo()) return;
   Duo.init({ game: 'ogon-i-voda', accent: '#e2bd62' });
@@ -1495,7 +1976,7 @@ function initNet() {
   Duo.onState(onPartner);
 }
 function onPartner() {
-  if (S.solo) return;
+  if (S.solo || S.party) return;
   const pt = Duo.partner(); if (!pt) return;
   S.netLost = false;
   const sel = pt.sel;
@@ -1515,6 +1996,7 @@ function effectiveSel() {
   return ps && ps.ep > S.sel.ep ? ps : S.sel;
 }
 function choose(l) {
+  if (P.on) { partyChoose(l); return; }
   const ps = !S.solo ? partnerSel() : null;
   S.sel = { l, ep: Math.max(Date.now(), ps ? ps.ep + 1 : 0) };
   pset({ sel: [S.sel.l, S.sel.ep] });
@@ -1530,15 +2012,18 @@ function syncSelection() {
 }
 
 // ---------- level lifecycle ----------
-function newRemote() { return { role: null, x: 0, y: 0, vx: 0, vy: 0, face: 1, gr: true, dead: false, door: false, gm: 0, lv: null, active: false, rx: 0, ry: 0, an: newAnim() }; }
+function newRemote() { return { role: null, x: 0, y: 0, vx: 0, vy: 0, face: 1, gr: true, dead: false, door: false, gm: 0, lv: null, active: false, rx: 0, ry: 0, an: newAnim(), sk: null, lt: 0, sc: null }; }
 function newAnim() { return { sx: 1, sy: 1, fl: 1, lean: 0, ph: 0, blink: 0, nextBlink: 2, wasGr: true, landV: 0 }; }
 function loadLevel(i, ep) {
-  S.lv = buildLevel(LEVELS[i]); S.lvDemo = false;
-  S.world = newWorld(S.lv); S.theme = Math.min(THEMES.length - 1, Math.floor(i / PER_WORLD));
+  S.party = P.on; if (S.party) { S.proles = partyRoles(); S.role = P.myRole; }
+  S.lv = S.party ? buildLevel(EL_LEVELS[i], S.proles) : buildLevel(LEVELS[i]); S.lvDemo = false;
+  S.world = newWorld(S.lv); S.theme = S.party ? Math.min(THEMES.length - 1, Math.floor(i / 5)) : Math.min(THEMES.length - 1, Math.floor(i / PER_WORLD));
   S.pl = {}; S.plist.length = 0;
   const roles = S.solo ? ['f', 'w'] : [S.role];
-  for (const r of roles) { const p = newPlayer(S.lv, r); p.px = p.x; p.py = p.y; p.rx = p.x; p.ry = p.y; p.an = newAnim(); p.dead = false; S.pl[r] = p; S.plist.push(p); }
-  S.R = S.solo ? null : newRemote();
+  for (const r of roles) { const p = newPlayer(S.lv, r); p.px = p.x; p.py = p.y; p.rx = p.x; p.ry = p.y; p.an = newAnim(); p.dead = false; p.sk = skinArr(r); S.pl[r] = p; S.plist.push(p); }
+  S.R = (S.solo || S.party) ? null : newRemote();
+  S.RL = S.party ? partyRemotes() : S.R ? [S.R] : [];
+  S.gmMask = 0; S.lastLevKey = '';
   S.gems = new Set(); S.lev = {}; S.end = null; S.paused = false; S.tNow = 0; S.simT = 0; S.acc = 0;
   S.levArr.length = lvLen(S.lv);
   if (S.ppt.length < S.lv.plat.length) S.ppt = new Float64Array(S.lv.plat.length + 8);
@@ -1551,13 +2036,14 @@ function loadLevel(i, ep) {
   prepareLevel();
   $('hudLvl').textContent = (i + 1) + '. ' + S.lv.name;
   showBanner(i);
+  if (S.party) partyLevelLoaded(i);
   requestWake();
 }
 const lvLen = (lv) => lv.lev.length;
 function levelClock() { return S.solo ? S.simT : (Date.now() - S.cur.ep) / 1000; }
 
 // ---------- screens ----------
-const SCREENS = { title: 'scrTitle', role: 'scrRole', levels: 'scrLevels', set: 'scrSet' };
+const SCREENS = { title: 'scrTitle', role: 'scrRole', levels: 'scrLevels', set: 'scrSet', skins: 'scrSkins', assign: 'scrAssign', pick: 'scrPick' };
 function show(scr) {
   const was = S.scr; S.scr = scr;
   for (const k in SCREENS) $(SCREENS[k]).classList.toggle('on', k === scr);
@@ -1566,7 +2052,10 @@ function show(scr) {
   $('pad').classList.toggle('solo', S.solo);
   $('pkJ1').hidden = !S.solo; $('pkJ').hidden = S.solo;
   $('pk2L').hidden = !S.solo; $('pk2R').hidden = !S.solo; $('pk2J').hidden = !S.solo;
-  if (scr === 'title' || scr === 'levels' || scr === 'role' || scr === 'set') demoLevel();
+  if (scr === 'title' || scr === 'levels' || scr === 'role' || scr === 'set' || scr === 'skins' || scr === 'assign' || scr === 'pick') demoLevel();
+  if (scr === 'pick') partyPickRefresh();
+  if (scr === 'assign') assignRender();
+  if (scr === 'skins') skinsRender();
   if (scr === 'levels' && was !== 'levels') S.tab = Math.max(0, Math.min(NWORLD - 1, Math.floor((was === 'play' && S.cur.l >= 0 ? S.cur.l : Math.min(S.unlocked, NLEV) - 1) / PER_WORLD)));
   pset({ sc: scr });
   refreshMenus();
@@ -1648,7 +2137,7 @@ function pickRole(r) {
   beep('click');
   const pt = partnerSt();
   if (pt && pt.r === r && S.role !== r) { toast('Этого героя уже выбрал партнёр'); return; }
-  S.role = r; pset({ r });
+  S.role = r; pset({ r, sk: skinArr(r) });
   refreshMenus();
 }
 
@@ -1661,15 +2150,15 @@ function hideOverlay() { $('ovl').classList.remove('on'); $('app').classList.rem
 function openPause() {
   if (S.end) return;
   S.paused = true;
-  overlay('<div class="big full">Пауза</div>' + (S.lv && S.lv.hint ? '<div class="hintbox full">' + S.lv.hint + '</div>' : '') + '<div class="acts"><button class="btn" id="oRes">Продолжить</button><button class="btn ghost" id="oRe">Начать уровень заново</button></div><div class="acts"><button class="btn ghost" id="oLv">К списку уровней</button>' + (S.solo ? '' : '<p class="sub" style="font-size:13px">Заново и выход к уровням сработают на обоих телефонах.</p>') + '</div>',
-    { oRes: () => { S.paused = false; hideOverlay(); }, oRe: () => choose(S.cur.l), oLv: () => choose(-1) });
+  overlay('<div class="big full">Пауза</div>' + (S.lv && S.lv.hint ? '<div class="hintbox full">' + S.lv.hint + '</div>' : '') + '<div class="acts"><button class="btn" id="oRes">Продолжить</button><button class="btn ghost" id="oRe">Начать уровень заново</button></div><div class="acts"><button class="btn ghost" id="oLv">К списку уровней</button>' + (P.on ? '<button class="btn ghost" id="oQuit">Выйти из комнаты</button>' : '') + (S.solo ? '' : '<p class="sub" style="font-size:13px">Заново и выход к уровням сработают на ' + (P.on ? 'всех' : 'обоих') + ' телефонах.</p>') + '</div>',
+    { oRes: () => { S.paused = false; hideOverlay(); }, oRe: () => choose(S.cur.l), oLv: () => choose(-1), oQuit: () => { if (P.on) partyQuit(); } });
 }
-const DEATH = { f: 'Огонь погас', w: 'Вода испарилась' };
+const DEATH = { f: 'Огонь погас', w: 'Вода испарилась', e: 'Земля увязла', a: 'Воздух развеяло', l: 'Свет погас', s: 'Тень рассеялась' };
 function showDeath(role) {
   if (S.end) return; S.end = 'dead';
   setTimeout(() => {
     if (S.end !== 'dead') return;
-    overlay('<div class="big full" style="color:var(--' + (role === 'f' ? 'fire' : 'water') + ')">' + DEATH[role] + '</div><p class="sub full">Попробуйте ещё раз, вместе получится.</p><div class="acts"><button class="btn hot" id="oRe">Заново</button></div><div class="acts"><button class="btn ghost" id="oLv">К уровням</button></div>',
+    overlay('<div class="big full" style="color:' + ROLE_COL[role] + '">' + DEATH[role] + '</div><p class="sub full">Попробуйте ещё раз, вместе получится.</p><div class="acts"><button class="btn hot" id="oRe">Заново</button></div><div class="acts"><button class="btn ghost" id="oLv">К уровням</button></div>',
       { oRe: () => choose(S.cur.l), oLv: () => choose(-1) });
   }, 450);
 }
@@ -1679,14 +2168,15 @@ function showWin() {
   const i = S.cur.l, t = S.tNow;
   const got = collected().size, total = S.lv.gems.length;
   const rank = rankOf(t, got, total, S.lv.par);
-  const prev = S.best[i];
-  if (!prev || 'ABC'.indexOf(rank) < 'ABC'.indexOf(prev.rank) || (rank === prev.rank && t < prev.t)) { S.best[i] = { t, rank, gems: got }; store.set('best', S.best); }
-  if (S.unlocked < Math.min(NLEV, i + 2)) { S.unlocked = Math.min(NLEV, i + 2); store.set('un', S.unlocked); pset({ un: S.unlocked }); }
-  const last = i >= NLEV - 1;
+  const bm = S.party ? S.bestE : S.best, prev = bm[i], NL = S.party ? NEL : NLEV;
+  if (!prev || 'ABC'.indexOf(rank) < 'ABC'.indexOf(prev.rank) || (rank === prev.rank && t < prev.t)) { bm[i] = { t, rank, gems: got }; store.set(S.party ? 'bestE' : 'best', bm); }
+  if (S.party) { if (S.unE < Math.min(NEL, i + 2)) { S.unE = Math.min(NEL, i + 2); store.set('unE', S.unE); } }
+  else if (S.unlocked < Math.min(NLEV, i + 2)) { S.unlocked = Math.min(NLEV, i + 2); store.set('un', S.unlocked); pset({ un: S.unlocked }); }
+  const last = i >= NL - 1;
   setTimeout(() => {
     if (S.end !== 'win') return;
-    overlay('<div class="big full" style="color:var(--gold)">' + (last ? 'Храм пройден!' : 'Уровень пройден!') + '</div><div><div class="rank">' + rank + '</div><div class="stats"><span>⏱ ' + fmtT(t) + '</span><span>◆ ' + got + '/' + total + '</span></div></div>' +
-      '<div class="acts">' + (last ? '<p class="sub">Все ' + NLEV + ' уровней пройдены!</p>' : '<button class="btn hot" id="oNx">Следующий уровень</button>') +
+    overlay('<div class="big full" style="color:var(--gold)">' + (last ? (S.party ? 'Стихии покорены!' : 'Храм пройден!') : 'Уровень пройден!') + '</div><div><div class="rank">' + rank + '</div><div class="stats"><span>⏱ ' + fmtT(t) + '</span><span>◆ ' + got + '/' + total + '</span></div></div>' +
+      '<div class="acts">' + (last ? '<p class="sub">Все ' + NL + ' уровней пройдены!</p>' : '<button class="btn hot" id="oNx">Следующий уровень</button>') +
       '<div class="row"><button class="btn ghost" id="oRe">Ещё раз</button><button class="btn ghost" id="oLv">К уровням</button></div></div>',
       { oNx: () => choose(i + 1), oRe: () => choose(i), oLv: () => choose(-1) });
     refreshMenus();
@@ -1752,7 +2242,10 @@ const NP = 700;
 const PA = { x: new Float32Array(NP), y: new Float32Array(NP), vx: new Float32Array(NP), vy: new Float32Array(NP), life: new Float32Array(NP), max: new Float32Array(NP), r: new Float32Array(NP), g: new Float32Array(NP), col: new Uint8Array(NP), kind: new Uint8Array(NP) };
 let pHead = 0;
 // colour table: 0-2 fire, 3-5 water, 6 dust, 7 smoke, 8 goo, 9 gold, 10 white, 11 violet, 12 mint
-const PCOL = ['#ffb347', '#ff6b2c', '#ffd166', '#8fd8ff', '#39b4ff', '#e8f8ff', '#a89878', '#8a8577', '#9cf06e', '#e2bd62', '#ffffff', '#b48cff', '#5ee6c8'];
+const PCOL = ['#ffb347', '#ff6b2c', '#ffd166', '#8fd8ff', '#39b4ff', '#e8f8ff', '#a89878', '#8a8577', '#9cf06e', '#e2bd62', '#ffffff', '#b48cff', '#5ee6c8',
+  '#8b6b3a', '#a8854a', '#c9a96a', '#dff6ff', '#bfe9ff', '#ffffff', '#ffe066', '#fff3a0', '#fffbe0', '#6a3fa0', '#3a1f5e', '#b48cff'];
+const ROLE_PC = { f: 0, w: 3, e: 13, a: 16, l: 19, s: 22 };   // first of three particle colours of each hero
+const glowOfCol = (c) => c < 3 ? GLOW.fire : c < 6 ? GLOW.water : c < 13 ? GLOW.gold : c < 16 ? GLOW.earth : c < 19 ? GLOW.air : c < 22 ? GLOW.light : GLOW.shade;
 // kinds: 0 dot, 1 glow (additive), 2 bubble ring, 3 smoke (grows), 4 square confetti, 5 shock ring
 function spawn(kind, x, y, vx, vy, life, r, g, col) {
   const i = pHead; pHead = (pHead + 1) % NP;
@@ -1771,32 +2264,32 @@ function updateParticles(dt) {
   }
 }
 function burst(x, y, role, n, smoke) {
-  const c0 = role === 'f' ? 0 : 3;
+  const c0 = ROLE_PC[role];
   n = Math.ceil(n * S.fx);
   for (let i = 0; i < n; i++) { const a = rnd() * 6.283, s = 1 + rnd() * 4.5; spawn(smoke && i % 3 === 0 ? 3 : 0, x, y, Math.cos(a) * s, Math.sin(a) * s - 2, .5 + rnd() * .5, .06 + rnd() * .09, 7, smoke && i % 3 === 0 ? 7 : c0 + (i % 3)); }
   spawn(5, x, y, 0, 0, .45, .2, 0, c0 + 2);
 }
 function dust(x, y, n, vspread) { n = Math.ceil(n * S.fx); for (let i = 0; i < n; i++) spawn(3, x + (rnd() - .5) * .5, y, (rnd() - .5) * (vspread || 2.4), -rnd() * .7, .35 + rnd() * .2, .07, 0, 6); }
-function sparkle(x, y, role, n) { n = Math.ceil(n * S.fx); const c0 = role === 'f' ? 0 : 3; for (let i = 0; i < n; i++) { const a = rnd() * 6.283, s = .8 + rnd() * 2.2; spawn(1, x, y, Math.cos(a) * s, Math.sin(a) * s - .6, .5 + rnd() * .4, .09 + rnd() * .08, 2, c0 + 2); } spawn(5, x, y, 0, 0, .35, .12, 0, c0 + 2); }
+function sparkle(x, y, role, n) { n = Math.ceil(n * S.fx); const c0 = ROLE_PC[role]; for (let i = 0; i < n; i++) { const a = rnd() * 6.283, s = .8 + rnd() * 2.2; spawn(1, x, y, Math.cos(a) * s, Math.sin(a) * s - .6, .5 + rnd() * .4, .09 + rnd() * .08, 2, c0 + 2); } spawn(5, x, y, 0, 0, .35, .12, 0, c0 + 2); }
 function winFx() {
-  for (const r of ['f', 'w']) { const d = S.lv.doors[r]; if (!d) continue; for (let i = 0; i < 26 * S.fx; i++) spawn(4, d.x + .5, d.y - .2, (rnd() - .5) * 5, -2 - rnd() * 4, 1 + rnd(), .06 + rnd() * .05, 7, r === 'f' ? (i % 2 ? 2 : 1) : (i % 2 ? 5 : 4)); }
+  for (const r of ELS) { const d = S.lv.doors[r]; if (!d) continue; for (let i = 0; i < 26 * S.fx; i++) spawn(4, d.x + .5, d.y - .2, (rnd() - .5) * 5, -2 - rnd() * 4, 1 + rnd(), .06 + rnd() * .05, 7, r === 'f' ? (i % 2 ? 2 : 1) : r === 'w' ? (i % 2 ? 5 : 4) : ROLE_PC[r] + (i % 3)); }
 }
 
 // ---------- gems / levers shared with the partner ----------
 S.gmMask = 0;
-function isCollected(id) { return ((S.gmMask >> id) & 1) === 1 || (S.R && S.R.active && ((S.R.gm >> id) & 1) === 1); }
+function isCollected(id) { if (((S.gmMask >> id) & 1) === 1) return true; const L = S.RL; for (let i = 0; i < L.length; i++) if (L[i].active && ((L[i].gm >> id) & 1) === 1) return true; return false; }
 function gemCount(role) { let n = 0; const g = S.lv.gems; for (let i = 0; i < g.length; i++) if (g[i].t === role && isCollected(g[i].id)) n++; return n; }
 function collected() { const s = new Set(); if (!S.lv) return s; for (const g of S.lv.gems) if (isCollected(g.id)) s.add(g.id); return s; }
 // lever state = [value, version]; the higher version wins (version = max seen + 1 at every toggle)
 function leverState(i) {
   const a = S.lev[i]; let val = a ? a[0] : 0, ver = a ? a[1] : 0;
-  const R = S.R;
-  if (R && R.active && R.lv) { const q = R.lv; for (let k = 0; k + 2 < q.length; k += 3) if (q[k] === i && q[k + 2] > ver) { val = q[k + 1]; ver = q[k + 2]; } }
+  const L = S.RL;
+  for (let j = 0; j < L.length; j++) { const R = L[j]; if (R.active && R.lv) { const q = R.lv; for (let k = 0; k + 2 < q.length; k += 3) if (q[k] === i && q[k + 2] > ver) { val = q[k + 1]; ver = q[k + 2]; } } }
   return val;
 }
 function leverVer(i) {
-  const a = S.lev[i]; let ver = a ? a[1] : 0; const R = S.R;
-  if (R && R.active && R.lv) { const q = R.lv; for (let k = 0; k + 2 < q.length; k += 3) if (q[k] === i && q[k + 2] > ver) ver = q[k + 2]; }
+  const a = S.lev[i]; let ver = a ? a[1] : 0; const L = S.RL;
+  for (let j = 0; j < L.length; j++) { const R = L[j]; if (R.active && R.lv) { const q = R.lv; for (let k = 0; k + 2 < q.length; k += 3) if (q[k] === i && q[k + 2] > ver) ver = q[k + 2]; } }
   return ver;
 }
 function levPayload() { const o = []; for (const k in S.lev) o.push(+k, S.lev[k][0], S.lev[k][1]); return o; }
@@ -1804,12 +2297,13 @@ function levPayload() { const o = []; for (const k in S.lev) o.push(+k, S.lev[k]
 // ---------- partner body, sampled once per rendered frame ----------
 const SAMPLE_OPT = { lerp: ['x', 'y'], vel: { x: 'vx', y: 'vy' }, maxExtrapolate: 60 };
 function updateRemote() {
+  if (S.party) { updateRemotesParty(); return; }
   const R = S.R; if (!R) return;
   if (!hasDuo() || !Duo.linked()) { R.active = false; return; }
   const st = Duo.sample(SAMPLE_OPT);
   if (!st || st.ce !== S.cur.ep || typeof st.x !== 'number' || !st.r) { R.active = false; return; }
   if (!R.active || R.role !== st.r) { R.rx = st.x; R.ry = st.y; R.role = st.r; }
-  R.active = true; R.x = st.x; R.y = st.y; R.vx = st.vx || 0; R.vy = st.vy || 0; R.face = st.f || 1; R.gr = !!st.gr; R.dead = !!st.d; R.door = !!st.dr; R.gm = st.gm | 0; R.lv = Array.isArray(st.lv) ? st.lv : null;
+  R.active = true; R.x = st.x; R.y = st.y; R.vx = st.vx || 0; R.vy = st.vy || 0; R.face = st.f || 1; R.gr = !!st.gr; R.dead = !!st.d; R.door = !!st.dr; R.gm = st.gm | 0; R.lv = Array.isArray(st.lv) ? st.lv : null; R.sk = st.sk || null;
   R.rx = R.x; R.ry = R.y;
 }
 
@@ -1822,11 +2316,14 @@ function tick() {
   w.clock = levelClock();
   const bodies = S.bodies; bodies.length = 0;
   for (let i = 0; i < pls.length; i++) bodies.push(pls[i]);
-  if (R && R.active && !R.dead) bodies.push(R);
+  for (let i = 0; i < S.RL.length; i++) { const q = S.RL[i]; if (q.active && !q.dead) bodies.push(q); }
+  w.bodies = bodies;
+  if (S.party) partySyncWorld(w);
   for (let i = 0; i < lv.lev.length; i++) S.levArr[i] = leverState(i);
-  const active = groupState(lv, bodies, S.levArr);
+  const active = groupState(lv, bodies, S.levArr, w.st);
   for (let i = 0; i < lv.btn.length; i++) { const b = lv.btn[i]; if (!!b.pressed !== !!b.pp) { b.pp = !!b.pressed; beep('btn'); sparkle(b.x + .5, b.y + .7, b.pressed ? 'f' : 'w', 4); } }
   stepPlatforms(w, active, pls, STEP);
+  stepStones(w, STEP);
   for (let pi = 0; pi < pls.length; pi++) {
     const p = pls[pi], role = p.role;
     if (p.dead) continue;
@@ -1843,17 +2340,22 @@ function tick() {
       const l = lv.lev[i];
       if (!inLever(l, p)) continue;
       const cur = S.levArr[i];
-      if ((p.vx > 1.5 && cur !== 1) || (p.vx < -1.5 && cur !== 0)) { const nv = p.vx > 0 ? 1 : 0; S.lev[i] = [nv, leverVer(i) + 1]; S.levArr[i] = nv; S.lastLevKey = levPayload().join(','); beep('lever'); sparkle(l.x + .5, l.y + .3, role, 5); }
+      const vxl = l.inv ? -p.vx : p.vx;
+      if ((vxl > 1.5 && cur !== 1) || (vxl < -1.5 && cur !== 0)) { const nv = vxl > 0 ? 1 : 0; S.lev[i] = [nv, leverVer(i) + 1]; S.levArr[i] = nv; S.lastLevKey = levPayload().join(','); beep('lever'); sparkle(l.x + .5, l.y + .3, role, 5); }
     }
     const dr = atDoor(lv, p);
     if (dr && !p.door) { beep('door'); sparkle(lv.doors[role].x + .5, lv.doors[role].y + .2, role, 12); }
     p.door = dr;
     // body emitters: embers / drips
-    if (chance(Math.abs(p.vx) > 1 ? .45 : .14)) spawn(role === 'f' ? 1 : 0, p.x + PH.W / 2 + (rnd() - .5) * .4, p.y + .3 + rnd() * .3, (rnd() - .5) * .6, role === 'f' ? -1.2 - rnd() : .3, .6, role === 'f' ? .07 : .05, role === 'f' ? -1 : 6, role === 'f' ? rnd() * 3 | 0 : 3 + (rnd() * 3 | 0));
+    if (chance(Math.abs(p.vx) > 1 ? .45 : .14)) {
+      const up = role === 'f' || role === 'l' || role === 'a';
+      spawn(role === 'f' ? 1 : 0, p.x + PH.W / 2 + (rnd() - .5) * .4, p.y + .3 + rnd() * .3, (rnd() - .5) * .6, role === 'f' ? -1.2 - rnd() : role === 'w' ? .3 : up ? -.6 - rnd() * .6 : .5 + rnd() * .4, .6, role === 'f' ? .07 : .05, role === 'f' ? -1 : up ? -.5 : 6, role === 'f' ? rnd() * 3 | 0 : ROLE_PC[role] + (rnd() * 3 | 0));
+    }
   }
-  if (S.solo) { if (S.pl.f.door && S.pl.w.door) showWin(); }
+  if (S.party) { if (partyAllHome()) showWin(); }
+  else if (S.solo) { if (S.pl.f.door && S.pl.w.door) showWin(); }
   else if (S.role && S.pl[S.role] && S.pl[S.role].door && R && R.active && R.door) showWin();
-  if (!S.solo) netSend();
+  if (S.party) partyNetSend(); else if (!S.solo) netSend();
 }
 
 function netSend() {
@@ -1866,7 +2368,7 @@ function netSend() {
   const now = performance.now();
   if (key === S.lastKey && now - S.lastSend < 600) return;
   S.lastKey = key; S.lastSend = now;
-  Duo.set({ ce: S.cur.ep, x, y, vx, vy, f: p.face, gr: p.gr ? 1 : 0, d, dr, gm: S.gmMask, lv: levPayload() });
+  Duo.set({ ce: S.cur.ep, x, y, vx, vy, f: p.face, gr: p.gr ? 1 : 0, d, dr, gm: S.gmMask, lv: levPayload(), sk: skinArr(S.role) });
 }
 S.lastLevKey = '';
 
@@ -1909,7 +2411,8 @@ function glowSprite(rgb, size) {
   gr.addColorStop(0, 'rgba(' + rgb + ',1)'); gr.addColorStop(.25, 'rgba(' + rgb + ',.55)'); gr.addColorStop(.6, 'rgba(' + rgb + ',.16)'); gr.addColorStop(1, 'rgba(' + rgb + ',0)');
   g.fillStyle = gr; g.fillRect(0, 0, size, size); return c;
 }
-const GLOW = { fire: glowSprite('255,150,60', 96), water: glowSprite('70,170,255', 96), lava: glowSprite('255,110,30', 96), goo: glowSprite('120,255,90', 96), gold: glowSprite('255,215,110', 96), white: glowSprite('255,255,255', 64), violet: glowSprite('180,140,255', 96), mint: glowSprite('94,230,200', 96), pink: glowSprite('255,143,200', 96), lime: glowSprite('159,232,112', 96), th: [] };
+const ROLE_COL = { f: '#ff6b2c', w: '#39b4ff', e: '#b8864a', a: '#cfeefc', l: '#ffd84a', s: '#9a6ae0' };
+const GLOW = { fire: glowSprite('255,150,60', 96), water: glowSprite('70,170,255', 96), lava: glowSprite('255,110,30', 96), goo: glowSprite('120,255,90', 96), gold: glowSprite('255,215,110', 96), white: glowSprite('255,255,255', 64), earth: glowSprite('201,160,90', 96), air: glowSprite('200,240,255', 96), light: glowSprite('255,240,140', 96), shade: glowSprite('150,100,230', 96), violet: glowSprite('180,140,255', 96), mint: glowSprite('94,230,200', 96), pink: glowSprite('255,143,200', 96), lime: glowSprite('159,232,112', 96), th: [] };
 THEMES.forEach((t) => GLOW.th.push(glowSprite(t.glowRGB, 128)));
 const GROUP_GLOW = [GLOW.violet, GLOW.gold, GLOW.mint, GLOW.pink, GLOW.lime];
 let vignette = null;
@@ -1922,7 +2425,7 @@ function makeVignette() {
 
 // ---------- layer storage ----------
 const L = { far: mk(2, 2), mid: mk(2, 2), bg: mk(2, 2), wall: mk(2, 2), rs: 1, farOff: 0, midOff: 0 };
-const SPR = { gemF: null, gemW: null, doorF: null, doorW: null, plat: new Map(), liq: {}, liqTop: { L: '#ffb13b', W: '#6fd0ff', G: '#9cf06e' } };
+const SPR = { gemF: null, gemW: null, doorF: null, doorW: null, plat: new Map(), liq: {}, liqTop: { L: '#ffb13b', W: '#6fd0ff', G: '#9cf06e', M: '#b88a4a', V: '#eafaff', B: '#fff3a0', D: '#6a3fa0' }, gem: {}, stone: null, gate: null };
 const RUN = { n: 0, x: [], len: [], y: [], t: [], surf: [] };
 const DECO = { n: 0, x: [], y: [], kind: [], ph: [] };
 const FOG = [];
@@ -2109,18 +2612,28 @@ function renderWalls(th) {
     if (!solid(x - 1, y)) { g.fillStyle = 'rgba(255,240,200,.14)'; g.fillRect(x, y, .06, 1.01); }
     if (!solid(x + 1, y)) { g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(x + .93, y, .07, 1.01); }
   }
+  // shadow gates (T): dark mesh, only the shadow hero passes
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+    if (tileAt(lv, x, y) !== 'T') continue;
+    g.fillStyle = 'rgba(40,20,70,.82)'; g.fillRect(x, y, 1.01, 1.01);
+    g.strokeStyle = 'rgba(180,140,255,.55)'; g.lineWidth = .05;
+    g.beginPath(); g.moveTo(x + .5, y); g.lineTo(x + .5, y + 1); g.moveTo(x, y + .5); g.lineTo(x + 1, y + .5); g.stroke();
+    g.strokeRect(x + .04, y + .04, .92, .92);
+    g.fillStyle = 'rgba(220,200,255,.85)'; g.beginPath(); g.ellipse(x + .5, y + .5, .13, .07, 0, 0, 7); g.fill();
+  }
   // noise over everything
   g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = g.createPattern(noisePattern(), 'repeat'); g.fillRect(0, 0, w, h); g.restore();
 }
 
 // ---------- liquids (runs of cells) ----------
+const LIQ = { L: 1, W: 1, G: 1, M: 1, V: 1, B: 1, D: 1 };
 function buildRuns() {
   const lv = S.lv; RUN.n = 0; RUN.x.length = RUN.len.length = RUN.y.length = RUN.t.length = RUN.surf.length = 0;
   for (let y = 0; y < ROWS; y++) {
     let x = 0;
     while (x < COLS) {
       const c = lv.grid[y][x];
-      if (c !== 'L' && c !== 'W' && c !== 'G') { x++; continue; }
+      if (!LIQ[c]) { x++; continue; }
       const surf = !(lv.grid[y - 1] && lv.grid[y - 1][x] === c);
       let x2 = x + 1;
       while (x2 < COLS && lv.grid[y][x2] === c && (!(lv.grid[y - 1] && lv.grid[y - 1][x2] === c)) === surf) x2++;
@@ -2130,7 +2643,7 @@ function buildRuns() {
   }
 }
 function buildLiquidBodies() {
-  const defs = { L: ['#ffb13b', '#ff6a1c', '#b3250c'], W: ['#5cc4ff', '#1f7fe0', '#124c9c'], G: ['#a6f56f', '#43b231', '#1d6b1b'] };
+  const defs = { L: ['#ffb13b', '#ff6a1c', '#b3250c'], W: ['#5cc4ff', '#1f7fe0', '#124c9c'], G: ['#a6f56f', '#43b231', '#1d6b1b'], M: ['#c9a064', '#8b6232', '#4e3318'], V: ['#f4fcff', '#b8e4f6', '#7fb6d8'], B: ['#fffbd0', '#ffd84a', '#d6911c'], D: ['#8a5ad0', '#3d2166', '#140a26'] };
   for (const k in defs) {
     const c = mk(128, 128), g = c.getContext('2d'), d = defs[k];
     const gr = g.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, d[0]); gr.addColorStop(.3, d[1]); gr.addColorStop(1, d[2]); g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
@@ -2138,6 +2651,10 @@ function buildLiquidBodies() {
     for (let i = 0; i < 26; i++) { g.fillStyle = 'rgba(255,255,255,' + (.04 + R() * .09) + ')'; g.beginPath(); g.ellipse(R() * 128, R() * 128, 6 + R() * 18, 1.2 + R() * 2.4, 0, 0, 7); g.fill(); }
     if (k === 'L') { g.strokeStyle = 'rgba(80,10,0,.45)'; g.lineWidth = 2; for (let i = 0; i < 6; i++) { g.beginPath(); let x = R() * 128, y = R() * 128; g.moveTo(x, y); for (let j = 0; j < 4; j++) { x += (R() - .5) * 40; y += (R() - .5) * 30; g.lineTo(x, y); } g.stroke(); } }
     if (k === 'G') { for (let i = 0; i < 10; i++) { g.strokeStyle = 'rgba(220,255,200,.35)'; g.lineWidth = 1.2; g.beginPath(); g.arc(R() * 128, R() * 128, 3 + R() * 6, 0, 7); g.stroke(); } }
+    if (k === 'M') { for (let i = 0; i < 12; i++) { g.strokeStyle = 'rgba(255,230,180,.28)'; g.lineWidth = 1.4; g.beginPath(); g.arc(R() * 128, R() * 128, 2 + R() * 5, 0, 7); g.stroke(); } g.fillStyle = 'rgba(60,35,12,.35)'; for (let i = 0; i < 18; i++) g.fillRect(R() * 128, R() * 128, 3 + R() * 5, 2); }
+    if (k === 'V') { g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2.2; g.lineCap = 'round'; for (let i = 0; i < 7; i++) { const cx = R() * 128, cy = R() * 128; g.beginPath(); g.arc(cx, cy, 6 + R() * 12, R() * 6, R() * 6 + 3.5); g.stroke(); } }
+    if (k === 'B') { g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 1.6; for (let i = 0; i < 9; i++) { const cx = R() * 128; g.beginPath(); g.moveTo(cx, 0); g.lineTo(cx + (R() - .5) * 40, 128); g.stroke(); } }
+    if (k === 'D') { for (let i = 0; i < 6; i++) { const cx = 10 + R() * 108, cy = 10 + R() * 108; g.fillStyle = 'rgba(255,240,200,.85)'; g.beginPath(); g.ellipse(cx - 4, cy, 2.4, 3.4, 0, 0, 7); g.ellipse(cx + 4, cy, 2.4, 3.4, 0, 0, 7); g.fill(); } }
     SPR.liq[k] = c;
   }
 }
@@ -2156,7 +2673,9 @@ function buildSprites(th) {
     return c;
   };
   SPR.gemF = gem('#e8341b', '#ffb83a', '#ffe9a0'); SPR.gemW = gem('#1c78f0', '#7fd6ff', '#e4f8ff');
-  for (const role of ['f', 'w']) {
+  SPR.gem = { f: SPR.gemF, w: SPR.gemW, e: gem('#9a6a2a', '#e0b060', '#fff0c8'), a: gem('#8cc4e0', '#f0fbff', '#ffffff'), l: gem('#f0b800', '#ffe85a', '#fffbd0'), s: gem('#5a2f9a', '#a070e8', '#e6d4ff') };
+  SPR.door = {};
+  for (const role of ELS) {
     const dw = 1.8, dh = 2.3, c = mk(dw * L.rs, dh * L.rs), g = c.getContext('2d'); g.setTransform(L.rs, 0, 0, L.rs, 0, 0);
     const cx = dw / 2, top = .12, bot = dh - .08;
     const arch = (r, y) => { g.beginPath(); g.moveTo(cx - r, bot); g.lineTo(cx - r, y + r); g.arc(cx, y + r, r, Math.PI, 0); g.lineTo(cx + r, bot); };
@@ -2172,18 +2691,31 @@ function buildSprites(th) {
     // steps
     g.fillStyle = th.stB; g.fillRect(cx - .95, bot - .12, 1.9, .2); g.fillStyle = th.trim; g.globalAlpha = .6; g.fillRect(cx - .95, bot - .12, 1.9, .04); g.globalAlpha = 1;
     // side torches (small gem lamps in role colour)
-    g.fillStyle = role === 'f' ? '#ff6b2c' : '#39b4ff'; for (const sx of [-1, 1]) { g.beginPath(); g.arc(cx + sx * .86, top + 1.2, .07, 0, 7); g.fill(); }
-    SPR[role === 'f' ? 'doorF' : 'doorW'] = c;
+    g.fillStyle = ROLE_COL[role]; for (const sx of [-1, 1]) { g.beginPath(); g.arc(cx + sx * .86, top + 1.2, .07, 0, 7); g.fill(); }
+    SPR.door[role] = c; if (role === 'f') SPR.doorF = c; if (role === 'w') SPR.doorW = c;
+  }
+  // stone block (earth hero pushes it)
+  {
+    const sz = Math.ceil(L.rs), c = mk(sz, sz), g = c.getContext('2d'); g.setTransform(sz, 0, 0, sz, 0, 0);
+    const gr = g.createLinearGradient(0, 0, 0, 1); gr.addColorStop(0, '#a99a80'); gr.addColorStop(1, '#6c6048');
+    g.fillStyle = gr; rr(g, .03, .03, .94, .94, .14); g.fill();
+    g.strokeStyle = 'rgba(0,0,0,.5)'; g.lineWidth = .05; rr(g, .03, .03, .94, .94, .14); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.28)'; rr(g, .1, .08, .7, .12, .05); g.fill();
+    g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = .04; g.beginPath(); g.moveTo(.3, .3); g.lineTo(.46, .5); g.lineTo(.36, .72); g.moveTo(.62, .24); g.lineTo(.74, .46); g.stroke();
+    g.fillStyle = 'rgba(40,110,40,.55)'; g.beginPath(); g.ellipse(.7, .1, .16, .06, 0, 0, 7); g.fill();
+    SPR.stone = c;
   }
   SPR.plat.clear();
 }
 function platSprite(p, gi) {
-  const key = p.w + 'x' + p.h + 'x' + (p.auto ? 'a' : gi) + S.theme;
+  const key = p.w + 'x' + p.h + 'x' + (p.auto ? 'a' : gi) + S.theme + (p.sh ? 's' : '');
   let c = SPR.plat.get(key); if (c) return c;
   const rs = L.rs, th = THEMES[S.theme];
   c = mk(p.w * rs, p.h * rs); const g = c.getContext('2d'); g.setTransform(rs, 0, 0, rs, 0, 0);
-  const col = p.auto ? '#d8cfa8' : GROUP_COL[gi % GROUP_COL.length];
-  const gr = g.createLinearGradient(0, 0, 0, p.h); gr.addColorStop(0, '#9a8758'); gr.addColorStop(.5, '#6e603e'); gr.addColorStop(1, '#4a3f28'); g.fillStyle = gr; g.fillRect(0, 0, p.w, p.h);
+  const col = p.sh ? '#b48cff' : p.auto ? '#d8cfa8' : GROUP_COL[gi % GROUP_COL.length];
+  const gr = g.createLinearGradient(0, 0, 0, p.h);
+  if (p.sh) { gr.addColorStop(0, '#5a4a80'); gr.addColorStop(.5, '#2e2450'); gr.addColorStop(1, '#170f2e'); } else { gr.addColorStop(0, '#9a8758'); gr.addColorStop(.5, '#6e603e'); gr.addColorStop(1, '#4a3f28'); }
+  g.fillStyle = gr; g.fillRect(0, 0, p.w, p.h);
   g.fillStyle = 'rgba(255,255,255,.28)'; g.fillRect(0, 0, p.w, .07);
   g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(0, p.h - .08, p.w, .08);
   g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = .05; g.strokeRect(.03, .03, p.w - .06, p.h - .06);
@@ -2197,6 +2729,228 @@ function platSprite(p, gi) {
   g.globalAlpha = .35; g.fillStyle = '#fff'; if (p.h > p.w) g.fillRect(p.w / 2 - .09, .22, .05, p.h - .44); else g.fillRect(.22, p.h / 2 - .06, p.w - .44, .035);
   g.globalAlpha = 1;
   SPR.plat.set(key, c); return c;
+}
+
+// ===== GAME part 3b: heroes of the six elements, skins (shapes + colour shades), skin storage =====
+// A skin is [shape, shade]. Shade palettes stay inside the element's colours so the element is recognisable at a glance.
+const mkPal = (feet, ab, bd, bl, mo, h, dot, hi, tuft, af) => ({ feet, ab, bd, bl, mo, h, dot, hi: hi || 'rgba(255,255,255,.55)', tuft: tuft || '#ffffff', af: af || bd });
+const SKIN_PAL = {
+  f: [
+    { n: 'Пламя', ...mkPal('#6e2410', '#a8381a', '#c4421b', '#ff8a3c', '#7a2008', ['#ff3d14', '#ff9a1f', '#ffe27a'], '#ff6b2c', 'rgba(255,230,140,.7)') },
+    { n: 'Золото', ...mkPal('#6a4708', '#b07a12', '#d49a1c', '#ffd84a', '#7a4e08', ['#ffb300', '#ffd54a', '#fff4b0'], '#ffc21a', 'rgba(255,250,200,.8)') },
+    { n: 'Малина', ...mkPal('#5a0f22', '#a31a3a', '#c9254a', '#ff6b88', '#6a0f26', ['#e0103a', '#ff5c70', '#ffc2c8'], '#e8264f', 'rgba(255,220,225,.7)') },
+    { n: 'Уголь', ...mkPal('#2a1410', '#5a2a20', '#7a3a28', '#c8582c', '#3a1408', ['#ff5a1c', '#ffa040', '#ffe0a0'], '#9a4a30', 'rgba(255,200,120,.6)') },
+    { n: 'Белый жар', ...mkPal('#7a4a20', '#c87830', '#e8923a', '#ffd49a', '#7a3a10', ['#ffd27a', '#fff0b0', '#ffffff'], '#ffe6a8', 'rgba(255,255,255,.85)') },
+  ],
+  w: [
+    { n: 'Капля', ...mkPal('#10386a', '#1a5fae', '#1e6fc4', '#5cc2ff', '#0c3a78', ['#1576d6', '#3aa8f0', '#8fdcff'], '#2e9bf0', 'rgba(255,255,255,.55)', '#bfeaff', '#2478d0') },
+    { n: 'Бирюза', ...mkPal('#0c4a52', '#127886', '#1c9aa8', '#6fe0e8', '#0a4a54', ['#0f8f9e', '#33c4d0', '#9aeef0'], '#22b8c8', 'rgba(255,255,255,.6)', '#c8fbff') },
+    { n: 'Океан', ...mkPal('#0a1f4a', '#14388a', '#1a4aa8', '#4a86e8', '#0a2060', ['#0f3aa0', '#2a62d8', '#7aa6f0'], '#2a58c8', 'rgba(255,255,255,.5)', '#b0c8ff') },
+    { n: 'Лёд', ...mkPal('#2a5a7a', '#5a9ac0', '#7cc0e0', '#cdf0ff', '#2a5a80', ['#5aa8d0', '#a8e0f8', '#f0fcff'], '#b4e6fa', 'rgba(255,255,255,.8)', '#ffffff') },
+    { n: 'Небо', ...mkPal('#1a4a8a', '#3a82d0', '#4a9aee', '#a6dcff', '#1a4a90', ['#3a8ae8', '#7cc0ff', '#d4eeff'], '#6ab4f4', 'rgba(255,255,255,.7)', '#e4f4ff') },
+  ],
+  e: [
+    { n: 'Глина', ...mkPal('#4a3016', '#7a5226', '#9a6a30', '#d0a060', '#3a2208', ['#6e4a22', '#a87a40', '#d6b070'], '#a87a40', 'rgba(255,240,200,.5)', '#5aa83a') },
+    { n: 'Мох', ...mkPal('#24401a', '#3e6a2a', '#52883a', '#9acc6a', '#183010', ['#3a6a28', '#6aa044', '#b0dc86'], '#6aa044', 'rgba(240,255,200,.5)', '#f0c040') },
+    { n: 'Песок', ...mkPal('#6a5226', '#a88848', '#c8a860', '#f0dc9c', '#4a3a14', ['#a88848', '#d8bc78', '#f6e8b8'], '#d8bc78', 'rgba(255,255,230,.6)', '#7aa04a') },
+    { n: 'Гранит', ...mkPal('#3a3a42', '#5e5e6c', '#7a7a8a', '#b8b8c8', '#2a2a32', ['#5a5a68', '#8c8c9c', '#c4c4d4'], '#8c8c9c', 'rgba(255,255,255,.5)', '#6a9a4a') },
+    { n: 'Терракота', ...mkPal('#5a2412', '#9a4226', '#c05a34', '#f0906a', '#4a1808', ['#984024', '#cc6a44', '#f0a888'], '#cc6a44', 'rgba(255,230,200,.5)', '#7aa04a') },
+  ],
+  a: [
+    { n: 'Облако', ...mkPal('#6a8aa0', '#a4c4d8', '#bcdcee', '#f4fbff', '#4a6a80', ['#9ccce4', '#e4f4fc', '#ffffff'], '#dff3fc', 'rgba(255,255,255,.9)', '#ffffff') },
+    { n: 'Небо', ...mkPal('#3a6a8a', '#6aa4cc', '#82bce0', '#d6f0ff', '#2a5a7a', ['#6ab2e0', '#b4e0fa', '#f4fcff'], '#9ad4f4', 'rgba(255,255,255,.85)', '#f4fcff') },
+    { n: 'Лаванда', ...mkPal('#6a5a8a', '#a496c8', '#bcaedc', '#eee8fa', '#4a3a6a', ['#a898d4', '#d8d0f0', '#faf8ff'], '#cfc4ec', 'rgba(255,255,255,.85)', '#faf8ff') },
+    { n: 'Мятный ветер', ...mkPal('#5a8a7a', '#94c4b4', '#aedcc8', '#e6faf2', '#3a6a5a', ['#8cc8b4', '#c8ecde', '#f6fffb'], '#bde8d6', 'rgba(255,255,255,.85)', '#f6fffb') },
+    { n: 'Закат', ...mkPal('#8a6a6a', '#c4a0a0', '#e0bcbc', '#fff0ee', '#6a4a4a', ['#e0aaa8', '#f6d4d0', '#fffaf8'], '#f0cac6', 'rgba(255,255,255,.85)', '#fffaf8') },
+  ],
+  l: [
+    { n: 'Золотой', ...mkPal('#8a6208', '#d49a10', '#f0b81c', '#fff08a', '#7a4e08', ['#f0a800', '#ffd84a', '#fff7b0'], '#ffd84a', 'rgba(255,255,255,.8)', '#fff7b0') },
+    { n: 'Лимон', ...mkPal('#7a7a10', '#c8c828', '#e4e43a', '#faffa0', '#5a5a08', ['#d8d010', '#f4f04a', '#ffffc0'], '#f0ec50', 'rgba(255,255,255,.8)', '#ffffc0') },
+    { n: 'Рассвет', ...mkPal('#8a4a18', '#e08a30', '#ffa040', '#ffe0a8', '#7a3a08', ['#ff9a20', '#ffc86a', '#fff0d0'], '#ffb454', 'rgba(255,255,255,.8)', '#fff0d0') },
+    { n: 'Белый', ...mkPal('#8a8670', '#d8d2b0', '#f0ead0', '#ffffff', '#6a6648', ['#e8e0a8', '#fff8d0', '#ffffff'], '#fff6d0', 'rgba(255,255,255,.9)', '#ffffff') },
+    { n: 'Янтарь', ...mkPal('#6a3a08', '#b86a10', '#d88a18', '#ffc864', '#5a2e04', ['#d88a10', '#f6b43a', '#ffe49a'], '#f0a830', 'rgba(255,255,255,.7)', '#ffe49a') },
+  ],
+  s: [
+    { n: 'Сумрак', ...mkPal('#1a0e2e', '#341c58', '#432572', '#7a4ec0', '#d8c4ff', ['#24103e', '#3f2268', '#7a4ec0'], '#6a3fa8', 'rgba(200,170,255,.45)', '#9a6ae0') },
+    { n: 'Ночь', ...mkPal('#0a0a1c', '#181838', '#202050', '#3c3c90', '#b4b4ff', ['#101030', '#1c1c58', '#3c3c9a'], '#2c2c78', 'rgba(160,160,255,.4)', '#6a6ae0') },
+    { n: 'Слива', ...mkPal('#2a0e24', '#521a46', '#72245e', '#b04a98', '#ffc4ec', ['#3e0e34', '#6a2060', '#b04a98'], '#8a2c74', 'rgba(255,170,230,.4)', '#d070c0') },
+    { n: 'Уголь', ...mkPal('#101010', '#2a2a2e', '#38383e', '#6a6a74', '#d0d0e0', ['#16161a', '#2a2a30', '#5a5a66'], '#44444c', 'rgba(220,220,240,.35)', '#8a8a98') },
+    { n: 'Ледяной мрак', ...mkPal('#14243a', '#24406a', '#305a90', '#6aa0d8', '#cfe8ff', ['#162a48', '#284c80', '#6aa0d8'], '#3a6aa8', 'rgba(170,210,255,.4)', '#8ac0f0') },
+  ],
+};
+// shapes: name + body proportions (rx, ry of the body ellipse)
+const SKIN_SHAPES = {
+  f: [{ n: 'Язычок', bw: .23, bh: .25 }, { n: 'Вихор', bw: .21, bh: .26 }, { n: 'Корона', bw: .25, bh: .24 }, { n: 'Огонёк', bw: .22, bh: .23 }],
+  w: [{ n: 'Капля', bw: .23, bh: .25 }, { n: 'Волна', bw: .25, bh: .24 }, { n: 'Плавник', bw: .21, bh: .26 }, { n: 'Брызги', bw: .22, bh: .25 }],
+  e: [{ n: 'Валун', bw: .26, bh: .24 }, { n: 'Листик', bw: .22, bh: .25 }, { n: 'Гриб', bw: .24, bh: .24 }, { n: 'Кристаллы', bw: .23, bh: .26 }],
+  a: [{ n: 'Облачко', bw: .24, bh: .24 }, { n: 'Вихрь', bw: .21, bh: .26 }, { n: 'Перо', bw: .22, bh: .25 }, { n: 'Крылышки', bw: .23, bh: .25 }],
+  l: [{ n: 'Солнышко', bw: .23, bh: .25 }, { n: 'Звезда', bw: .22, bh: .26 }, { n: 'Лампочка', bw: .24, bh: .24 }, { n: 'Нимб', bw: .22, bh: .25 }],
+  s: [{ n: 'Капюшон', bw: .21, bh: .26 }, { n: 'Рожки', bw: .23, bh: .25 }, { n: 'Ушки', bw: .22, bh: .25 }, { n: 'Цилиндр', bw: .22, bh: .26 }],
+};
+const ROLE_GLOW = (r) => ({ f: GLOW.fire, w: GLOW.water, e: GLOW.earth, a: GLOW.air, l: GLOW.light, s: GLOW.shade })[r] || GLOW.fire;
+const SKIN_KEY = (r) => 'skin.fw.' + r;
+(function () {
+  for (const r of ELS) {
+    let v = 0, c = 0;
+    try { const o = JSON.parse(localStorage.getItem(SKIN_KEY(r)) || 'null'); if (o && Number.isInteger(o.v) && Number.isInteger(o.c)) { v = o.v; c = o.c; } } catch (e) {}
+    S.skin[r] = { v: Math.max(0, Math.min(SKIN_SHAPES[r].length - 1, v)), c: Math.max(0, Math.min(SKIN_PAL[r].length - 1, c)) };
+  }
+})();
+function setSkin(r, v, c) {
+  S.skin[r] = { v, c };
+  try { localStorage.setItem(SKIN_KEY(r), JSON.stringify({ v, c })); } catch (e) {}
+}
+function skinArr(r) { const k = r && S.skin[r]; return k ? [k.v, k.c] : [0, 0]; }
+const palOf = (role, sk) => { const L = SKIN_PAL[role] || SKIN_PAL.f; return L[(sk && sk[1]) | 0] || L[0]; };
+const shapeOf = (role, sk) => { const L = SKIN_SHAPES[role] || SKIN_SHAPES.f; return L[(sk && sk[0]) | 0] || L[0]; };
+
+// ---------- heads ----------
+function flame(cx, cy, sc, t, ph, drag) {
+  const f1 = Math.sin(t * 13 + ph) * .06, f2 = Math.sin(t * 11 + 1 + ph) * .08, f3 = Math.sin(t * 15 + 2 + ph) * .05;
+  ctx.beginPath();
+  ctx.moveTo(cx - .36 * sc, cy + .1 * sc);
+  ctx.quadraticCurveTo(cx - .46 * sc, cy - .25 * sc, cx - .26 * sc + drag, cy - .55 * sc + f1);
+  ctx.quadraticCurveTo(cx - .13 * sc, cy - .3 * sc, cx - .02 * sc + drag * 1.4, cy - .82 * sc + f2);
+  ctx.quadraticCurveTo(cx + .1 * sc, cy - .35 * sc, cx + .24 * sc + drag, cy - .6 * sc + f3);
+  ctx.quadraticCurveTo(cx + .48 * sc, cy - .2 * sc, cx + .36 * sc, cy + .1 * sc);
+  ctx.quadraticCurveTo(cx + .3 * sc, cy + .38 * sc, cx, cy + .38 * sc);
+  ctx.quadraticCurveTo(cx - .3 * sc, cy + .38 * sc, cx - .36 * sc, cy + .1 * sc);
+  ctx.fill();
+}
+function ell(x, y, rx, ry, rot) { ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot || 0, 0, 6.2832); ctx.fill(); }
+function tri(x1, y1, x2, y2, x3, y3) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.lineTo(x3, y3); ctx.closePath(); ctx.fill(); }
+function round(r, hy, P) {          // plain round head used by most shapes
+  ctx.fillStyle = P.h[0]; ell(0, hy + .01, r + .03, r + .03);
+  ctx.fillStyle = P.h[1]; ell(-.02, hy, r, r);
+  ctx.fillStyle = P.h[2]; ell(-.1, hy - .12, r * .55, r * .4, -.3);
+}
+function drawHead(role, v, P, hy, drag, t) {
+  const H = P.h;
+  if (role === 'f') {
+    if (v === 0) { ctx.fillStyle = H[0]; flame(0, hy, 1.04, t, 0, drag); ctx.fillStyle = H[1]; flame(0, hy + .04, .84, t, 1.3, drag * .8); ctx.fillStyle = H[2]; flame(0, hy + .08, .62, t, 2.6, drag * .6); }
+    else if (v === 1) { ctx.fillStyle = H[0]; flame(drag * 1.5, hy, 1.1, t, 0, drag * 2.2); ctx.fillStyle = H[1]; flame(drag * 1.5, hy + .04, .88, t, 1.3, drag * 1.8); ctx.fillStyle = H[0]; flame(.3, hy - .02, .5, t, 3.1, drag); ctx.fillStyle = H[2]; flame(drag, hy + .08, .6, t, 2.6, drag * 1.2); }
+    else if (v === 2) { ctx.fillStyle = H[0]; ell(0, hy + .02, .36, .34); ctx.fillStyle = H[1]; ell(0, hy + .04, .28, .27); ctx.fillStyle = H[0]; flame(-.22, hy - .22, .5, t, 0, drag); flame(.22, hy - .22, .5, t, 2, drag); ctx.fillStyle = H[1]; flame(0, hy - .3, .72, t, 1, drag); ctx.fillStyle = H[2]; flame(0, hy - .27, .42, t, 1.8, drag); }
+    else { ctx.fillStyle = H[0]; ell(0, hy + .05, .32, .31); ctx.fillStyle = H[1]; ell(-.02, hy + .06, .25, .24); ctx.fillStyle = H[0]; flame(0, hy - .22, .66, t, .5, drag); ctx.fillStyle = H[2]; flame(0, hy - .2, .38, t, 2.2, drag); }
+  } else if (role === 'w') {
+    const wob = Math.sin(t * 4) * .02;
+    if (v === 0) {
+      ctx.fillStyle = H[0];
+      ctx.beginPath(); ctx.moveTo(drag * 2, hy - .7 + wob); ctx.bezierCurveTo(.1 + drag, hy - .46, .4, hy - .28, .4, hy + .02); ctx.arc(0, hy + .02, .4, 0, Math.PI, false); ctx.bezierCurveTo(-.4, hy - .28, -.1 + drag, hy - .46, drag * 2, hy - .7 + wob); ctx.fill();
+      ctx.fillStyle = H[1]; ell(-.03, hy, .32, .32); ctx.fillStyle = H[2]; ell(-.1, hy - .12, .19, .15, -.3);
+      ctx.strokeStyle = P.tuft; ctx.lineWidth = .06; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(.05 + drag, hy - .5 + wob); ctx.quadraticCurveTo(.22 + Math.sin(t * 5) * .04, hy - .62, .25, hy - .42); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.9)'; ell(-.17, hy - .2, .075, .045, -.6);
+    } else if (v === 1) {
+      round(.36, hy, P);
+      ctx.fillStyle = H[0]; ctx.beginPath(); ctx.moveTo(-.36, hy - .1); ctx.quadraticCurveTo(-.3, hy - .5, -.12, hy - .34); ctx.quadraticCurveTo(0, hy - .66 + wob, .14, hy - .38); ctx.quadraticCurveTo(.34, hy - .5, .36, hy - .1); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = H[2]; ell(-.12, hy - .4, .05, .04); ell(.14, hy - .44, .05, .04);
+    } else if (v === 2) {
+      round(.35, hy, P);
+      ctx.fillStyle = H[0]; ctx.beginPath(); ctx.moveTo(-.18, hy - .3); ctx.quadraticCurveTo(-.02, hy - .85 + wob, .3 + drag, hy - .72); ctx.quadraticCurveTo(.12, hy - .52, .18, hy - .3); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = H[2]; ctx.globalAlpha = .6; tri(-.06, hy - .36, .02, hy - .62, .12, hy - .4); ctx.globalAlpha = 1;
+    } else {
+      round(.34, hy + .03, P);
+      ctx.fillStyle = H[1]; for (let k = -1; k <= 1; k++) { const bx = k * .2, by = hy - .46 - (k === 0 ? .12 : 0) + Math.sin(t * 4 + k) * .02; ctx.beginPath(); ctx.moveTo(bx, by - .16); ctx.quadraticCurveTo(bx + .1, by, bx, by + .06); ctx.quadraticCurveTo(bx - .1, by, bx, by - .16); ctx.fill(); }
+      ctx.fillStyle = H[2]; ell(-.2, hy - .45, .025, .03);
+    }
+  } else if (role === 'e') {
+    if (v === 0) {
+      ctx.fillStyle = H[0]; rr(ctx, -.4, hy - .34, .8, .74, .2); ctx.fill();
+      ctx.fillStyle = H[1]; rr(ctx, -.35, hy - .3, .68, .64, .17); ctx.fill();
+      ctx.fillStyle = H[2]; rr(ctx, -.3, hy - .26, .34, .2, .08); ctx.fill();
+      ctx.strokeStyle = P.tuft; ctx.lineWidth = .06; ctx.lineCap = 'round'; ctx.beginPath(); for (let k = -1; k <= 1; k++) { ctx.moveTo(k * .12, hy - .32); ctx.quadraticCurveTo(k * .16 + (k || .1) * .1, hy - .5, k * .22, hy - .6 + Math.sin(t * 3 + k) * .02); } ctx.stroke();
+    } else if (v === 1) {
+      round(.36, hy, P);
+      ctx.strokeStyle = P.tuft; ctx.lineWidth = .05; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, hy - .34); ctx.quadraticCurveTo(.02, hy - .5, .04, hy - .58); ctx.stroke();
+      ctx.fillStyle = P.tuft; ctx.save(); ctx.translate(.04, hy - .58); ctx.rotate(Math.sin(t * 2) * .08); ctx.beginPath(); ctx.ellipse(.14, -.04, .16, .08, -.4, 0, 6.2832); ctx.fill(); ctx.beginPath(); ctx.ellipse(-.14, -.06, .16, .08, .4, 0, 6.2832); ctx.fill(); ctx.restore();
+    } else if (v === 2) {
+      ctx.fillStyle = H[1]; ell(0, hy + .06, .3, .3); ctx.fillStyle = H[2]; ell(-.08, hy + .02, .16, .14);
+      ctx.fillStyle = H[0]; ctx.beginPath(); ctx.ellipse(0, hy - .12, .46, .3, 0, Math.PI, 0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = H[2]; ell(-.2, hy - .24, .07, .06); ell(.12, hy - .3, .06, .05); ell(.28, hy - .16, .05, .04);
+    } else {
+      round(.35, hy, P);
+      ctx.fillStyle = H[2]; tri(-.22, hy - .26, -.16, hy - .68, -.06, hy - .3); tri(-.06, hy - .32, .04, hy - .8, .14, hy - .32); tri(.12, hy - .28, .22, hy - .6, .3, hy - .22);
+      ctx.fillStyle = 'rgba(255,255,255,.5)'; tri(-.06, hy - .32, .04, hy - .8, .0, hy - .3);
+    }
+  } else if (role === 'a') {
+    if (v === 0) {
+      ctx.fillStyle = H[0]; ell(0, hy + .14, .4, .2); ell(-.25, hy + .04, .22, .2); ell(.25, hy + .04, .22, .2); ell(0, hy - .08, .28, .27);
+      ctx.fillStyle = H[1]; ell(0, hy + .12, .38, .18); ell(-.25, hy + .02, .2, .18); ell(.25, hy + .02, .2, .18); ell(0, hy - .1, .26, .25);
+      ctx.fillStyle = H[2]; ell(-.08, hy - .2, .13, .09, -.3); ell(.2, hy - .02, .07, .05);
+    } else if (v === 1) {
+      round(.36, hy, P);
+      ctx.strokeStyle = H[0]; ctx.lineWidth = .07; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(.04, hy - .52, .14, 2, 6.6 + Math.sin(t * 3) * .3); ctx.stroke();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = .035; ctx.beginPath(); ctx.arc(.04, hy - .52, .14, 2.4, 5.6); ctx.stroke();
+    } else if (v === 2) {
+      round(.35, hy, P);
+      ctx.save(); ctx.translate(.05, hy - .34); ctx.rotate(.45 + Math.sin(t * 2.5) * .05); ctx.fillStyle = H[0]; ell(0, -.24, .1, .34); ctx.fillStyle = H[2]; ell(-.01, -.26, .06, .3);
+      ctx.strokeStyle = H[0]; ctx.lineWidth = .025; ctx.beginPath(); ctx.moveTo(0, -.55); ctx.lineTo(0, .05); ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.translate(-.1, hy - .34); ctx.rotate(-.4); ctx.fillStyle = H[1]; ell(0, -.16, .07, .22); ctx.restore();
+    } else {
+      round(.35, hy, P);
+      const fl = Math.sin(t * 8) * .08;
+      for (const sx of [-1, 1]) { ctx.save(); ctx.translate(sx * .36, hy - .02); ctx.rotate(sx * (-.5 + fl)); ctx.fillStyle = H[1]; ell(sx * .1, -.06, .22, .09); ctx.fillStyle = H[2]; ell(sx * .12, -.08, .15, .05); ctx.restore(); }
+    }
+  } else if (role === 'l') {
+    if (v === 0) {
+      ctx.strokeStyle = H[1]; ctx.lineWidth = .07; ctx.lineCap = 'round'; ctx.beginPath();
+      for (let k = 0; k < 10; k++) { const a = k * .6283 + t * .6, r0 = .44, r1 = .56 + (k % 2) * .08; ctx.moveTo(Math.cos(a) * r0, hy + Math.sin(a) * r0); ctx.lineTo(Math.cos(a) * r1, hy + Math.sin(a) * r1); }
+      ctx.stroke(); round(.36, hy, P);
+    } else if (v === 1) {
+      const star = (r0, r1) => { ctx.beginPath(); for (let k = 0; k < 10; k++) { const a = -1.5708 + k * .6283, r = k % 2 ? r0 : r1; ctx.lineTo(Math.cos(a) * r, hy + .02 + Math.sin(a) * r); } ctx.closePath(); ctx.fill(); };
+      ctx.fillStyle = H[0]; star(.3, .62); ctx.fillStyle = H[1]; star(.26, .54); ctx.fillStyle = H[2]; ell(-.06, hy - .08, .12, .1);
+    } else if (v === 2) {
+      ctx.fillStyle = P.mo; rr(ctx, -.15, hy + .3, .3, .13, .04); ctx.fill();
+      ctx.fillStyle = H[0]; ell(0, hy - .02, .39, .39); ctx.fillStyle = H[1]; ell(0, hy - .02, .34, .34); ctx.fillStyle = H[2]; ell(-.1, hy - .14, .17, .12, -.3);
+      ctx.fillStyle = H[0]; rr(ctx, -.16, hy + .26, .32, .1, .03); ctx.fill();
+    } else {
+      round(.35, hy + .03, P);
+      ctx.strokeStyle = H[2]; ctx.lineWidth = .07; ctx.beginPath(); ctx.ellipse(0, hy - .45 + Math.sin(t * 3) * .02, .27, .08, 0, 0, 6.2832); ctx.stroke();
+      ctx.strokeStyle = H[1]; ctx.lineWidth = .03; ctx.beginPath(); ctx.ellipse(0, hy - .45 + Math.sin(t * 3) * .02, .27, .08, 0, 0, 6.2832); ctx.stroke();
+    }
+  } else {   // shadow
+    if (v === 0) { ctx.fillStyle = H[0]; tri(-.3, hy - .2, .12 + drag, hy - .8, .34, hy - .15); round(.36, hy, P); ctx.fillStyle = H[0]; ctx.beginPath(); ctx.ellipse(0, hy - .02, .37, .37, 0, Math.PI * 1.05, Math.PI * 1.95); ctx.fill(); }
+    else if (v === 1) { ctx.fillStyle = H[2]; tri(-.34, hy - .1, -.3, hy - .62, -.12, hy - .3); tri(.34, hy - .1, .3, hy - .62, .12, hy - .3); round(.36, hy, P); }
+    else if (v === 2) { ctx.fillStyle = H[1]; tri(-.36, hy - .1, -.32, hy - .62, -.06, hy - .34); tri(.36, hy - .1, .32, hy - .62, .06, hy - .34); ctx.fillStyle = H[2]; tri(-.3, hy - .22, -.29, hy - .5, -.16, hy - .32); tri(.3, hy - .22, .29, hy - .5, .16, hy - .32); round(.35, hy, P); }
+    else { round(.35, hy, P); ctx.fillStyle = H[0]; rr(ctx, -.46, hy - .36, .92, .1, .04); ctx.fill(); rr(ctx, -.27, hy - .78, .54, .46, .06); ctx.fill(); ctx.fillStyle = H[2]; ctx.fillRect(-.27, hy - .42, .54, .07); }
+  }
+}
+
+function drawHero(p, an, t, alpha, mine) {
+  const role = p.role, P = palOf(role, p.sk), shp = shapeOf(role, p.sk), v = (p.sk && p.sk[0]) | 0;
+  const cx = p.rx + PH.W / 2, fy = p.ry + PH.H;
+  const run = p.gr && Math.abs(p.vx) > .6;
+  const ph = an.ph * 6.2832;
+  const idle = Math.sin(t * 3 + (role === 'f' ? 0 : 1.7 + ELS.indexOf(role) * .5));
+  const bob = run ? Math.abs(Math.sin(ph)) * .05 : idle * .014;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.translate(cx, fy);
+  ctx.fillStyle = 'rgba(0,0,0,.3)'; ell(0, .02, .31 * an.sx, .07);
+  ctx.rotate(an.lean); ctx.scale(an.fl * an.sx, an.sy);
+  const lf = run ? Math.sin(ph) * .15 : 0, lift = run ? Math.max(0, Math.sin(ph)) * .07 : 0, lift2 = run ? Math.max(0, -Math.sin(ph)) * .07 : 0;
+  ctx.fillStyle = P.feet;
+  ell(-.13 + lf, -.06 - lift, .13, .075); ell(.13 - lf, -.06 - lift2, .13, .075);
+  const ar = run ? Math.sin(ph + 3.14) * .13 : Math.sin(t * 2.1) * .02;
+  ctx.fillStyle = P.ab;
+  ell(-.25 - ar * .5, -.4 - bob, .075, .13, .35 + ar);
+  ctx.fillStyle = P.bd; ell(0, -.32 - bob, shp.bw, shp.bh);
+  ctx.fillStyle = P.bl; ell(.02, -.29 - bob, shp.bw * .6, shp.bh * .6);
+  ctx.fillStyle = P.hi; ell(-.05, -.36 - bob, .05, .06);
+  ctx.fillStyle = P.af;
+  ell(.25 + ar * .5, -.4 - bob, .075, .13, -.35 - ar);
+  const hy = -.82 - bob * 1.4 + (an.sy < 1 ? .03 : 0);
+  const drag = -Math.max(-.12, Math.min(.12, p.vx * .016 * (an.fl >= 0 ? 1 : -1)));
+  drawHead(role, v, P, hy, drag, t);
+  // face
+  const bl = an.blink > 0 ? .12 : 1, lookX = Math.max(-.03, Math.min(.03, p.vx * .004)) + .02;
+  for (let s = -1; s <= 1; s += 2) {
+    const ex = s * .125 + .045;
+    ctx.fillStyle = '#fff'; ell(ex, hy + .06, .088, .118 * bl);
+    if (bl > .5) { ctx.fillStyle = '#1a1208'; ell(ex + lookX + .015, hy + .075, .047, .058); ctx.fillStyle = '#fff'; ell(ex + lookX + .03, hy + .055, .015, .015); }
+  }
+  ctx.strokeStyle = P.mo; ctx.lineWidth = .03; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(.05, hy + .17, p.gr ? .075 : .05, .25, Math.PI - .25); ctx.stroke();
+  ctx.restore();
 }
 
 // ===== GAME part 4: drawing (no allocation per frame), main loop, boot =====
@@ -2222,93 +2976,29 @@ function animUpdate(p, an, dt, remote) {
   if (an.nextBlink < 0) { an.blink = .13; an.nextBlink = 1.8 + rnd() * 3.5; }
   if (an.blink > 0) an.blink -= dt;
 }
-function flame(cx, cy, sc, t, ph, drag) {
-  const f1 = Math.sin(t * 13 + ph) * .06, f2 = Math.sin(t * 11 + 1 + ph) * .08, f3 = Math.sin(t * 15 + 2 + ph) * .05;
-  ctx.beginPath();
-  ctx.moveTo(cx - .36 * sc, cy + .1 * sc);
-  ctx.quadraticCurveTo(cx - .46 * sc, cy - .25 * sc, cx - .26 * sc + drag, cy - .55 * sc + f1);
-  ctx.quadraticCurveTo(cx - .13 * sc, cy - .3 * sc, cx - .02 * sc + drag * 1.4, cy - .82 * sc + f2);
-  ctx.quadraticCurveTo(cx + .1 * sc, cy - .35 * sc, cx + .24 * sc + drag, cy - .6 * sc + f3);
-  ctx.quadraticCurveTo(cx + .48 * sc, cy - .2 * sc, cx + .36 * sc, cy + .1 * sc);
-  ctx.quadraticCurveTo(cx + .3 * sc, cy + .38 * sc, cx, cy + .38 * sc);
-  ctx.quadraticCurveTo(cx - .3 * sc, cy + .38 * sc, cx - .36 * sc, cy + .1 * sc);
-  ctx.fill();
-}
-function ell(x, y, rx, ry, rot) { ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot || 0, 0, 6.2832); ctx.fill(); }
-function drawHero(p, an, t, alpha, mine) {
-  const fire = p.role === 'f';
-  const cx = p.rx + PH.W / 2, fy = p.ry + PH.H;
-  const run = p.gr && Math.abs(p.vx) > .6;
-  const ph = an.ph * 6.2832;
-  const idle = Math.sin(t * 3 + (fire ? 0 : 1.7));
-  const bob = run ? Math.abs(Math.sin(ph)) * .05 : idle * .014;
-  ctx.save(); ctx.globalAlpha = alpha;
-  ctx.translate(cx, fy);
-  ctx.fillStyle = 'rgba(0,0,0,.3)'; ell(0, .02, .31 * an.sx, .07);
-  ctx.rotate(an.lean); ctx.scale(an.fl * an.sx, an.sy);
-  const lf = run ? Math.sin(ph) * .15 : 0, lift = run ? Math.max(0, Math.sin(ph)) * .07 : 0, lift2 = run ? Math.max(0, -Math.sin(ph)) * .07 : 0;
-  // feet
-  ctx.fillStyle = fire ? '#6e2410' : '#10386a';
-  ell(-.13 + lf, -.06 - lift, .13, .075); ell(.13 - lf, -.06 - lift2, .13, .075);
-  // arms behind
-  const ar = run ? Math.sin(ph + 3.14) * .13 : Math.sin(t * 2.1) * .02;
-  ctx.fillStyle = fire ? '#a8381a' : '#1a5fae';
-  ell(-.25 - ar * .5, -.4 - bob, .075, .13, .35 + ar);
-  // body
-  ctx.fillStyle = fire ? '#c4421b' : '#1e6fc4'; ell(0, -.32 - bob, .23, .25);
-  ctx.fillStyle = fire ? '#ff8a3c' : '#5cc2ff'; ell(.02, -.29 - bob, .14, .15);
-  ctx.fillStyle = fire ? 'rgba(255,230,140,.7)' : 'rgba(255,255,255,.55)'; ell(-.05, -.36 - bob, .05, .06);
-  // arm in front
-  ctx.fillStyle = fire ? '#c4421b' : '#2478d0';
-  ell(.25 + ar * .5, -.4 - bob, .075, .13, -.35 - ar);
-  // head
-  const hy = -.82 - bob * 1.4 + (an.sy < 1 ? .03 : 0);
-  const drag = -Math.max(-.12, Math.min(.12, p.vx * .016 * (an.fl >= 0 ? 1 : -1)));
-  if (fire) {
-    ctx.fillStyle = '#ff3d14'; flame(0, hy, 1.04, t, 0, drag);
-    ctx.fillStyle = '#ff9a1f'; flame(0, hy + .04, .84, t, 1.3, drag * .8);
-    ctx.fillStyle = '#ffe27a'; flame(0, hy + .08, .62, t, 2.6, drag * .6);
-  } else {
-    // droplet head
-    const wob = Math.sin(t * 4) * .02;
-    ctx.fillStyle = '#1576d6';
-    ctx.beginPath(); ctx.moveTo(drag * 2, hy - .7 + wob); ctx.bezierCurveTo(.1 + drag, hy - .46, .4, hy - .28, .4, hy + .02); ctx.arc(0, hy + .02, .4, 0, Math.PI, false); ctx.bezierCurveTo(-.4, hy - .28, -.1 + drag, hy - .46, drag * 2, hy - .7 + wob); ctx.fill();
-    ctx.fillStyle = '#3aa8f0'; ell(-.03, hy, .32, .32);
-    ctx.fillStyle = '#8fdcff'; ell(-.1, hy - .12, .19, .15, -.3);
-    // wavy tuft
-    ctx.strokeStyle = '#bfeaff'; ctx.lineWidth = .06; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(.05 + drag, hy - .5 + wob); ctx.quadraticCurveTo(.22 + Math.sin(t * 5) * .04, hy - .62, .25, hy - .42); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,.9)'; ell(-.17, hy - .2, .075, .045, -.6);
-  }
-  // face
-  const bl = an.blink > 0 ? .12 : 1, lookX = Math.max(-.03, Math.min(.03, p.vx * .004)) + .02;
-  for (let s = -1; s <= 1; s += 2) {
-    const ex = s * .125 + .045;
-    ctx.fillStyle = '#fff'; ell(ex, hy + .06, .088, .118 * bl);
-    if (bl > .5) { ctx.fillStyle = '#1a1208'; ell(ex + lookX + .015, hy + .075, .047, .058); ctx.fillStyle = '#fff'; ell(ex + lookX + .03, hy + .055, .015, .015); }
-  }
-  ctx.strokeStyle = fire ? '#7a2008' : '#0c3a78'; ctx.lineWidth = .03; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.arc(.05, hy + .17, p.gr ? .075 : .05, .25, Math.PI - .25); ctx.stroke();
-  ctx.restore();
-}
 function drawDoor(d, role, open, t) {
   const cx = d.x + .5, bot = d.y + 1;
-  ctx.drawImage(role === 'f' ? SPR.doorF : SPR.doorW, cx - .9, bot - 2.22, 1.8, 2.3);
-  const c = role === 'f' ? 0 : 1;
+  ctx.drawImage(SPR.door[role], cx - .9, bot - 2.22, 1.8, 2.3);
+  const c = ELS.indexOf(role);
+  const IN = { f: '#5a1a0a', w: '#0b2f5a', e: '#4a3016', a: '#2a4a60', l: '#6a5008', s: '#1a0e2e' };
   // portal interior (inside the dark arch)
   const top = bot - 2.22 + .12, r = .58, ay = top + .3 + r;
   ctx.save();
   ctx.beginPath(); ctx.moveTo(cx - r, bot - .1); ctx.lineTo(cx - r, ay); ctx.arc(cx, ay, r, Math.PI, 0); ctx.lineTo(cx + r, bot - .1); ctx.closePath(); ctx.clip();
-  ctx.fillStyle = role === 'f' ? '#5a1a0a' : '#0b2f5a'; ctx.fillRect(cx - r, top, r * 2, 2.2);
+  ctx.fillStyle = IN[role]; ctx.fillRect(cx - r, top, r * 2, 2.2);
   ctx.globalAlpha = open ? .95 : .6;
-  ctx.fillStyle = role === 'f' ? '#ff6b2c' : '#39b4ff';
+  ctx.fillStyle = ROLE_COL[role];
   for (let k = 0; k < 4; k++) { const yy = bot - .1 - ((t * .5 + k * .27) % 1) * 1.6; ctx.globalAlpha = (open ? .6 : .35) * (1 - ((t * .5 + k * .27) % 1)); ctx.beginPath(); ctx.ellipse(cx + Math.sin(t * 2 + k * 1.7) * .22, yy, .22, .09 + k * .01, 0, 0, 6.2832); ctx.fill(); }
   ctx.globalAlpha = 1; ctx.restore();
   // symbol
   const sy = ay + .35 + Math.sin(t * 2 + c) * .03;
   ctx.fillStyle = open ? 'rgba(255,255,255,.95)' : 'rgba(255,255,255,.7)';
   if (role === 'f') { ctx.beginPath(); ctx.moveTo(cx - .2, sy + .1); ctx.lineTo(cx - .18, sy - .16); ctx.lineTo(cx - .07, sy - .03); ctx.lineTo(cx, sy - .34); ctx.lineTo(cx + .09, sy - .05); ctx.lineTo(cx + .18, sy - .2); ctx.lineTo(cx + .2, sy + .1); ctx.quadraticCurveTo(cx + .18, sy + .29, cx, sy + .29); ctx.quadraticCurveTo(cx - .18, sy + .29, cx - .2, sy + .1); ctx.fill(); }
-  else { ctx.beginPath(); ctx.moveTo(cx, sy - .32); ctx.quadraticCurveTo(cx + .22, sy + .02, cx + .18, sy + .12); ctx.arc(cx, sy + .11, .18, 0, Math.PI); ctx.quadraticCurveTo(cx - .22, sy + .02, cx, sy - .32); ctx.fill(); }
+  else if (role === 'w') { ctx.beginPath(); ctx.moveTo(cx, sy - .32); ctx.quadraticCurveTo(cx + .22, sy + .02, cx + .18, sy + .12); ctx.arc(cx, sy + .11, .18, 0, Math.PI); ctx.quadraticCurveTo(cx - .22, sy + .02, cx, sy - .32); ctx.fill(); }
+  else if (role === 'e') { ctx.beginPath(); ctx.moveTo(cx - .28, sy + .24); ctx.lineTo(cx - .08, sy - .14); ctx.lineTo(cx + .04, sy + .04); ctx.lineTo(cx + .14, sy - .08); ctx.lineTo(cx + .3, sy + .24); ctx.closePath(); ctx.fill(); }
+  else if (role === 'a') { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = .06; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(cx, sy, .24, 0, 4.4); ctx.stroke(); ctx.beginPath(); ctx.arc(cx, sy, .12, 1, 5.6); ctx.stroke(); }
+  else if (role === 'l') { ctx.beginPath(); ctx.arc(cx, sy, .13, 0, 6.2832); ctx.fill(); ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = .05; ctx.lineCap = 'round'; ctx.beginPath(); for (let k = 0; k < 8; k++) { const a = k * .7854; ctx.moveTo(cx + Math.cos(a) * .2, sy + Math.sin(a) * .2); ctx.lineTo(cx + Math.cos(a) * .32, sy + Math.sin(a) * .32); } ctx.stroke(); }
+  else { ctx.beginPath(); ctx.arc(cx, sy, .26, .6, 5.7); ctx.arc(cx + .12, sy - .03, .2, 5.2, 1.1, true); ctx.fill(); }
 }
 function lightRect(spr, x, y, w, h, a) { ctx.globalAlpha = a; ctx.drawImage(spr, x, y, w, h); }
 function drawFlame(x, y, s, t, ph, c1, c2) {
@@ -2322,7 +3012,7 @@ function computeCamera(dt, t) {
   if (S.scr === 'play' && S.plist.length) {
     let mn = 1e9, mx = -1e9, n = 0;
     for (let i = 0; i < S.plist.length; i++) { const p = S.plist[i]; if (p.dead) continue; const x = p.rx + PH.W / 2; if (x < mn) mn = x; if (x > mx) mx = x; n++; }
-    const R = S.R; if (R && R.active && !R.dead) { const x = R.rx + PH.W / 2; if (x < mn) mn = x; if (x > mx) mx = x; n++; }
+    for (let k = 0; k < S.RL.length; k++) { const R = S.RL[k]; if (R.active && !R.dead) { const x = R.rx + PH.W / 2; if (x < mn) mn = x; if (x > mx) mx = x; n++; } }
     if (n) {
       fx = (mn + mx) / 2;
       if (portrait) { const vis = Math.max(W / tsMax, Math.min(COLS, mx - mn + 12)); tsT = Math.max(tsMin, W / vis); }
@@ -2338,11 +3028,11 @@ function computeCamera(dt, t) {
   oy = Math.max(topY - 2, topY + (botY - topY - ROWS * ts) / 2);
 }
 
-let hudR = '', hudB = '', hudT = '', hudPing = '';
+let hudR = '', hudB = '', hudT = '', hudPing = '', hudX = '';
 function draw(alpha, dt, t) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   if (!S.lv || !W) { ctx.fillStyle = '#15130e'; ctx.fillRect(0, 0, cv.width, cv.height); return; }
-  const lv = S.lv, th = THEMES[S.theme], R = S.R, world = S.world;
+  const lv = S.lv, th = THEMES[S.theme], RL = S.RL, world = S.world;
   const pls = S.plist;
   for (let i = 0; i < pls.length; i++) { const p = pls[i]; p.rx = p.px + (p.x - p.px) * alpha; p.ry = p.py + (p.y - p.py) * alpha; }
   computeCamera(dt, t);
@@ -2361,11 +3051,11 @@ function draw(alpha, dt, t) {
   for (let i = 0; i < FOG.length; i++) { const f = FOG[i]; const fxp = ((f.x + t * f.s * .35) % (COLS + 12)) - 6; ctx.drawImage(GLOW.th[S.theme], fxp - f.w / 2, f.y - 2, f.w, 4); }
   ctx.globalAlpha = 1;
   // doors
-  for (const role of ['f', 'w']) {
+  for (const role of ELS) {
     const d = lv.doors[role]; if (!d) continue;
     let occ = false;
     for (let i = 0; i < pls.length; i++) if (pls[i].role === role && pls[i].door) occ = true;
-    if (R && R.active && R.role === role && R.door) occ = true;
+    for (let i = 0; i < RL.length; i++) if (RL[i].active && RL[i].role === role && RL[i].door) occ = true;
     drawDoor(d, role, occ, t);
   }
   // moving blocks (behind walls and liquids)
@@ -2394,11 +3084,23 @@ function draw(alpha, dt, t) {
       if (c === 'L' && chance(dt * 1.6 * len)) spawn(1, x + rnd() * len, y + .12, (rnd() - .5) * .4, -1.2 - rnd(), .8, .06, -.6, 2);
       else if (c === 'G' && chance(dt * 1.1 * len)) spawn(2, x + rnd() * len, y + .2, 0, -.5, 1, .07, 0, 8);
       else if (c === 'W' && chance(dt * .5 * len)) spawn(2, x + rnd() * len, y + .3, 0, -.35, 1.1, .05, 0, 5);
+      else if (c === 'M' && chance(dt * .5 * len)) spawn(2, x + rnd() * len, y + .3, 0, -.3, 1.2, .06, 0, 14);
+      else if (c === 'V' && chance(dt * 1.4 * len)) spawn(0, x + rnd() * len, y + .5, (rnd() - .5) * 2.4, -.6 - rnd() * .8, .9, .045, 0, 17);
+      else if (c === 'B' && chance(dt * 1.6 * len)) spawn(1, x + rnd() * len, y + .2, (rnd() - .5) * .4, -.9 - rnd(), .8, .06, -.4, 20);
+      else if (c === 'D' && chance(dt * .6 * len)) spawn(0, x + rnd() * len, y + .4, (rnd() - .5) * .3, -.5, 1, .05, 0, 24);
     } else ctx.drawImage(SPR.liq[c], 0, 0, 128, 128, x, y, len, 1.01);
   }
   // ---- buttons, levers ----
   for (let i = 0; i < lv.btn.length; i++) {
     const b = lv.btn[i], pr = b.pressed, col = GROUP_COL[b.g % GROUP_COL.length];
+    if (b.lt) {   // light sensor: a lamp that lights up when the light hero is near
+      const cx = b.x + .5, cy = b.y + .5, lit = pr || (world && lv.plat.some((p, pi) => p.g === b.g && p.latch && world.latch[pi]));
+      ctx.fillStyle = '#2a2414'; ctx.beginPath(); ctx.arc(cx, cy, .3, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = lit ? '#fff3a0' : '#6a5a30'; ctx.beginPath(); ctx.arc(cx, cy, .22, 0, 6.2832); ctx.fill();
+      ctx.strokeStyle = lit ? '#fff' : '#a89868'; ctx.lineWidth = .05; ctx.beginPath(); ctx.arc(cx, cy, .3, 0, 6.2832); ctx.stroke();
+      if (lit) { ctx.strokeStyle = 'rgba(255,243,160,.7)'; ctx.lineWidth = .04; ctx.beginPath(); for (let k = 0; k < 8; k++) { const a = k * .7854 + t; ctx.moveTo(cx + Math.cos(a) * .38, cy + Math.sin(a) * .38); ctx.lineTo(cx + Math.cos(a) * .55, cy + Math.sin(a) * .55); } ctx.stroke(); }
+      continue;
+    }
     ctx.fillStyle = '#2a2414'; ctx.fillRect(b.x + .04, b.y + .82, .92, .18);
     ctx.fillStyle = '#8f7d50'; ctx.fillRect(b.x + .06, b.y + .84, .88, .06);
     const h = pr ? .06 : .18, y0 = b.y + .84 - h;
@@ -2416,6 +3118,8 @@ function draw(alpha, dt, t) {
     ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(kx - .04, ky - .04, .045, 0, 6.2832); ctx.fill();
     ctx.fillStyle = '#8f7d50'; ctx.beginPath(); ctx.arc(cx, cy + .05, .3, Math.PI, 0); ctx.fill();
   }
+  // ---- stones (earth hero's blocks) ----
+  if (world && world.st) for (let i = 0; i < world.st.length; i++) { const s0 = world.st[i]; ctx.drawImage(SPR.stone, s0.vx, s0.vy, 1, 1); }
   // ---- decoration flames ----
   for (let i = 0; i < DECO.n; i++) {
     const x = DECO.x[i], y = DECO.y[i], k = DECO.kind[i];
@@ -2428,13 +3132,13 @@ function draw(alpha, dt, t) {
     const g = lv.gems[i]; if (isCollected(g.id)) continue;
     const sc = Math.cos(t * 2.4 + g.id), bob = Math.sin(t * 2 + g.id) * .07;
     ctx.save(); ctx.translate(g.x, g.y + bob); ctx.scale(.45 + Math.abs(sc) * .55, 1);
-    ctx.drawImage(g.t === 'f' ? SPR.gemF : SPR.gemW, -.5, -.5, 1, 1);
+    ctx.drawImage(SPR.gem[g.t], -.5, -.5, 1, 1);
     ctx.restore();
     const gl = (t * .55 + g.id * .37) % 1;
     if (gl < .2) { const a = Math.sin(gl / .2 * 3.14), x = g.x + .08, y = g.y + bob - .2, r = .22 * a; ctx.strokeStyle = 'rgba(255,255,255,' + a + ')'; ctx.lineWidth = .03; ctx.beginPath(); ctx.moveTo(x - r, y); ctx.lineTo(x + r, y); ctx.moveTo(x, y - r); ctx.lineTo(x, y + r); ctx.stroke(); }
   }
   // ---- heroes ----
-  if (R && R.active && !R.dead && R.role) { animUpdate(R, R.an, dt, true); drawHero(R, R.an, t, 1, false); }
+  for (let k = 0; k < RL.length; k++) { const R = RL[k]; if (R.active && !R.dead && R.role) { animUpdate(R, R.an, dt, true); drawHero(R, R.an, t, 1, false); } }
   for (let i = 0; i < pls.length; i++) {
     const p = pls[i]; if (p.dead) continue;
     animUpdate(p, p.an, dt, false);
@@ -2462,19 +3166,19 @@ function draw(alpha, dt, t) {
   for (let i = 0; i < NP; i++) {
     if (PA.life[i] <= 0 || PA.kind[i] !== 1) continue;
     const a = Math.max(0, PA.life[i] / PA.max[i]), r = PA.r[i] * 2.6, c = PA.col[i];
-    ctx.globalAlpha = a * .9; ctx.drawImage(c < 3 ? GLOW.fire : c < 6 ? GLOW.water : GLOW.gold, PA.x[i] - r, PA.y[i] - r, r * 2, r * 2);
+    ctx.globalAlpha = a * .9; ctx.drawImage(glowOfCol(c), PA.x[i] - r, PA.y[i] - r, r * 2, r * 2);
   }
   for (let i = 0; i < DECO.n; i++) {
     const x = DECO.x[i], y = DECO.y[i], fl = .75 + Math.sin(t * 9 + DECO.ph[i]) * .12 + Math.sin(t * 5.3 + DECO.ph[i] * 2) * .1, r = th.deco === 'brazier' ? 2.6 : 2;
     lightRect(GLOW.th[S.theme], x + .5 - r, y + .4 - r, r * 2, r * 2, fl * .55 * fx);
   }
   for (let i = 0; i < RUN.n; i++) {
-    const c = RUN.t[i]; if (c === 'W' || !RUN.surf[i]) continue;
+    const c = RUN.t[i]; if (c === 'W' || c === 'D' || !RUN.surf[i]) continue;
     const pul = .55 + Math.sin(t * 2 + RUN.x[i]) * .1;
-    lightRect(c === 'L' ? GLOW.lava : GLOW.goo, RUN.x[i] - .6, RUN.y[i] - 1.3, RUN.len[i] + 1.2, 2.3, pul * (c === 'L' ? 1 : .6));
+    lightRect(c === 'L' ? GLOW.lava : c === 'G' ? GLOW.goo : c === 'B' ? GLOW.light : c === 'V' ? GLOW.air : GLOW.earth, RUN.x[i] - .6, RUN.y[i] - 1.3, RUN.len[i] + 1.2, 2.3, pul * (c === 'L' || c === 'B' ? 1 : c === 'G' ? .6 : .35));
   }
-  for (const role of ['f', 'w']) { const d = lv.doors[role]; if (d) lightRect(role === 'f' ? GLOW.fire : GLOW.water, d.x - 1, d.y - 2, 3, 3.6, .38 + Math.sin(t * 2.5) * .08); }
-  for (let i = 0; i < lv.gems.length; i++) { const g = lv.gems[i]; if (isCollected(g.id)) continue; lightRect(g.t === 'f' ? GLOW.fire : GLOW.water, g.x - .7, g.y - .7, 1.4, 1.4, .55 + Math.sin(t * 3 + g.id) * .15); }
+  for (const role of ELS) { const d = lv.doors[role]; if (d) lightRect(ROLE_GLOW(role), d.x - 1, d.y - 2, 3, 3.6, .38 + Math.sin(t * 2.5) * .08); }
+  for (let i = 0; i < lv.gems.length; i++) { const g = lv.gems[i]; if (isCollected(g.id)) continue; lightRect(ROLE_GLOW(g.t), g.x - .7, g.y - .7, 1.4, 1.4, .55 + Math.sin(t * 3 + g.id) * .15); }
   for (let i = 0; i < lv.btn.length; i++) { const b = lv.btn[i]; lightRect(GROUP_GLOW[b.g % 5], b.x - .4, b.y - .2, 1.8, 1.2, b.pressed ? .8 : .3); }
   for (let i = 0; i < lv.lev.length; i++) { const l = lv.lev[i]; lightRect(GROUP_GLOW[l.g % 5], l.x - .3, l.y - .4, 1.6, 1.6, S.lvAng[i] > 0 ? .7 : .25); }
   for (let i = 0; i < lv.plat.length; i++) {
@@ -2482,8 +3186,8 @@ function draw(alpha, dt, t) {
     const pt = S.ppt[i] + ((world ? world.pt[i] : 0) - S.ppt[i]) * alpha;
     lightRect(GROUP_GLOW[p.g % 5], p.x + p.dx * pt - .3, p.y + p.dy * pt - .3, p.w + .6, p.h + .6, .12 + .45 * pt);
   }
-  for (let i = 0; i < pls.length; i++) { const p = pls[i]; if (p.dead) continue; lightRect(p.role === 'f' ? GLOW.fire : GLOW.water, p.rx + PH.W / 2 - 1.5, p.ry + PH.H / 2 - 1.5 - .2, 3, 3, .5 * fx + Math.sin(t * 9) * .05); }
-  if (R && R.active && !R.dead && R.role) lightRect(R.role === 'f' ? GLOW.fire : GLOW.water, R.rx + PH.W / 2 - 1.5, R.ry + PH.H / 2 - 1.7, 3, 3, .5 * fx);
+  for (let i = 0; i < pls.length; i++) { const p = pls[i]; if (p.dead) continue; lightRect(ROLE_GLOW(p.role), p.rx + PH.W / 2 - (p.role === 'l' ? 2.4 : 1.5), p.ry + PH.H / 2 - (p.role === 'l' ? 2.4 : 1.5) - .2, p.role === 'l' ? 4.8 : 3, p.role === 'l' ? 4.8 : 3, (p.role === 'l' ? .6 : .5) * fx + Math.sin(t * 9) * .05); }
+  for (let k = 0; k < RL.length; k++) { const R = RL[k]; if (R.active && !R.dead && R.role) { const big = R.role === 'l' ? 2.4 : 1.5; lightRect(ROLE_GLOW(R.role), R.rx + PH.W / 2 - big, R.ry + PH.H / 2 - big - .2, big * 2, big * 2, (R.role === 'l' ? .6 : .5) * fx); } }
   ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
   // ---- screen-space finish ----
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -2500,20 +3204,33 @@ let hudAcc = 0;
 function updateHud(dt) {
   hudAcc += dt; if (hudAcc < .1) return; hudAcc = 0;
   const lv = S.lv; let rt = 0, bt = 0;
-  for (let i = 0; i < lv.gems.length; i++) if (lv.gems[i].t === 'f') rt++; else bt++;
+  const tot = {};
+  for (let i = 0; i < lv.gems.length; i++) { const t0 = lv.gems[i].t; tot[t0] = (tot[t0] || 0) + 1; if (t0 === 'f') rt++; else if (t0 === 'w') bt++; }
   const r = '◆ ' + gemCount('f') + '/' + rt, b = '◆ ' + gemCount('w') + '/' + bt, tm = fmtT(S.tNow);
   if (r !== hudR) { hudR = r; $('hudR').textContent = r; }
   if (b !== hudB) { hudB = b; $('hudB').textContent = b; }
   if (tm !== hudT) { hudT = tm; $('hudT').textContent = tm; }
+  if (S.party) {
+    // one chip per hero in the game: fire/water use the usual two chips, the other elements their own
+    let key = '';
+    for (const e of ['e', 'a', 'l', 's']) { const on = S.proles.indexOf(e) >= 0; if (on) key += e + gemCount(e) + '/' + (tot[e] || 0) + ' '; const el = $('hud' + e.toUpperCase()); if (el.hidden === on) el.hidden = !on; }
+    for (const e of ['f', 'w']) { const el = $(e === 'f' ? 'hudR' : 'hudB'); const on = S.proles.indexOf(e) >= 0; if (el.hidden === on) el.hidden = !on; }
+    if (key !== hudX) { hudX = key; for (const e of ['e', 'a', 'l', 's']) if (S.proles.indexOf(e) >= 0) $('hud' + e.toUpperCase()).textContent = '◆ ' + gemCount(e) + '/' + (tot[e] || 0); }
+  }
   let pg = '';
   const pe = $('hudPing');
-  if (!S.solo && hasDuo()) {
+  if (S.party && typeof Party !== 'undefined') {
+    let worst = 0, cnt2 = 0;
+    for (const q of Party.players) { if (q.slot === Party.me.slot) continue; const pi = Party.ping(q.slot); if (pi) { worst = Math.max(worst, pi.ms); cnt2++; } }
+    pg = cnt2 ? worst + ' мс' : 'нет связи';
+    if (pg !== hudPing) pe.classList.toggle('slow', !cnt2 || worst > 120);
+  } else if (!S.solo && hasDuo()) {
     const pi = Duo.ping();
     pg = pi ? pi.ms + ' мс' + (pi.via === 'напрямую' ? '' : ' · сервер') : (netLinked() ? '' : 'нет связи');
     if (pg !== hudPing) { pe.classList.toggle('slow', !pi || pi.ms > 90); }
   }
   if (pg !== hudPing) { hudPing = pg; pe.textContent = pg; pe.hidden = !pg; }
-  const on = S.solo || (netLinked() && !S.netLost);
+  const on = S.party ? partyLinked() : (S.solo || (netLinked() && !S.netLost));
   if (on !== S.dotOn) { S.dotOn = on; $('netDot').classList.toggle('on', on); }
 }
 
@@ -2524,8 +3241,8 @@ function demoLevel() {
     const i = Math.max(0, Math.min(NLEV, S.unlocked) - 1);
     S.lv = buildLevel(LEVELS[i]); S.world = newWorld(S.lv); S.lvDemo = true; S.theme = Math.min(THEMES.length - 1, Math.floor(i / PER_WORLD));
     S.pl = {}; S.plist.length = 0;
-    for (const r of ['f', 'w']) { const p = newPlayer(S.lv, r); p.px = p.x; p.py = p.y; p.rx = p.x; p.ry = p.y; p.an = newAnim(); p.gr = true; S.pl[r] = p; S.plist.push(p); }
-    S.R = null; S.gems = new Set(); S.lev = {}; S.gmMask = 0; S.cur = S.cur.l >= 0 ? { l: -1, ep: S.cur.ep } : S.cur;
+    for (const r of ['f', 'w']) { const p = newPlayer(S.lv, r); p.px = p.x; p.py = p.y; p.rx = p.x; p.ry = p.y; p.an = newAnim(); p.gr = true; p.sk = skinArr(r); S.pl[r] = p; S.plist.push(p); }
+    S.R = null; S.RL = []; S.party = P.on; S.gems = new Set(); S.lev = {}; S.gmMask = 0; S.cur = S.cur.l >= 0 ? { l: -1, ep: S.cur.ep } : S.cur;
     S.levArr.length = S.lv.lev.length; if (S.ppt.length < S.lv.plat.length) S.ppt = new Float64Array(S.lv.plat.length + 8);
     S.camInit = false; S.prepKey = ''; relayout(); resetFx();
   }
@@ -2537,7 +3254,7 @@ function drawAvatars(dt, t) {
   avAcc += dt; if (avAcc < 1 / 30) return; const d = avAcc; avAcc = 0;
   for (const role of ['f', 'w']) {
     const c = $(role === 'f' ? 'avF' : 'avW'), g = c.getContext('2d'), a = AVT[role];
-    animUpdate(a.p, a.an, d, false);
+    a.p.sk = skinArr(role); animUpdate(a.p, a.an, d, false);
     g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
     g.setTransform(c.width * .4, 0, 0, c.width * .4, c.width / 2, c.height * .88);
     const keep = ctx; ctx = g;
@@ -2556,21 +3273,276 @@ function frame(now) {
   let alpha = 1;
   if (play) {
     updateRemote();
-    const frozen = S.paused || S.end || (!S.solo && !netLinked());
+    const frozen = S.paused || S.end || (S.party ? !partyLinked() : (!S.solo && !netLinked()));
     if (!frozen) {
       S.acc += dt; let n = 0;
       while (S.acc >= STEP && n < 5 && !S.end) { S.acc -= STEP; tick(); n++; }
       if (n >= 5) S.acc = 0;
       alpha = S.acc / STEP;
     } else S.acc = 0;
-    const R = S.R;
-    if (R && R.active && R.dead && !S.end) showDeath(R.role);
+    for (let k = 0; k < S.RL.length; k++) { const R = S.RL[k]; if (R.active && R.dead && !S.end) showDeath(R.role); }
     updateHud(dt);
   }
-  if (S.scr === 'role') drawAvatars(dt, now / 1000);
+  if (S.scr === 'role') drawAvatars(dt, now / 1000); else if (S.scr === 'skins' || S.scr === 'assign') previewTick(dt, now / 1000);
   draw(alpha, dt, now / 1000);
 }
 
+
+// ===== GAME part 5: skins screen, «Стихии» campaign over Party (3–6 phones) =====
+const NEL = EL_LEVELS.length;
+const ROLE_DESC = { f: 'ходит по лаве', w: 'ходит по воде', e: 'толкает каменные блоки', a: 'прыгает второй раз в воздухе', l: 'зажигает световые датчики рядом', s: 'проходит сквозь тёмные врата' };
+
+// ---------- live previews (skins screen, hero list) ----------
+function pvDraw(c, role, sk, t, dt, run) {
+  let a = c._pv; if (!a) a = c._pv = { p: { role, rx: -PH.W / 2, ry: -PH.H, vx: 0, vy: 0, face: 1, gr: true, sk: null }, an: newAnim() };
+  const p = a.p; p.role = role; p.sk = sk; p.vx = run ? 3.4 : 0; p.face = run && Math.sin(t * 1.1) < 0 ? -1 : 1;
+  animUpdate(p, a.an, dt, false);
+  const g = c.getContext('2d');
+  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
+  g.setTransform(c.width * .4, 0, 0, c.width * .4, c.width / 2, c.height * .9);
+  const keep = ctx; ctx = g;
+  try { g.globalAlpha = .35; g.drawImage(ROLE_GLOW(role), -1.1, -1.9, 2.2, 2.2); g.globalAlpha = 1; drawHero(p, a.an, t, 1, false); } finally { ctx = keep; }
+}
+let pvAcc = 0;
+function previewTick(dt, t) {
+  pvAcc += dt; if (pvAcc < 1 / 30) return; const d = pvAcc; pvAcc = 0;
+  if (S.scr === 'skins') pvDraw($('skCv'), SK.el, skinArr(SK.el), t, d, true);
+  else if (S.scr === 'assign') document.querySelectorAll('#asList canvas').forEach((c) => pvDraw(c, c.dataset.r, c._sk || [0, 0], t, d, false));
+}
+
+// ---------- skins screen ----------
+const SK = { el: 'f', built: false };
+function skinsRender() {
+  const tabs = $('skEl');
+  if (!SK.built) {
+    SK.built = true; tabs.innerHTML = '';
+    for (const r of ELS) {
+      const b = document.createElement('button'); b.className = 'skTab'; b.dataset.r = r; b.textContent = ROLE_NAME[r]; b.style.setProperty('--c', ROLE_COL[r]);
+      b.addEventListener('click', () => { beep('click'); SK.el = r; skinsRender(); });
+      tabs.appendChild(b);
+    }
+  }
+  const el = SK.el, cur = S.skin[el];
+  tabs.querySelectorAll('.skTab').forEach((b) => b.classList.toggle('on', b.dataset.r === el));
+  const sh = $('skShapes'); sh.innerHTML = '';
+  SKIN_SHAPES[el].forEach((s, i) => {
+    const b = document.createElement('button'); b.className = 'skOpt' + (i === cur.v ? ' on' : ''); b.setAttribute('aria-label', s.n);
+    const c = document.createElement('canvas'); c.width = 64; c.height = 64; b.appendChild(c);
+    const l = document.createElement('span'); l.textContent = s.n; b.appendChild(l);
+    pvDraw(c, el, [i, cur.c], 0.7, 0, false);
+    b.addEventListener('click', () => { beep('click'); skinPick(el, i, S.skin[el].c); });
+    sh.appendChild(b);
+  });
+  const cl = $('skShades'); cl.innerHTML = '';
+  SKIN_PAL[el].forEach((p, i) => {
+    const b = document.createElement('button'); b.className = 'skSw' + (i === cur.c ? ' on' : ''); b.setAttribute('aria-label', p.n); b.title = p.n;
+    b.style.background = 'radial-gradient(circle at 35% 30%, ' + p.bl + ', ' + p.bd + ' 70%)';
+    b.addEventListener('click', () => { beep('click'); skinPick(el, S.skin[el].v, i); });
+    cl.appendChild(b);
+  });
+  $('skName').textContent = ROLE_NAME[el] + ' · ' + SKIN_SHAPES[el][cur.v].n + ' · ' + SKIN_PAL[el][cur.c].n;
+}
+function skinPick(el, v, c) {
+  setSkin(el, v, c); skinsRender();
+  if (S.role === el) pset({ sk: skinArr(el) });
+  if (P.inited) partySkinPush();
+}
+$('btnSkins').addEventListener('click', () => { beep('click'); show('skins'); skinsRender(); });
+$('skBack').addEventListener('click', () => { beep('click'); show('title'); });
+
+// ---------- «Стихии»: room, roles, level choice ----------
+const P = { on: false, inited: false, roles: {}, myRole: null, lost: false, lastLvl: 0 };
+function partyRoles() { const v = Object.keys(P.roles).map((k) => P.roles[k]); return ELS.filter((r) => v.indexOf(r) >= 0); }
+function applyMyRole() { P.myRole = P.roles[Party.me.slot] || null; S.role = P.myRole; }
+const partyLinked = () => P.on && !P.lost;
+function partySkinObj() {
+  const s = {}; for (const r of ELS) s[r] = skinArr(r);
+  const slot = Party.me && typeof Party.me.slot === 'number' ? Party.me.slot : 0, r = ELS[slot % 6];
+  return { s, c: SKIN_PAL[r][S.skin[r].c].bd, r };
+}
+function partySkinPush() { try { Party.setSkin(partySkinObj()); } catch (e) {} }
+function pName(slot) { const q = Party.players.find((x) => x.slot === slot); return q ? (q.name || ('Игрок ' + (slot + 1))) : 'Игрок'; }
+function partyInit() {
+  if (P.inited) return true;
+  if (typeof Party === 'undefined') return false;
+  P.inited = true;
+  Party.init({ game: 'ogon-i-voda-stihii', title: 'Огонь и Вода: Стихии', min: 3, max: 6, accent: '#e2bd62', skin: partySkinObj, skinColor: (s) => (s && s.c) || '#e2bd62' });
+  Party.on('start', onPartyStart);
+  Party.on('msg', onPartyMsg);
+  Party.on('roster', () => {
+    if (!P.on && Party.me && Party.me.skin && Party.me.skin.r !== ELS[Party.me.slot % 6]) partySkinPush();   // lobby dot = colour of the default hero of my seat
+    if (P.on && S.scr === 'assign') assignRender();
+  });
+  Party.on('leave', (slot) => { if (P.on) { toast(pName(slot) + ' отключился', 2600); if (S.scr === 'assign') assignRender(); } });
+  Party.on('join', (slot) => { if (P.on && Party.isHost) Party.send('sync', syncObj(), slot); });
+  Party.on('hostLost', () => { if (!P.on) return; P.lost = true; partyLostOverlay(); });
+  Party.on('hostBack', () => { if (P.on && P.lost) { P.lost = false; hideOverlay(); toast('Хозяин снова на связи'); if (!Party.isHost) Party.send('needSync', null, 0); } });
+  return true;
+}
+function partyLostOverlay() {
+  overlay('<div class="big full">Хозяин вышел из игры</div><p class="sub full">Связь с комнатой потеряна. Можно подождать — вдруг хозяин вернётся.</p><div class="acts"><button class="btn hot" id="oQuit">В меню</button></div>', { oQuit: partyQuit });
+}
+function partyQuit() {
+  try { Party.leave(); } catch (e) {}
+  P.on = false; P.lost = false; S.party = false; S.role = null; S.RL = []; S.end = null; S.paused = false;
+  S.cur = { l: -1, ep: 0 }; S.lvDemo = false; hideOverlay(); show('title');
+}
+function onPartyStart(cfg) {
+  P.on = true; P.lost = false; P.roles = {};
+  const list = cfg.players.slice().sort((a, b) => a.slot - b.slot);
+  list.forEach((q, i) => { P.roles[q.slot] = ELS[i % 6]; });
+  applyMyRole();
+  S.solo = false; S.party = true; S.netLost = false; S.paused = false; S.end = null; S.cur = { l: -2, ep: 0 };
+  S.lvDemo = false; hideOverlay();
+  show('assign');
+  if (cfg.rejoin && !Party.isHost) Party.send('needSync', null, 0);
+}
+const syncObj = () => ({ roles: P.roles, l: S.cur.l, ep: S.cur.ep, unE: S.unE });
+function onPartyMsg(type, d, from) {
+  if (!P.on) return;
+  if (type === 'assign' && from === 0) { P.roles = d.roles; applyMyRole(); if (S.scr === 'assign') assignRender(); }
+  else if (type === 'lvl' && from === 0) { if (d.roles) { P.roles = d.roles; applyMyRole(); } applyLvl(d); }
+  else if (type === 'sync' && from === 0) { P.roles = d.roles; applyMyRole(); if (d.l !== S.cur.l || d.ep !== S.cur.ep) applyLvl(d); }
+  else if (type === 'needSync' && Party.isHost) Party.send('sync', syncObj(), from);
+  else if (type === 'req' && Party.isHost) {
+    const l = d && d.l;
+    if (!Number.isInteger(l) || l < -1 || l >= NEL || (l >= 0 && l >= S.unE)) return;
+    if (performance.now() - P.lastLvl < 1500) return;     // two phones asked for the same thing at once
+    partyChoose(l);
+  }
+}
+function applyLvl(d) {
+  if (typeof d.unE === 'number' && d.unE > S.unE) { S.unE = Math.min(NEL, d.unE); store.set('unE', S.unE); }
+  S.cur = { l: d.l, ep: d.ep || Date.now() };
+  S.end = null; S.paused = false; S.party = true;
+  if (d.l === -2) { show('assign'); }
+  else if (d.l < 0) { S.lv = null; show('pick'); }
+  else loadLevel(d.l, S.cur.ep);
+}
+function partyChoose(l) {
+  if (!Party.isHost) { if (l !== -2) Party.send('req', { l }, 0); return; }
+  P.lastLvl = performance.now();
+  const d = { l, ep: Date.now(), unE: S.unE };
+  Party.send('lvl', d); applyLvl(d);
+}
+
+// ---------- hero list (host reassigns elements) ----------
+function assignRender() {
+  const box = $('asList'); const ps = Party.players.slice().sort((a, b) => a.slot - b.slot);
+  const key = ps.map((q) => q.slot + ':' + (P.roles[q.slot] || '') + (q.online === false ? 'x' : '')).join(',');
+  const host = Party.isHost;
+  $('asInfo').innerHTML = host ? 'Нажми на героя игрока, чтобы поменять стихию. Потом — «К уровням».' : 'Хозяин распределяет героев. Свой герой: <b>' + (P.myRole ? ROLE_NAME[P.myRole] : '?') + '</b>';
+  $('asGo').hidden = !host; $('asGo').disabled = ps.length < 3;
+  if (box.dataset.key === key && box.dataset.host === String(host)) return;
+  box.dataset.key = key; box.dataset.host = String(host); box.innerHTML = '';
+  ps.forEach((q) => {
+    const r = P.roles[q.slot]; if (!r) return;
+    const row = document.createElement('div'); row.className = 'asRow' + (q.slot === Party.me.slot ? ' me' : '');
+    const c = document.createElement('canvas'); c.width = 72; c.height = 72; c.dataset.r = r;
+    const sk = q.skin && q.skin.s && q.skin.s[r]; c._sk = Array.isArray(sk) ? sk : [0, 0]; row.appendChild(c);
+    const nm = document.createElement('div'); nm.className = 'asNm';
+    nm.textContent = (q.host ? '👑 ' : '') + (q.name || ('Игрок ' + (q.slot + 1))) + (q.slot === Party.me.slot ? ' (ты)' : '') + (q.online === false ? ' · нет связи' : '');
+    row.appendChild(nm);
+    const b = document.createElement('button'); b.className = 'asEl'; b.style.setProperty('--c', ROLE_COL[r]); b.disabled = !host;
+    b.innerHTML = '<b>' + ROLE_NAME[r] + '</b><small>' + ROLE_DESC[r] + '</small>';
+    b.addEventListener('click', () => { beep('click'); assignCycle(q.slot); });
+    row.appendChild(b); box.appendChild(row);
+  });
+}
+function assignCycle(slot) {
+  if (!Party.isHost) return;
+  const cur = P.roles[slot]; const nxt = ELS[(ELS.indexOf(cur) + 1) % ELS.length];
+  const other = Object.keys(P.roles).find((k) => P.roles[k] === nxt);
+  if (other !== undefined) P.roles[other] = cur;      // taken → swap
+  P.roles[slot] = nxt; applyMyRole();
+  Party.send('assign', { roles: P.roles }); assignRender();
+}
+$('asGo').addEventListener('click', () => { beep('click'); partyChoose(-1); });
+$('asBack').addEventListener('click', () => { beep('click'); partyQuit(); });
+
+// ---------- level choice ----------
+function partyPickRefresh() {
+  if (!P.on) return;
+  const grid = $('plGrid');
+  if (grid.childElementCount !== NEL) {
+    grid.innerHTML = '';
+    EL_LEVELS.forEach((L, i) => {
+      const b = document.createElement('button'); b.className = 'lv'; b.id = 'pl' + i;
+      b.innerHTML = '<span class="n">' + (i + 1) + '</span><span class="t"></span><span class="s"></span>';
+      b.addEventListener('click', () => { beep('click'); partyChoose(i); });
+      grid.appendChild(b);
+    });
+  }
+  EL_LEVELS.forEach((L, i) => {
+    const b = $('pl' + i), best = S.bestE[i];
+    b.disabled = i >= S.unE; b.classList.toggle('done', !!best);
+    b.querySelector('.t').textContent = i >= S.unE ? '🔒' : L.name;
+    b.querySelector('.s').textContent = best ? best.rank + ' · ' + fmtT(best.t) : '';
+  });
+  const names = partyRoles().map((r) => ROLE_NAME[r]).join(', ');
+  $('plStatus').innerHTML = '<b>●</b> ' + Party.players.length + ' ' + plural(Party.players.length, 'игрок', 'игрока', 'игроков') + ': ' + names + '. Ты — ' + (P.myRole ? ROLE_NAME[P.myRole] : '?') + '. Уровень может выбрать любой.';
+  $('plHeroes').hidden = !Party.isHost;
+}
+$('plHeroes').addEventListener('click', () => { beep('click'); partyChoose(-2); });
+$('plBack').addEventListener('click', () => { beep('click'); partyQuit(); });
+$('btnParty').addEventListener('click', () => {
+  beep('click');
+  if (!partyInit()) { toast('Сетевой модуль недоступен'); return; }
+  S.solo = false; partySkinPush();
+  Party.lobby();
+});
+
+// ---------- in-game sync ----------
+function partyRemotes() {
+  const out = [];
+  for (const q of Party.players) { if (q.slot === Party.me.slot) continue; const r = P.roles[q.slot]; if (!r) continue; const R = newRemote(); R.slot = q.slot; R.role = r; out.push(R); }
+  return out;
+}
+function partyLevelLoaded() { S.lastKey = ''; S.lastSend = 0; S.sendN = 0; for (const p of S.plist) p.sk = skinArr(p.role); }
+function updateRemotesParty() {
+  for (let k = 0; k < S.RL.length; k++) {
+    const R = S.RL[k], st = Party.sample(R.slot, SAMPLE_OPT);
+    if (!st || st.ce !== S.cur.ep || typeof st.x !== 'number') { R.active = false; continue; }
+    if (!R.active) { R.rx = st.x; R.ry = st.y; }
+    R.active = true; R.x = st.x; R.y = st.y; R.vx = st.vx || 0; R.vy = st.vy || 0; R.face = st.f || 1; R.gr = !!st.gr; R.dead = !!st.d; R.door = !!st.dr; R.gm = st.gm | 0;
+    R.lv = Array.isArray(st.lv) ? st.lv : null; R.sk = st.sk || null; R.st = Array.isArray(st.st) ? st.st : null;
+    R.rx = R.x; R.ry = R.y;
+  }
+}
+// the earth hero's phone is the authority for stone blocks; everyone else mirrors its positions
+function partySyncWorld(w) {
+  if (!w.st || !w.st.length) return;
+  if (S.role === 'e') { w.nopush = false; return; }
+  w.nopush = true;
+  for (let k = 0; k < S.RL.length; k++) {
+    const R = S.RL[k]; if (R.role !== 'e' || !R.active || !R.st) continue;
+    for (let i = 0; i < w.st.length; i++) { const cx = R.st[i * 2], cy = R.st[i * 2 + 1]; if (typeof cx === 'number' && typeof cy === 'number') { w.st[i].cx = cx; w.st[i].cy = cy; } }
+  }
+}
+function partyAllHome() {
+  const p = S.pl[S.role]; if (!p || !p.door) return false;
+  if (!S.RL.length) return false;
+  for (let k = 0; k < S.RL.length; k++) { const R = S.RL[k]; if (!R.active || !R.door) return false; }
+  return true;
+}
+function partyNetSend() {
+  const p = S.pl[S.role]; if (!p) return;
+  S.sendN++;
+  if ((S.sendN & 1) && !S.end) return;     // ~30 sends per second
+  const x = Math.round(p.x * 100) / 100, y = Math.round(p.y * 100) / 100, vx = Math.round(p.vx * 10) / 10, vy = Math.round(p.vy * 10) / 10;
+  const dr = p.door ? 1 : 0, d = p.dead ? 1 : 0;
+  let st = null;
+  if (S.role === 'e' && S.world && S.world.st && S.world.st.length) { st = []; for (const s of S.world.st) st.push(s.cx, s.cy); }
+  const key = x + ',' + y + ',' + vx + ',' + vy + ',' + p.face + ',' + (p.gr ? 1 : 0) + ',' + d + ',' + dr + ',' + S.gmMask + ',' + S.lastLevKey + ',' + (st ? st.join('.') : '');
+  const now = performance.now();
+  if (key === S.lastKey && now - S.lastSend < 600) return;
+  S.lastKey = key; S.lastSend = now;
+  const o = { ce: S.cur.ep, x, y, vx, vy, f: p.face, gr: p.gr ? 1 : 0, d, dr, gm: S.gmMask, lv: levPayload(), sk: skinArr(S.role) };
+  if (st) o.st = st;
+  Party.set(o);
+}
+
+// ===== GAME part 6: boot =====
 // ---------- boot ----------
 demoLevel();
 initNet();
