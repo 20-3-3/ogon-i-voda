@@ -762,4 +762,62 @@
       return null;
     },
   };
+
+  // ---------- inside the start page (games/index.html): the game uses the page's one room, see hub.js ----------
+  // The partner is the other player of that room who opened the same game «по сети». Everything crosses the frame
+  // border as JSON, so the game never holds objects of the page (and vice versa).
+  function duoProxy(port, real) {
+    const H2 = { state: [], link: [], loss: [], ev: {} };
+    const call2 = (m, ...a) => { let r; try { r = port.d(m, JSON.stringify(a)); } catch (e) { console.error(e); return undefined; } return typeof r === 'string' ? JSON.parse(r) : r; };
+    let snap = null, sv = -1, pc = null, pcv = -1, pRes = null, pRej = null, mine2 = {};
+    const S = () => { const v = port.dv(); if (v !== sv || !snap) { snap = call2('snap') || {}; sv = v; } return snap; };
+    const partner2 = () => { const v = port.dpv(); if (v !== pcv) { pc = call2('partner'); pcv = v; } return pc; };
+    const fire = (list, ...a) => list.slice().forEach(f => { try { f(...a); } catch (e) { console.error(e); } });
+    port.listen('d', (ev, js) => {
+      const a = js ? JSON.parse(js) : [];
+      if (ev === 'link') fire(H2.link);
+      else if (ev === 'loss') fire(H2.loss);
+      else if (ev === 'state') fire(H2.state, partner2());
+      else if (ev === 'paired') { const r = pRes; pRes = pRej = null; if (r) r(); }
+      else if (ev === 'cancel') { const r = pRej; pRes = pRej = null; if (r) r(new Error('cancel')); }
+      else if (ev === 'ev') fire(H2.ev[a[0]] || [], a[1]);
+    });
+    return {
+      init(o) { call2('init', { game: o && o.game, accent: o && o.accent }); },
+      pair() {
+        if (S().linked) return Promise.resolve();
+        return new Promise((res, rej) => { if (pRej) pRej(new Error('cancel')); pRes = res; pRej = rej; call2('pair'); });
+      },
+      leave() { call2('leave'); },
+      set(patch) {
+        for (const k in patch) { if (patch[k] === null || patch[k] === undefined) delete mine2[k]; else mine2[k] = patch[k]; }
+        mine2 = { ...mine2 }; call2('set', patch || {});
+      },
+      mine() { return mine2; },
+      partner: partner2, linked: () => !!S().linked, isHost: () => !!S().isHost, code: () => S().code || '',
+      get myId() { return S().myId || ''; },
+      onState(f) { H2.state.push(f); }, onLink(f) { H2.link.push(f); }, onLoss(f) { H2.loss.push(f); },
+      emit(k, v) { call2('emit', k, v === undefined ? null : v); }, on(k, f) { (H2.ev[k] = H2.ev[k] || []).push(f); },
+      status() { return call2('status') || {}; },
+      sample(o) { return call2('sample', o || {}); }, delay: () => call2('delay') || 0, direct: () => !!call2('direct'),
+      ping() { return call2('ping'); },
+      diagnose: real.diagnose,
+      hub: true,
+    };
+  }
+  try {
+    const hub = window.parent !== window && window.parent.__hub && window.parent.__hub.attach ? window.parent.__hub : null;
+    const port = hub && hub.attach(window);
+    if (port) {
+      window.Duo = duoProxy(port, window.Duo);
+      window.addEventListener('pagehide', (e) => { if (!e.persisted) port.detach(); });
+      // links back to the list of games: show the start page instead of loading it again (the connection stays)
+      document.addEventListener('click', (e) => {
+        const a = e.target && e.target.closest && e.target.closest('a[href]'); if (!a || a.target === '_blank') return;
+        let u; try { u = new URL(a.href, location.href); } catch (er) { return; }
+        if (u.origin !== location.origin || (u.pathname !== hub.path && u.pathname !== hub.path + 'index.html')) return;
+        e.preventDefault(); port.home(u.hash);
+      }, true);
+    }
+  } catch (e) {}
 })();

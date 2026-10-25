@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ru">
-<head><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="../../games/icons/morskoy-boy-180.png"><link rel="stylesheet" href="../../games/shared/fonts/fonts.css">
+<head><script>/* opened directly: reopen inside the start page, which keeps the one connection for all games (?solo = without it) */try{if(window.top===window&&!/[?&]solo\b/.test(location.search)){var h=location.hash.replace(/^#/,'').replace(/^(\d{4})$/,'room=$1');location.replace(new URL('../',location.href).href+'#play=morskoy-boy'+(h?'&'+h:''))}}catch(e){}</script><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="../../games/icons/morskoy-boy-180.png"><link rel="stylesheet" href="../../games/shared/fonts/fonts.css">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#06202e">
@@ -1094,7 +1094,8 @@ $('b-resume').onclick = async () => {
   G = { mode: 'net', ep: sv.ep, level: sv.level, ships: sv.ships, board: b, phase: sv.phase, rdy: sv.rdy, pRdy: false, over: false, rev: null };
   S[role] = { mv: sv.mv || [], an: sv.an || [] }; ansSeen = [S[0].an.length, S[1].an.length];
   netSync();
-  const pp = Duo.pair(); const o = document.querySelector('.duo-ov'); o.querySelector('[data-r="in"]').value = sv.room; o.querySelector('[data-r="go"]').click();
+  // на стартовой странице комната общая для всех игр: просто ждём партнёра; без неё — входим в сохранённую комнату
+  const pp = Duo.pair(); const o = Duo.hub ? null : document.querySelector('.duo-ov'); if (o) { o.querySelector('[data-r="in"]').value = sv.room; o.querySelector('[data-r="go"]').click(); }
   try { await pp; } catch (e) { mode = null; G = null; linkedOnce = false; return; }
   linkedOnce = false; onLinked(); mode = 'net'; role = sv.role; show(G.phase === 'battle' ? 'battle' : 'place'); if (G.phase === 'battle') startBattleUI(); netSync();
 };

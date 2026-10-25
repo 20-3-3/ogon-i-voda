@@ -81,6 +81,10 @@
 // through the relays. Guest→guest traffic is forwarded by the host.
 (function () {
   if (window.Party) return;
+  // A game opened inside the start page (games/index.html) uses the page's one room instead of its own (see hub.js):
+  // here window.Party becomes a thin proxy to it, so switching games never needs a new connection.
+  const HUBP = (function () { try { return window.parent !== window && window.parent.__hub && window.parent.__hub.attach ? window.parent.__hub : null; } catch (e) { return null; } })();
+  if (HUBP) { const port = HUBP.attach(window); if (port) { window.Party = partyProxy(port); window.addEventListener('pagehide', (e) => { if (!e.persisted) port.detach(); }); return; } }
   const BROKERS = Array.isArray(window.DUO_TEST_BROKERS) ? window.DUO_TEST_BROKERS : ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt', 'wss://mqtt.eclipseprojects.io:443/mqtt'];
   // Transport budget. Public brokers throttle / kick clients that publish too often, and all phones on one Wi-Fi share one
   // public IP, so the relay path is batched: every RELAY_TICK ms at most one publish per topic per broker, each broker
@@ -101,6 +105,10 @@
   const ssDel = (k) => { try { sessionStorage.removeItem(k); } catch (e) {} };
 
   let G = { game: 'game', title: 'Игра с друзьями', min: 2, max: 6, modes: [], accent: '#e2bd62', skinFn: null, resolveSkin: null, skinColor: null, optsInit: null, autoResume: true };
+  // Hub mode (start page only): the room lives as long as the page and is shared by all games; G then describes the game
+  // that is open right now. HUB = hooks from hub.js: ctx() → texts/buttons of the overlay, where(p), eligible(seat).
+  let HUB = null;
+  const CAP = 6;
   let st = 'idle';            // idle | hosting | joining | joined | lost
   let code = '', isHost = false, tok = '', ep = rnd(6), session = 0, error = '', joinSince = 0, silent = false, nearby = false;
   let me = { slot: -1, id: '', name: '', skin: null, team: 0 };
@@ -460,8 +468,8 @@
     if (st !== 'hosting' || typeof d.i !== 'string') return;
     let S = seatByTok[d.i], isNew = false;
     if (!S) {
-      if (room.started) { xmit(d.i, pk('full', { why: 'started' }), 'both', true); return; }
-      if (seats.length >= G.max) { xmit(d.i, pk('full', { why: 'full' }), 'both', true); return; }
+      if (room.started && !HUB) { xmit(d.i, pk('full', { why: 'started' }), 'both', true); return; }
+      if (seats.length >= (HUB ? CAP : G.max)) { xmit(d.i, pk('full', { why: 'full' }), 'both', true); return; }
       S = addSeat(d.i, d); isNew = true;
     } else {
       if (S.ep !== d.e) { S.ep = d.e; delete OUT[S.tok]; delete IN[S.tok]; const r = rec(S.slot); r.lastS = 0; closeLink(S.tok); }
@@ -508,6 +516,7 @@
     if (!d.p || typeof d.p !== 'object' || typeof d.s !== 'number') return;
     const r = rec(S.slot); if (d.s <= r.lastS) return;
     r.lastS = d.s; r.w = d.w; r.latest = d.p; r.fq++; r.ver++; recordSnap(r, d.w, d.p);
+    if (HUB) call('state', S.slot);
   }
   // forward fresh states from everyone to every guest as one bundle (20–60 Hz over rtc, ~20 Hz over a relay)
   const lastBundle = {};
@@ -535,7 +544,7 @@
   }
   function guestStates(d) {
     if (!Array.isArray(d.es)) return;
-    d.es.forEach(e => { if (e[0] === me.slot) return; const r = rec(e[0]); if (e[1] <= r.fq) return; r.fq = e[1]; r.w = e[2]; r.latest = e[3]; r.ver++; recordSnap(r, e[2], e[3]); });
+    d.es.forEach(e => { if (e[0] === me.slot) return; const r = rec(e[0]); if (e[1] <= r.fq) return; r.fq = e[1]; r.w = e[2]; r.latest = e[3]; r.ver++; recordSnap(r, e[2], e[3]); if (HUB) call('state', e[0]); });
   }
 
   // ---------- guest ----------
@@ -578,7 +587,9 @@
     lastMatch = cfg.match; sawLobby = false;
     const c = clone(cfg); c.rejoin = !!rejoin;
     me.team = (cfg.players.find(p => p.id === me.id) || me).team || 0;
-    hideOverlay(); saveAct();
+    saveAct();
+    if (HUB) { call('start', c); return; }   // hub.js decides whether this match is for the game open on this phone
+    hideOverlay();
     if (lobbyRes) { const r = lobbyRes; lobbyRes = null; r(c); }
     call('start', c);
   }
@@ -820,7 +831,7 @@
   async function nearNewOffer() {
     if (!nearby || !isHost || !rtcOk()) return;
     if (near.pend && near.pend.pc && near.pend.pc.connectionState === 'new' && !near.pend.answered) return;
-    if (seats.filter(S => S.online).length >= G.max) { near.offerTxt = ''; ui(); return; }
+    if (seats.filter(S => S.online).length >= (HUB ? CAP : G.max)) { near.offerTxt = ''; ui(); return; }
     const ss = session, key = '~' + rnd(6), lk = Lk(key); lk.made = now(); near.pend = lk; near.offerTxt = ''; ui();
     const pc = rtcNewPc(lk);
     rtcWire(lk, pc.createDataChannel('duo', { ordered: false, maxRetransmits: 0 }), pc);
@@ -975,23 +986,28 @@
   function setOpts(o) { if (!isHost) return; room.opts = Object.assign({}, room.opts, o); bump(); }
   function setTeam(slot, team) { if (!isHost || room.started) return; const S = seats[slot], n = teamsN(); if (!S || !n) return; S.team = ((team % n) + n) % n; bump(); }
   function autoTeams(silentBump) { if (!isHost) return; const n = teamsN() || 2; seats.forEach((S, i) => { S.team = i % n; }); if (!silentBump) bump(); }
+  // hub mode: only the players who opened this game's network mode take part (the others are in the menu or another game)
+  const inMatch = (S) => S.online && (!HUB || HUB.eligible(S));
   function canStart() {
     if (!isHost || room.started) return false;
-    const on = seats.filter(S => S.online);
-    if (on.length < G.min) return false;
-    const n = teamsN(); if (n && new Set(on.map(S => S.team)).size < 2) return false;
+    const on = seats.filter(inMatch);
+    if (on.length < G.min || (HUB && on.length > G.max)) return false;
+    const n = teamsN(); if (n && !HUB && new Set(on.map(S => S.team)).size < 2) return false;   // hub: start() splits the teams itself
     return true;
   }
   function start(over) {
     over = over || {};
     if (!isHost || room.started) return false;
     seats.filter(S => !S.online).forEach(S => removeSeat(S));
-    if (seats.length < G.min) return false;
+    const ps = seats.filter(inMatch);
+    if (ps.length < G.min || (HUB && ps.length > G.max)) return false;
     if (over.mode && modeInfo(over.mode)) room.mode = over.mode;
     if (over.opts) room.opts = Object.assign({}, room.opts, over.opts);
     const n = teamsN();
+    if (HUB && n) { const tm = new Set(ps.map(S => S.team)); if (tm.size < 2) ps.forEach((S, i) => { S.team = i % n; }); }
     room.started = true; room.match++;
-    const cfg = { mode: room.mode, players: seats.map(S => ({ slot: S.slot, id: S.id, name: S.name, skin: S.skin, team: n ? S.team : 0 })), seed: over.seed != null ? over.seed >>> 0 : (Math.random() * 4294967296) >>> 0, opts: clone(room.opts), match: room.match, rejoin: false };
+    const cfg = { mode: room.mode, players: ps.map(S => ({ slot: S.slot, id: S.id, name: S.name, skin: S.skin, team: n ? S.team : 0 })), seed: over.seed != null ? over.seed >>> 0 : (Math.random() * 4294967296) >>> 0, opts: clone(room.opts), match: room.match, rejoin: false };
+    if (HUB) cfg.g = G.key;
     room.cfg = cfg; room.v++; syncMyRoom();
     const m = JSON.stringify(pk('start', { cfg }));
     relayPub('all', m, true);
@@ -1169,12 +1185,15 @@
     <p class="pty-sub" data-r="modeinfo" hidden></p>
     <button class="pty-btn hot" data-r="start">Начать</button>
     <p class="pty-sub" data-r="wait" hidden>Ждём, когда хозяин начнёт</p>
+    <div class="pty-st" data-r="hubnote" hidden></div>
+    <button class="pty-btn sm" data-r="invite" hidden>Позвать</button>
     <div class="pty-st" data-r="stat" hidden></div>
     <div class="pty-st pty-err" data-r="err" hidden></div>
     <p class="pty-diag" data-r="diag" hidden></p>
   </div>
   <div class="pty-foot">
     <input class="pty-in" data-r="name2" maxlength="14" placeholder="Твоё имя" autocomplete="off" aria-label="Имя игрока" style="min-height:44px;font-size:16px">
+    <button class="pty-btn" data-r="hidebtn" hidden>Готово</button>
     <button class="pty-btn ghost" data-r="leave">Выйти из комнаты</button>
   </div>
 </div>`;
@@ -1187,8 +1206,9 @@
     const go = () => { setName(nm.value); joinRoom($('in').value); };
     $('go').onclick = go;
     $('in').addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
-    $('close').onclick = () => { error = ''; hideOverlay(); if (lobbyRes) { const r = lobbyRes; lobbyRes = null; r(null); } };
-    $('leave').onclick = () => { leave(); hideOverlay(); };
+    $('close').onclick = () => { error = ''; hideOverlay(); if (lobbyRes) { const r = lobbyRes; lobbyRes = null; r(null); } if (HUB) HUB.ctx().onClose(); };
+    $('leave').onclick = () => { const c = HUB && HUB.ctx(); if (c && c.onBack) { hideOverlay(); c.onBack(); return; } leave(); hideOverlay(); };
+    $('invite').onclick = () => { const c = HUB && HUB.ctx(); if (c && c.onInvite) { c.onInvite(); $('invite').dataset.t = now(); ui(); setTimeout(() => { if (ov) ui(); }, 2600); } };
     $('start').onclick = () => { if (canStart()) start(); };
     $('nearbtn').onclick = () => { error = ''; near.view = 'choose'; near.err = ''; view = 'near'; ui(); };
     $('nhost').onclick = () => { setName(nm.value); near.err = ''; hostNearby(); };
@@ -1200,6 +1220,7 @@
     $('hscan').onclick = () => { if (near.scanning) { scanStop(); ui(); return; } scanStart((t) => nearHostAnswer(t)); };
     $('hpgo').onclick = () => { const v = $('hpaste').value; $('hpaste').value = ''; nearHostAnswer(v); };
     $('auto').onclick = () => autoTeams();
+    $('hidebtn').onclick = () => hideOverlay();
     $('share').onclick = async () => {
       if (nearby) return copyText(near.offerTxt, $('share'), 'Поделиться кодом текстом');
       const url = roomLink();
@@ -1234,21 +1255,23 @@
       $('nerr').textContent = near.err; $('nerr').hidden = !near.err;
       return;
     }
-    $('title').textContent = G.title;
-    $('sub').textContent = (G.min === G.max ? (G.max === 2 ? 'Игра для двоих' : 'Игра для ' + G.max + ' игроков') : 'Игра для ' + G.min + '–' + G.max + ' игроков') + ', у каждого свой телефон';
+    const hc = HUB ? HUB.ctx() : null;
+    $('title').textContent = hc ? hc.title : G.title;
+    $('sub').textContent = hc ? hc.sub : (G.min === G.max ? (G.max === 2 ? 'Игра для двоих' : 'Игра для ' + G.max + ' игроков') : 'Игра для ' + G.min + '–' + G.max + ' игроков') + ', у каждого свой телефон';
     $('err0').textContent = error; $('err0').hidden = !error || inRoom;
     if (!inRoom) return;
     $('code').textContent = nearby ? 'Рядом' : (code || '····');
-    $('rl').textContent = nearby ? (isHost ? (near.offerTxt ? 'Новый игрок сканирует этот код' : (seats.filter(S => S.online).length >= G.max ? 'Комната заполнена' : 'Готовлю код…')) : 'Комната рядом') : 'Код комнаты';
+    $('rl').textContent = nearby ? (isHost ? (near.offerTxt ? 'Новый игрок сканирует этот код' : (seats.filter(S => S.online).length >= (HUB ? CAP : G.max) ? 'Комната заполнена' : 'Готовлю код…')) : 'Комната рядом') : 'Код комнаты';
     if (nearby) { const q = $('qr'); if (isHost && near.offerTxt && !near.scanning) { drawBigQr(q, near.offerTxt); } else q.hidden = true; }
     else { $('qr').hidden = false; delete $('qr').dataset.text; drawQr(roomLink()); }
     $('hvid').hidden = !(nearby && isHost && near.scanning);
-    $('hscan').hidden = !(nearby && isHost && !room.started); $('hscan').textContent = near.scanning ? 'Остановить камеру' : '📷 Сканировать ответ игрока';
-    $('hprow').hidden = !(nearby && isHost && !room.started && !near.scanning);
+    $('hscan').hidden = !(nearby && isHost && (!room.started || HUB)); $('hscan').textContent = near.scanning ? 'Остановить камеру' : '📷 Сканировать ответ игрока';
+    $('hprow').hidden = !(nearby && isHost && (!room.started || HUB) && !near.scanning);
     $('hnerr').textContent = nearby ? near.err : ''; $('hnerr').hidden = !(nearby && near.err);
     $('share').hidden = st === 'lost' || (nearby && !(isHost && near.offerTxt)); $('share').textContent = nearby ? 'Поделиться кодом текстом' : ($('share').textContent === 'Поделиться кодом текстом' ? 'Позвать по ссылке' : $('share').textContent);
     const players = room.players;
-    const key = JSON.stringify([players.map(p => [p.slot, p.name, p.skin, p.team, p.online, p.via, p.ms >> 5]), me.id, isHost, teamsN(), room.mode, st]);
+    const where = (p) => (HUB ? HUB.where(p) : '');
+    const key = JSON.stringify([players.map(p => [p.slot, p.name, p.skin, p.team, p.online, p.via, p.ms >> 5, where(p)]), me.id, isHost, teamsN(), room.mode, st]);
     if (key !== lastListKey) {
       lastListKey = key;
       const ul = $('list'); ul.textContent = '';
@@ -1257,7 +1280,8 @@
         const li = el('li', 'pty-p' + (p.id === me.id ? ' me' : '') + (p.online ? '' : ' off'));
         li.appendChild(el('span', 'pty-n', String(p.slot + 1)));
         const sk = el('span', 'pty-sk'); sk.style.background = skinCss(p.skin); li.appendChild(sk);
-        li.appendChild(el('span', 'pty-nm', (p.host ? '👑 ' : '') + p.name + (p.id === me.id ? ' (ты)' : '')));
+        const nmEl = el('span', 'pty-nm', (p.host ? '👑 ' : '') + p.name + (p.id === me.id ? ' (ты)' : '')); li.appendChild(nmEl);
+        const wh = where(p); if (wh) { const sm = el('small', null, wh); sm.style.cssText = 'display:block;font-weight:600;font-size:12px;color:#9da0ae;overflow:hidden;text-overflow:ellipsis'; nmEl.appendChild(sm); }
         if (tN) { const t = el('span', 'pty-tm', TEAM_LET[p.team] || '?'); t.style.background = TEAM_COL[p.team % TEAM_COL.length]; li.appendChild(t); }
         const q = el('span', 'pty-q');
         if (!p.online) q.textContent = 'нет связи';
@@ -1269,27 +1293,31 @@
       });
     }
     // modes
-    const modesEl = $('modes'), hostPick = isHost && G.modes.length > 1;
+    const showStart = !hc || hc.start;
+    const modesEl = $('modes'), hostPick = isHost && G.modes.length > 1 && showStart;
     modesEl.hidden = !hostPick;
     if (hostPick) {
       const k2 = G.modes.map(m => m.id + (m.id === room.mode ? '*' : '')).join('|');
       if (modesEl.dataset.k !== k2) { modesEl.dataset.k = k2; modesEl.textContent = ''; G.modes.forEach(m => { const b = el('button', 'pty-btn' + (m.id === room.mode ? ' sel' : ''), m.name || m.id); b.onclick = () => setMode(m.id); modesEl.appendChild(b); }); }
     }
     const mi = modeInfo(room.mode);
-    $('modeinfo').hidden = isHost || !mi || G.modes.length < 2; if (mi) $('modeinfo').textContent = 'Режим: ' + (mi.name || mi.id) + (teamsN() ? ' — хозяин делит на команды' : '');
-    $('teamrow').hidden = !(isHost && teamsN());
-    const on = players.filter(p => p.online).length, can = isHost && canStart();
-    $('start').hidden = !isHost || room.started || st === 'lost';
+    $('modeinfo').hidden = isHost || !mi || G.modes.length < 2 || !(!hc || hc.kind === 'party'); if (mi) $('modeinfo').textContent = 'Режим: ' + (mi.name || mi.id) + (teamsN() ? ' — хозяин делит на команды' : '');
+    $('teamrow').hidden = !(isHost && teamsN() && showStart);
+    const on = hc && hc.count != null ? hc.count : players.filter(p => p.online).length, can = isHost && canStart();
+    $('start').hidden = !isHost || room.started || st === 'lost' || !showStart;
     $('start').disabled = !can;
-    $('start').textContent = on < G.min && isHost ? 'Начать (нужно минимум ' + G.min + ', сейчас ' + on + ')' : (isHost && !can && teamsN() ? 'Распредели игроков по командам' : 'Начать');
-    $('wait').hidden = isHost || st !== 'joined' || room.started;
-    const w = st === 'joining' ? 'Захожу в комнату ' + code + '…' : st === 'lost' ? (nearby ? 'Связь с хозяином потеряна. Отсканируйте новый код хозяина (кнопка «Рядом, без интернета»).' : 'Связь с хозяином потеряна. Пробую вернуться…') : (isHost && on < G.min ? (nearby ? 'Каждый игрок: «Рядом, без интернета» → «Сканировать код хозяина» (' + on + ' из ' + G.min + '–' + G.max + ')' : 'Пусть остальные введут код ' + code + ' или отсканируют QR (' + on + ' из ' + G.min + '–' + G.max + ')') : '');
+    $('start').textContent = on < G.min && isHost ? 'Начать (нужно минимум ' + G.min + ', сейчас ' + on + ')' : (isHost && HUB && on > G.max ? 'Начать (не больше ' + G.max + ', сейчас ' + on + ')' : (isHost && !can && teamsN() ? 'Распредели игроков по командам' : 'Начать'));
+    $('wait').hidden = isHost || st !== 'joined' || room.started || !!hc;
+    $('hubnote').textContent = hc && hc.note || ''; $('hubnote').hidden = !(hc && hc.note);
+    $('invite').hidden = !(hc && hc.invite && st !== 'joining'); if (hc && hc.invite) $('invite').textContent = now() - ($('invite').dataset.t || 0) < 2500 ? 'Позвали ✓' : hc.invite;
+    const w = st === 'joining' ? 'Захожу в комнату ' + code + '…' : st === 'lost' ? (nearby ? 'Связь с хозяином потеряна. Отсканируйте новый код хозяина (кнопка «Рядом, без интернета»).' : 'Связь с хозяином потеряна. Пробую вернуться…') : (isHost && (hc ? hc.kind === 'hub' && seats.filter(S => S.online).length < 2 : on < G.min) ? (nearby ? 'Каждый игрок: «Рядом, без интернета» → «Сканировать код хозяина» (' + on + ' из ' + G.min + '–' + G.max + ')' : 'Пусть остальные введут код ' + code + ' или отсканируют QR (' + on + ' из ' + G.min + '–' + G.max + ')') : '');
     $('stat').textContent = w; $('stat').hidden = !w;
     $('err').textContent = error; $('err').hidden = !error;
     const slow = (st === 'joining' && joinSince && now() - joinSince > 8000) || (st === 'hosting' && !relayUp() && relays.length && now() - joinSince > 8000);
     $('diag').hidden = false;
     $('diag').textContent = nearby ? 'Рядом, без интернета: прямая связь по Wi-Fi / точке доступа' : 'Прямая связь: ' + diag.rtc + ' · Серверы: ' + (relays.length ? relays.map(r => r.name + (r.ok ? ' ✓' : ' ✕')).join(', ') : '—');
-    $('leave').textContent = isHost ? 'Закрыть комнату' : 'Выйти из комнаты';
+    $('leave').textContent = hc && hc.back ? hc.back : (isHost ? 'Закрыть комнату' : 'Выйти из комнаты');
+    $('hidebtn').hidden = !(hc && hc.kind === 'hub');
   }
 
   // ---------- public API ----------
@@ -1322,6 +1350,26 @@
     if (silent && st === 'joining') silent = false;
     return new Promise((res) => { if (lobbyRes) lobbyRes(null); lobbyRes = res; });
   }
+  // ---------- hub mode (start page): one room for all games ----------
+  // hubContext: the game that is open on this phone now (its title, player limits, modes, skins); null = the menu.
+  // Topics stay 'hub' (G.game) so the connection never changes; G.key names the game for matches (cfg.g).
+  function hubContext(o) {
+    o = o || {};
+    G.key = String(o.game || ''); G.title = o.title || 'Игра по сети';
+    G.min = Math.max(2, Math.min(6, o.min || 2)); G.max = Math.max(G.min, Math.min(6, o.max || 6));
+    G.modes = Array.isArray(o.modes) ? o.modes.filter(m => m && m.id) : [];
+    if (o.accent) G.accent = o.accent;
+    G.skinFn = typeof o.skin === 'function' ? o.skin : null; G.resolveSkin = typeof o.resolveSkin === 'function' ? o.resolveSkin : null;
+    G.skinColor = typeof o.skinColor === 'function' ? o.skinColor : null; G.optsInit = o.opts || null;
+    if (isHost && code && !room.started) {
+      room.mode = G.modes.length ? G.modes[0].id : 'default';
+      try { room.opts = clone(typeof G.optsInit === 'function' ? G.optsInit() : (G.optsInit || {})) || {}; } catch (e) { room.opts = {}; }
+      const n = teamsN(); seats.forEach((S, i) => { S.team = n ? i % n : 0; });
+      seats.forEach(S => { let w = null; try { w = JSON.parse(S.reqSkin || 'null'); } catch (e) {} S.skin = fixSkin(S, w); });   // skins are per game
+      bump();
+    }
+    if (ov) ui();
+  }
   function pingOf(slot) {
     if (slot == null) slot = 0;
     const p = room.players.find(x => x.slot === slot);
@@ -1333,6 +1381,8 @@
   }
   window.Party = {
     init, lobby, resume, on, off, leave: () => leave(), start, end: endMatch,
+    hubSetup(h) { HUB = h; G.key = ''; }, hubContext, ui: () => { if (ov && !ov.hidden) ui(); }, hide: hideOverlay, shown: () => !!(ov && !ov.hidden),
+    hubSt: () => st, sess: () => session, tok: () => tok,
     send(type, data, toSlot) {
       if (!code || (st !== 'joined' && st !== 'hosting') || typeof type !== 'string') return false;
       if (isHost) {
@@ -1361,4 +1411,39 @@
     _near() { return { offer: near.offerTxt, answer: near.answerTxt, err: near.err, nearby }; },
     status() { return { nearby, state: st, code, isHost, started: room.started, slot: me.slot, mode: room.mode, players: room.players.length, hostLost: st === 'lost', diag: { ...diag }, error, relays: relays.map(r => r.name + ':' + (r.ok ? 'ok' : '–')) }; },
   };
+
+  // ---------- proxy for a game inside the start page: same API, the work is done by hub.js in the page ----------
+  // Everything crosses the frame border as JSON, so the game never holds objects of the page (and vice versa).
+  function partyProxy(port) {
+    const H = {};
+    const call = (m, ...a) => { let r; try { r = port.p(m, JSON.stringify(a)); } catch (e) { console.error(e); return undefined; } return typeof r === 'string' ? JSON.parse(r) : r; };
+    let snap = null, sv = -1, lobbyRes = null, mine2 = {};
+    const S = () => { const v = port.pv(); if (v !== sv || !snap) { snap = call('snap') || {}; sv = v; } return snap; };
+    port.listen('p', (ev, js) => {
+      const a = js ? JSON.parse(js) : [];
+      if (ev === 'lobby') { const r = lobbyRes; lobbyRes = null; if (r) r(a[0] || null); return; }
+      (H[ev] || []).slice().forEach(f => { try { f(...a); } catch (e) { console.error(e); } });
+    });
+    const P = {
+      init(o) { o = o || {}; const fns = {}, c = {}; for (const k in o) { if (typeof o[k] === 'function') fns[k] = o[k]; else c[k] = o[k]; } port.pInit(JSON.stringify(c), fns); },
+      lobby() { return new Promise((res) => { if (lobbyRes) lobbyRes(null); lobbyRes = res; call('lobby'); }); },
+      resume() { return false; },
+      on(k, f) { (H[k] = H[k] || []).push(f); }, off(k, f) { H[k] = (H[k] || []).filter(x => x !== f); },
+      leave() { mine2 = {}; call('leave'); }, start(o) { return !!call('start', o || {}); }, end() { call('end'); },
+      send(type, data, toSlot) { return !!call('send', type, data === undefined ? null : data, toSlot == null ? null : toSlot); },
+      set(patch) {
+        if (patch && typeof patch === 'object') for (const k in patch) { if (patch[k] === null || patch[k] === undefined) delete mine2[k]; else mine2[k] = patch[k]; }
+        mine2 = { ...mine2 }; call('set', patch || {});
+      },
+      mine() { return mine2; },
+      state(slot) { return call('state', slot); }, sample(slot, o) { return call('sample', slot, o || {}); }, delay(slot) { return call('delay', slot) || 0; },
+      setSkin(o) { call('setSkin', o == null ? null : o); }, setName(n) { call('setName', n); }, setMode(id) { return !!call('setMode', id); }, setOpts(o) { call('setOpts', o || {}); },
+      setTeam(slot, team) { call('setTeam', slot, team); }, autoTeams() { call('autoTeams'); }, kick(slot) { call('kick', slot); }, canStart() { return !!call('canStart'); },
+      ping(slot) { return call('ping', slot == null ? null : slot); }, direct(slot) { return !!call('direct', slot == null ? null : slot); }, link() { return call('link') || ''; },
+      get me() { return S().me; }, get players() { return S().players || []; }, get isHost() { return !!S().isHost; },
+      get code() { return S().code || ''; }, get mode() { return S().mode; }, get started() { return !!S().started; }, get cfg() { return S().cfg || null; },
+      _near() { return call('near'); }, status() { return call('status') || {}; },
+    };
+    return P;
+  }
 })();
