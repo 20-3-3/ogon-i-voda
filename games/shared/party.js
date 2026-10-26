@@ -777,7 +777,7 @@
   function weak(names) {
     const txt = names.length && code && st !== 'lost' ? '⚠ Связь с ' + names.join(', ') + ' прерывается — восстанавливаю…' : '';
     if (txt === weakTxt) return; weakTxt = txt;
-    if (!weakEl) { weakEl = document.createElement('div'); weakEl.style.cssText = 'position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 6px);transform:translateX(-50%);z-index:10000;background:rgba(20,20,26,.88);color:#ffd27a;font:600 13px/1.3 -apple-system,Roboto,sans-serif;padding:6px 12px;border-radius:999px;pointer-events:none;max-width:92vw;text-align:center;border:1px solid rgba(255,210,122,.35)'; (document.body || document.documentElement).appendChild(weakEl); }
+    if (!weakEl) { weakEl = document.createElement('div'); weakEl.style.cssText = 'position:fixed;left:50%;top:calc(var(--sa-top, env(safe-area-inset-top,0px)) + 6px);transform:translateX(-50%);z-index:10000;background:rgba(20,20,26,.88);color:#ffd27a;font:600 13px/1.3 -apple-system,Roboto,sans-serif;padding:6px 12px;border-radius:999px;pointer-events:none;max-width:92vw;text-align:center;border:1px solid rgba(255,210,122,.35)'; (document.body || document.documentElement).appendChild(weakEl); }
     weakEl.textContent = txt; weakEl.style.display = txt ? 'block' : 'none';
   }
   setInterval(tick, 250);
@@ -1080,7 +1080,7 @@
   function buildOverlay() {
     if (ov) return;
     const css = el('style', null, `
-.pty-ov{position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:16px;padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));background:rgba(12,13,18,.97);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-family:-apple-system,"Segoe UI",Roboto,sans-serif;color:#f2f1ec;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;-webkit-user-select:none;user-select:none;box-sizing:border-box}
+.pty-ov{position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:16px;padding-top:max(16px,var(--sa-top, env(safe-area-inset-top)));padding-bottom:max(16px,var(--sa-bottom, env(safe-area-inset-bottom)));padding-left:max(16px,var(--sa-left, env(safe-area-inset-left)));padding-right:max(16px,var(--sa-right, env(safe-area-inset-right)));background:rgba(12,13,18,.97);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-family:-apple-system,"Segoe UI",Roboto,sans-serif;color:#f2f1ec;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;-webkit-user-select:none;user-select:none;box-sizing:border-box}
 .pty-ov *{box-sizing:border-box}
 .pty-ov[hidden],.pty-ov [hidden]{display:none!important}
 .pty-box{width:min(460px,100%);display:flex;flex-direction:column;gap:10px;margin:auto}
@@ -1120,7 +1120,7 @@
 .pty-ov .pty-pane{display:flex;flex-direction:column;gap:8px;min-width:0}
 .pty-ov .pty-foot{display:flex;flex-direction:column;gap:8px}
 @media (orientation:landscape) and (max-height:520px){
-.pty-ov{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.pty-ov{padding-top:max(8px,var(--sa-top, env(safe-area-inset-top)));padding-bottom:max(8px,var(--sa-bottom, env(safe-area-inset-bottom)))}
 .pty-box{gap:7px;width:min(680px,100%)}
 .pty-h{font-size:18px}
 .pty-btn{font-size:15px;padding:6px 12px;min-height:44px}

@@ -551,7 +551,7 @@
   function buildOverlay() {
     if (ov) return;
     const css = el('style', null, `
-.duo-ov{position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:16px;padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));background:rgba(8,8,10,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-family:-apple-system,"Segoe UI",Roboto,sans-serif;color:#f3efe6;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;-webkit-user-select:none;user-select:none}
+.duo-ov{position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:16px;padding-top:max(16px,var(--sa-top, env(safe-area-inset-top)));padding-bottom:max(16px,var(--sa-bottom, env(safe-area-inset-bottom)));padding-left:max(16px,var(--sa-left, env(safe-area-inset-left)));padding-right:max(16px,var(--sa-right, env(safe-area-inset-right)));background:rgba(8,8,10,.96);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-family:-apple-system,"Segoe UI",Roboto,sans-serif;color:#f3efe6;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;-webkit-user-select:none;user-select:none}
 .duo-box{width:min(440px,100%);display:flex;flex-direction:column;gap:12px;margin:auto}
 .duo-h{font-size:24px;font-weight:800;text-align:center;margin:0}
 .duo-sub{text-align:center;color:#c2bcaf;font-size:14px;margin:0;line-height:1.45}
@@ -573,7 +573,7 @@
 .duo-steps{margin:0;padding-left:20px;color:#c2bcaf;font-size:14px;line-height:1.5}
 .duo-ov[hidden],.duo-ov [hidden]{display:none!important}
 @media (orientation:landscape) and (max-height:520px){
-.duo-ov{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.duo-ov{padding-top:max(8px,var(--sa-top, env(safe-area-inset-top)));padding-bottom:max(8px,var(--sa-bottom, env(safe-area-inset-bottom)))}
 .duo-box{gap:8px;width:min(640px,100%)}
 .duo-h{font-size:18px}
 .duo-btn{font-size:15px;padding:8px 12px;min-height:44px}.duo-btn small{font-size:12px}

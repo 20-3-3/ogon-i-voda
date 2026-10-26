@@ -8,7 +8,7 @@
 /* the page itself never scrolls (games open over it in a frame); the menu scrolls inside #menu */
 #menu{position:fixed;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}body.playing #menu{visibility:hidden}
 #hubFrame{position:fixed;inset:0;z-index:50;background:#000}
-#hubFrame iframe{position:absolute;display:block;border:0;margin:0;padding:0;top:env(safe-area-inset-top,0px);left:env(safe-area-inset-left,0px);width:calc(100% - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));height:calc(100% - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));background:transparent}
+#hubFrame iframe{position:absolute;display:block;border:0;margin:0;padding:0;inset:0;width:100%;height:100%;background:transparent}
 #hubBanner{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);transform:translateX(-50%);z-index:9000;display:flex;align-items:center;gap:8px;width:min(520px,calc(100vw - 16px));padding:8px 8px 8px 14px;border-radius:16px;background:rgba(26,24,32,.96);border:1px solid rgba(226,189,98,.5);box-shadow:0 8px 30px rgba(0,0,0,.5);color:var(--fg);font:700 14px/1.35 Nunito,-apple-system,sans-serif}
 #hubBanner .t{flex:1;min-width:0}#hubBanner button{font:inherit;font-weight:800;border-radius:12px;min-height:40px;padding:6px 12px;border:0;cursor:pointer;touch-action:manipulation}
 #hubBanner .go{background:#e2bd62;color:#1b160c}#hubBanner .x{background:transparent;color:var(--mut);font-size:18px;padding:6px 10px}

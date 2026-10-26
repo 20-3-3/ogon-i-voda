@@ -73,9 +73,24 @@
     };
     return c;
   }
+  // ---------- full screen: the frame covers the whole screen, the notch / home bar sizes are handed to the game ----------
+  // (inside a frame the browser reports them as 0, so the games read --sa-top/right/bottom/left instead of env())
+  let probe = null;
+  function insets() {
+    if (!probe) { probe = document.createElement('div'); probe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)'; document.body.appendChild(probe); }
+    const cs = getComputedStyle(probe);
+    return { top: cs.paddingTop, right: cs.paddingRight, bottom: cs.paddingBottom, left: cs.paddingLeft };
+  }
+  function pushInsets(doc) {
+    try { doc = doc || (ifr && ifr.contentDocument); if (!doc || !doc.documentElement) return; const s = insets(), r = doc.documentElement.style; for (const k in s) r.setProperty('--sa-' + k, s[k]); } catch (e) {}
+  }
+  let insT = [];
+  function insetsSoon() { insT.forEach(clearTimeout); insT = [0, 120, 400, 900].map((ms) => setTimeout(() => pushInsets(), ms)); }
+  window.addEventListener('resize', insetsSoon); window.addEventListener('orientationchange', insetsSoon);
   function attach(win) {
     if (!ifr || win !== ifr.contentWindow) return null;
     let doc; try { doc = win.document; } catch (e) { return null; }
+    pushInsets(doc);
     if (C && C.doc === doc) return C.port;
     if (C) dropClient();
     C = newClient(win, doc);
@@ -457,6 +472,7 @@
     const me = ifr;
     ifr.addEventListener('load', () => {
       if (ifr !== me) return;
+      pushInsets(me.contentDocument);
       try {
         const d = me.contentDocument, m = d.querySelector('meta[name=theme-color]');
         let bg = m && m.content; if (!bg) bg = getComputedStyle(d.body).backgroundColor;
