@@ -388,6 +388,8 @@
   // ---------- room overlay texts (party.js asks through HUB.ctx) ----------
   let ovCtx = { kind: 'hub' };
   function showOverlay(ctx) { ovCtx = ctx; Party.lobby(); Party.ui(); }
+  // a game asks for network play while this phone is in no room: connecting happens on the start page only
+  function toConnect() { ovCtx = { kind: 'hub' }; goHome(); setTimeout(() => { if (!curView && !inRoom()) showOverlay({ kind: 'hub' }); }, 650); }
   function subFor(min, max) { return (min === max ? (max === 2 ? 'Игра для двоих' : 'Игра для ' + max + ' игроков') : 'Игра для ' + min + '–' + max + ' игроков') + ', у каждого свой телефон. Подключиться нужно один раз — связь останется во всех играх.'; }
   function whereText(p) {
     if (p.online === false) return '';
@@ -410,11 +412,11 @@
       else if (Party.isHost) note = hereN < min ? 'По сети в этой игре: ' + hereN + ' из ' + (min === max ? min : min + '–' + max) + '. Остальным нужно открыть «' + t + '» и выбрать игру по сети — нажми «Позвать».' : (hereN > max ? 'В этом режиме не больше ' + max + ' игроков, а по сети здесь ' + hereN + '.' : '');
       else note = hostHere ? 'Ждём, когда хозяин начнёт' : 'Хозяин' + (host ? ' (' + host.name + ')' : '') + ' сейчас ' + (host ? whereText(host) : 'не на связи') + '. Начать игру может только он — позови его сюда.';
       const others = ps.some((p) => p.id !== meId && presOf(p).$p !== c.P.key);
-      return { kind: 'party', title: t, sub: subFor(min, max), note, start: true, count: hereN, back: 'Назад', onBack: () => partyOptOut(c), onClose: () => partyOptOut(c), invite: inRoom() && others ? 'Позвать всех в «' + t + '»' : null, onInvite: () => invite(c, 'party', true) };
+      return { kind: 'party', title: t, sub: subFor(min, max), note, start: true, count: hereN, back: 'Назад', onBack: () => partyOptOut(c), onClose: () => partyOptOut(c), onHome: () => { partyOptOut(c); toConnect(); }, invite: inRoom() && others ? 'Позвать всех в «' + t + '»' : null, onInvite: () => invite(c, 'party', true) };
     }
     if (k === 'duo' && c && C === c) {
       const t = titleOf(c.view);
-      return { kind: 'duo', title: 'Игра вдвоём · ' + t, sub: 'Создай комнату или войди по коду партнёра. Подключиться нужно один раз — связь останется во всех играх.', note: inRoom() ? 'Ждём партнёра: пусть откроет «' + t + '» и выберет игру по сети.' : '', start: false, count: null, back: 'Отмена', onBack: () => duoLeave(c, true), onClose: () => duoLeave(c, true), invite: inRoom() && online().length > 1 ? 'Позвать ещё раз' : null, onInvite: () => invite(c, 'duo', true) };
+      return { kind: 'duo', title: 'Игра вдвоём · ' + t, sub: subFor(2, 2), note: inRoom() ? 'Ждём партнёра: пусть откроет «' + t + '» и выберет игру по сети.' : '', start: false, count: null, back: 'Отмена', onBack: () => duoLeave(c, true), onClose: () => duoLeave(c, true), onHome: () => { duoLeave(c, true); toConnect(); }, invite: inRoom() && online().length > 1 ? 'Позвать ещё раз' : null, onInvite: () => invite(c, 'duo', true) };
     }
     return { kind: 'hub', title: 'Игра по сети', sub: 'Подключитесь один раз здесь — связь сохранится во всех играх. От 2 до 6 телефонов.', note: inRoom() && online().length > 1 ? 'Открывайте любые игры: в игре выберите игру по сети — партнёры уже подключены.' : '', start: false, count: null, back: null, onBack: null, onClose: () => {}, invite: null };
   }

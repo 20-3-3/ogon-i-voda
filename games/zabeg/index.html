@@ -235,7 +235,7 @@ a.allg{position:fixed;top:calc(var(--sa-top, env(safe-area-inset-top,0px)) + 10p
 <div class="scr scroll" id="s-co">
   <div class="top"><button class="sq" id="co-back" aria-label="Назад">←</button><h2>Компания 3–6</h2><span class="sq" style="visibility:hidden"></span></div>
   <p class="sub">Три–шесть бегунов на одной трассе. Каждый виден остальным призраком со своим скином и именем.</p>
-  <div class="btns"><button class="btn g" id="co-net">По сети<small>каждый на своём телефоне · комната по коду</small></button>
+  <div class="btns"><button class="btn g" id="co-net">По сети<small>каждый на своём телефоне</small></button>
   <button class="btn" id="co-hot">На одном телефоне<small>бегут по очереди, каждый — против призраков всех предыдущих</small></button></div>
 </div>
 
@@ -2525,7 +2525,7 @@ function renderMultiResult(){
     if(!run.some(r=>r.p.online!==false)&&fin.length){head=mp===0?'ПОБЕДА!':'Гонка окончена';sub='Победил '+partyName(fin[0].p)+' · '+fmt(fin[0].t)+' с'}
     else{head=mp>=0?(mp+1)+'-е место':'Финиш!';sub='Ждём остальных игроков…'}
     if(Party.isHost){$('r-again').textContent='Ещё раз';$('r-next').textContent='Следующая трасса';$('r-next').style.display=nxt?'':'none';$('r-lv').textContent='К выбору трасс';sub+=' · следующий шаг — за вами'}
-    else{$('r-again').style.display='none';$('r-next').style.display='none';$('r-lv').textContent='Выйти из комнаты';sub+=' · дальше выбирает хозяин'}
+    else{$('r-again').style.display='none';$('r-next').style.display='none';$('r-lv').textContent='Выйти из сетевой игры';sub+=' · дальше выбирает хозяин'}
   }
   $('r-tab').innerHTML=html;$('r-h').textContent=head;$('r-s').textContent=sub;
 }

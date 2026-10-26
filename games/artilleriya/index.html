@@ -222,7 +222,7 @@ a.allg{position:fixed;top:calc(var(--sa-top, env(safe-area-inset-top,0px)) + 10p
    <div class="thead"><div class="tag">дуэль на разрушаемой земле</div>
    <h1 class="logo">АРТИЛ&shy;ЛЕРИЯ</h1></div>
    <div class="tbtns">
-   <button class="bigbtn red" id="bNet">Играть вдвоём по сети<small>два телефона · код комнаты</small></button>
+   <button class="bigbtn red" id="bNet">Играть вдвоём по сети<small>у каждого свой телефон</small></button>
    <button class="bigbtn" id="bHot">Один телефон: вдвоём<small>передаём друг другу</small></button>
    <button class="bigbtn" id="bBot">Против бота<small>тренировка и одиночная игра</small></button>
    <button class="bigbtn" id="bMulti">3–6 игроков<small>по сети или на одном телефоне</small></button>
@@ -1968,7 +1968,7 @@ function teamsFor(n,tp){const arr=(TEAM_PRESETS[n]||[])[tp]||(TEAM_PRESETS[n]||[
 function renderMulti(step){
   const c=$('mCard');
   if(step===0){
-    c.innerHTML='<h3>3–6 игроков</h3><p>Каждый сам за себя или команда на команду.</p><div class="btns"><button class="bigbtn red wide" id="mpNet">По сети<small>у каждого свой телефон · комната</small></button><button class="bigbtn wide" id="mpHot">Один телефон<small>передаём телефон по кругу, можно добавить ботов</small></button><button class="bigbtn wide" id="mpX">Назад</button></div>';
+    c.innerHTML='<h3>3–6 игроков</h3><p>Каждый сам за себя или команда на команду.</p><div class="btns"><button class="bigbtn red wide" id="mpNet">По сети<small>у каждого свой телефон</small></button><button class="bigbtn wide" id="mpHot">Один телефон<small>передаём телефон по кругу, можно добавить ботов</small></button><button class="bigbtn wide" id="mpX">Назад</button></div>';
     $('mpNet').onclick=()=>{SFX.click();renderMulti(2);};$('mpHot').onclick=()=>{SFX.click();renderMulti(1);};$('mpX').onclick=()=>{$('ovMulti').classList.remove('on');};
   }else if(step===1){
     const n=MPS.n,pr=TEAM_PRESETS[n]||[];if(MPS.mode==='teams'&&!pr.length)MPS.mode='ffa';
@@ -1987,7 +1987,7 @@ function renderMulti(step){
     $('mpBack').onclick=()=>{SFX.click();renderMulti(0);};
     $('mpGo').onclick=()=>{auResume();SFX.click();mpStartHot();};
   }else if(step===2){
-    c.innerHTML='<h3>По сети</h3><p>Создайте комнату или войдите по коду — до 6 телефонов. Хозяин выбирает режим и команды в лобби.</p>'
+    c.innerHTML='<h3>По сети</h3><p>До 6 телефонов, подключённых на главной странице. Хозяин комнаты выбирает режим и команды в лобби.</p>'
       +'<div class="mrow"><span>Арсенал</span><div class="chips" id="cA">'+ARS.map((q,i)=>'<button class="chip'+(i===MPS.ars?' on':'')+'" data-k="'+i+'">'+q.n+'</button>').join('')+'</div></div>'
       +'<div class="mrow"><span>Поле</span><div class="chips" id="cP"><button class="chip'+(MPS.map<0?' on':'')+'" data-k="-1">Любое</button>'+MAPN.map((q,i)=>'<button class="chip'+(MPS.map===i?' on':'')+'" data-k="'+i+'">'+q+'</button>').join('')+'</div></div>'
       +'<p class="mini">Арсенал и поле берутся у хозяина комнаты.</p><div class="btns"><button class="bigbtn red wide" id="mpLob">В лобби</button><button class="bigbtn wide" id="mpBack">Назад</button></div>';

@@ -1175,6 +1175,7 @@
 .pty-ov .pty-side{display:flex;flex-direction:column;gap:8px}
 .pty-ov .pty-pane{display:flex;flex-direction:column;gap:8px;min-width:0}
 .pty-ov .pty-foot{display:flex;flex-direction:column;gap:8px}
+.pty-ov.ingame .pty-side{display:none}
 @media (orientation:landscape) and (max-height:520px){
 .pty-ov{padding-top:max(8px,var(--sa-top, env(safe-area-inset-top)));padding-bottom:max(8px,var(--sa-bottom, env(safe-area-inset-bottom)))}
 .pty-box{gap:7px;width:min(680px,100%)}
@@ -1193,6 +1194,9 @@
 .pty-ov .pty-foot{grid-column:1;grid-row:2;gap:6px}
 .pty-ov .pty-pane{grid-column:2;grid-row:1/3;min-height:0}
 .pty-ov .pty-list{overflow-y:auto;min-height:0;flex:1 1 auto}
+.pty-ov.ingame .pty-box.room{grid-template-columns:minmax(0,1fr)}
+.pty-ov.ingame .pty-pane{grid-column:1;grid-row:1}
+.pty-ov.ingame .pty-foot{grid-column:1;grid-row:2}
 }`);
     document.head.appendChild(css);
     ov = el('div', 'pty-ov'); ov.hidden = true; ov.style.setProperty('--pty-accent', G.accent);
@@ -1208,6 +1212,12 @@
   <div class="pty-st pty-err" data-r="err0" hidden></div>
   <button class="pty-btn" data-r="nearbtn">📶 Рядом, без интернета<small style="display:block;font-weight:600;font-size:12px;opacity:.75;margin-top:2px">одна сеть Wi-Fi или точка доступа · обмен QR-кодами</small></button>
   <button class="pty-btn ghost" data-r="close">Закрыть</button></div>
+</div>
+<div class="pty-box" data-v="home" hidden>
+  <p class="pty-h" data-r="htitle"></p>
+  <p class="pty-sub">Игра по сети подключается на главной странице — один раз для всех игр. Подключитесь там, потом откройте эту игру и выберите игру по сети: партнёры будут уже на связи.</p>
+  <button class="pty-btn hot" data-r="tohome">Подключиться на главной</button>
+  <button class="pty-btn ghost" data-r="hclose">Закрыть</button>
 </div>
 <div class="pty-box" data-v="near" hidden>
   <p class="pty-h">Рядом, без интернета</p>
@@ -1262,7 +1272,8 @@
     const go = () => { setName(nm.value); joinRoom($('in').value); };
     $('go').onclick = go;
     $('in').addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
-    $('close').onclick = () => { error = ''; hideOverlay(); if (lobbyRes) { const r = lobbyRes; lobbyRes = null; r(null); } if (HUB) HUB.ctx().onClose(); };
+    $('close').onclick = $('hclose').onclick = () => { error = ''; hideOverlay(); if (lobbyRes) { const r = lobbyRes; lobbyRes = null; r(null); } if (HUB) HUB.ctx().onClose(); };
+    $('tohome').onclick = () => { hideOverlay(); if (lobbyRes) { const r = lobbyRes; lobbyRes = null; r(null); } const c = HUB && HUB.ctx(); if (c && c.onHome) c.onHome(); };
     $('leave').onclick = () => { const c = HUB && HUB.ctx(); if (c && c.onBack) { hideOverlay(); c.onBack(); return; } leave(); hideOverlay(); };
     $('invite').onclick = () => { const c = HUB && HUB.ctx(); if (c && c.onInvite) { c.onInvite(); $('invite').dataset.t = now(); ui(); setTimeout(() => { if (ov) ui(); }, 2600); } };
     $('start').onclick = () => { if (canStart()) start(); };
@@ -1294,9 +1305,11 @@
     const inRoom = st === 'hosting' || st === 'joined' || st === 'joining' || st === 'lost';
     if (!inRoom && view !== 'near') view = 'main';
     const nearGuestPre = nearby && !isHost && st === 'joining';
-    const shown = nearGuestPre || (!inRoom && view === 'near') ? 'near' : (inRoom ? 'room' : 'main');
+    const hc0 = HUB ? HUB.ctx() : null, inGame = !!(hc0 && hc0.kind !== 'hub');
+    const shown = inGame && !inRoom ? 'home' : nearGuestPre || (!inRoom && view === 'near') ? 'near' : (inRoom ? 'room' : 'main');
     ov.querySelectorAll('[data-v]').forEach(b => { b.hidden = b.dataset.v !== shown; });
-    ov.classList.toggle('near', nearby);
+    ov.classList.toggle('near', nearby); ov.classList.toggle('ingame', inGame);
+    if (shown === 'home') { $('htitle').textContent = hc0.title; return; }
     if (shown === 'near') {
       const ans = nearGuestPre && near.answerTxt, scanning = !!near.scanning;
       $('nsub').textContent = ans ? 'Покажите этот код хозяину — пусть он нажмёт «Сканировать ответ игрока». После этого телефоны соединятся напрямую.'
