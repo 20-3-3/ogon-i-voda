@@ -1,6 +1,6 @@
 {
- "name": "Игры на двоих",
- "short_name": "Игры вдвоём",
+ "name": "Java Game",
+ "short_name": "Java Game",
  "start_url": "./",
  "scope": "../",
  "display": "standalone",
@@ -10,12 +10,12 @@
  "lang": "ru",
  "icons": [
   {
-   "src": "../games/icons/menu-192.png",
+   "src": "../games/icons/java-game-192.png",
    "sizes": "192x192",
    "type": "image/png"
   },
   {
-   "src": "../games/icons/menu-512.png",
+   "src": "../games/icons/java-game-512.png",
    "sizes": "512x512",
    "type": "image/png",
    "purpose": "any"
