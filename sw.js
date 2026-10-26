@@ -1,12 +1,12 @@
 // Offline cache for the games site: pages open even without internet (needed for the «Рядом» mode on a hotspot).
 // Same-origin files: network first (so updates arrive), cache as fallback. Other sites (fonts, libs): cache as fallback.
-const CACHE = 'duo-games-v8';
+const CACHE = 'duo-games-v9';
 const CORE = ['./', 'index.html', 'games/', 'games/index.html', 'games/shared/duo.js', 'games/shared/save.js', 'games/shared/party.js', 'games/shared/hub.js', 'games/shared/vfix.js', 'games/shared/fonts/fonts.css', 'games/shared/fonts/Nunito.woff', 'games/shared/fonts/RuslanDisplay.woff', 'games/shared/fonts/PressStart2P.woff', 'games/shared/fonts/RussoOne.woff', 'games/shared/fonts/Oswald.woff', 'games/shared/fonts/PTSansCaption-Regular.woff', 'games/shared/fonts/PTSansCaption-Bold.woff', 'games/shared/fonts/Caveat.woff', 'games/shared/fonts/RubikMonoOne.woff', 'games/shared/fonts/Rubik.woff', 'games/check.html', 'games/shared/vendor/qrcode.js', 'games/shared/vendor/jsQR.js',
   'games/morskoy-boy/', 'games/zabeg/', 'games/artilleriya/', 'games/risuy/'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.all(CORE.map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
 });
-self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k.startsWith('duo-games-')).map(k => caches.delete(k)))).catch(() => {}).then(() => self.clients.claim())); });
 function timeout(ms) { return new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms)); }
 self.addEventListener('fetch', (e) => {
   const req = e.request;

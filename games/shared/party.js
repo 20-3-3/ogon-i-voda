@@ -884,15 +884,28 @@
     room.v = 1; syncMyRoom(); view = 'room'; near.view = 'host'; drawnQr = ''; ui();
     nearNewOffer();
   }
+  // Safari (and Chrome) hide the phone's own network addresses from WebRTC until the page may use the camera or the microphone:
+  // without them phones on a hotspot or a Bluetooth modem with no internet may not find each other. The camera is needed to
+  // scan the codes anyway, so it is asked for once, before the first code is made, and switched off at once.
+  let localP = null;
+  function unlockLocal() {
+    return localP || (localP = (async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+      const p = navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      p.then((s) => s.getTracks().forEach((t) => t.stop()), () => {});
+      await Promise.race([p.catch(() => {}), new Promise((r) => setTimeout(r, 15000))]);
+    })());
+  }
   async function nearNewOffer() {
     if (!nearby || !isHost || !rtcOk()) return;
+    await unlockLocal(); if (!nearby || !isHost) return;
     if (near.pend && near.pend.pc && near.pend.pc.connectionState === 'new' && !near.pend.answered) return;
     if (seats.filter(S => S.online).length >= (HUB ? CAP : G.max)) { near.offerTxt = ''; ui(); return; }
     const ss = session, key = '~' + rnd(6), lk = Lk(key); lk.made = now(); near.pend = lk; near.offerTxt = ''; ui();
     const pc = rtcNewPc(lk);
     rtcWire(lk, pc.createDataChannel('duo', { ordered: false, maxRetransmits: 0 }), pc);
     rtcWire(lk, pc.createDataChannel('duo-safe', { ordered: true }), pc);
-    pc.addEventListener('connectionstatechange', () => { if (pc.connectionState === 'failed' && near.pend === lk) { near.err = 'Не получилось соединиться напрямую. Телефоны должны быть в одной сети Wi-Fi (или игрок — на точке доступа хозяина), VPN выключен. Покажите новый код.'; nearNewOffer(); } });
+    pc.addEventListener('connectionstatechange', () => { if (pc.connectionState === 'failed' && near.pend === lk) { near.err = 'Не получилось соединиться напрямую. Телефоны должны быть в одной сети (Wi-Fi, точка доступа или Bluetooth-модем), VPN выключен. Покажите новый код.'; nearNewOffer(); } });
     try {
       await pc.setLocalDescription(await pc.createOffer());
       await gatherDone(pc, 2000);
@@ -909,7 +922,7 @@
     try { lk.answered = true; await lk.pc.setRemoteDescription({ type: 'answer', sdp: o.s }); near.err = ''; }
     catch (e) { lk.answered = false; near.err = 'Не удалось применить ответ. Пусть игрок отсканирует ваш код заново.'; ui(); return; }
     near.view = 'host'; ui();
-    setTimeout(() => { if (nearby && isHost && L[o.k] === lk && !fastOpen(lk)) { near.err = 'Соединение не устанавливается. Оба телефона должны быть в одной сети Wi-Fi или игрок — на точке доступа хозяина; VPN выключите. Показываю новый код.'; if (near.pend === lk) near.pend = null; closeLink(o.k); delete L[o.k]; nearNewOffer(); } }, 15000);
+    setTimeout(() => { if (nearby && isHost && L[o.k] === lk && !fastOpen(lk)) { near.err = 'Соединение не устанавливается. Оба телефона должны быть в одной сети (Wi-Fi, точка доступа или Bluetooth-модем); VPN выключите. Показываю новый код.'; if (near.pend === lk) near.pend = null; closeLink(o.k); delete L[o.k]; nearNewOffer(); } }, 15000);
   }
   async function nearGuestOffer(text) {
     let o; try { o = await unpackNear(text); } catch (e) { near.err = 'Это не код игры. Отсканируйте QR-код с экрана хозяина.'; ui(); return; }
@@ -918,9 +931,10 @@
     stopAll(); nearby = true; isHost = false; code = String(o.c); tok = tokenFor(code); ep = rnd(6); error = ''; silent = false;
     st = 'joining'; joinSince = now(); lastJoin = now(); lastHb = now(); near.err = ''; near.view = 'answer'; near.answerTxt = '';
     me = { slot: -1, id: '', name: myName, skin: localSkin, team: 0 }; view = 'room'; ui();
-    const ss = session, lk = Lk('H'); lk.sid = o.k; lk.made = now();
+    const ss = session; await unlockLocal(); if (ss !== session) return;
+    const lk = Lk('H'); lk.sid = o.k; lk.made = now();
     const pc = rtcNewPc(lk); pc.ondatachannel = (e) => rtcWire(lk, e.channel, pc);
-    pc.addEventListener('connectionstatechange', () => { if (pc.connectionState === 'failed' && lk.pc === pc) { near.err = 'Не получилось соединиться напрямую. Проверьте, что телефоны в одной сети Wi-Fi (или на точке доступа хозяина) и VPN выключен, и отсканируйте новый код хозяина.'; near.view = 'choose'; ui(); } });
+    pc.addEventListener('connectionstatechange', () => { if (pc.connectionState === 'failed' && lk.pc === pc) { near.err = 'Не получилось соединиться напрямую. Проверьте, что телефоны в одной сети (Wi-Fi, точка доступа или Bluetooth-модем) и VPN выключен, и отсканируйте новый код хозяина.'; near.view = 'choose'; ui(); } });
     try {
       await pc.setRemoteDescription({ type: 'offer', sdp: o.s });
       await pc.setLocalDescription(await pc.createAnswer());
@@ -937,6 +951,7 @@
     try {
       await loadScript('jsqr', BASE + 'vendor/jsQR.js', () => typeof window.jsQR === 'function');
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }, audio: false });
+      if (!localP) localP = Promise.resolve();   // the camera is allowed: the page's own addresses are open to WebRTC now
       near.scan = { stream, stop: false };
       vid.srcObject = stream; vid.setAttribute('playsinline', ''); vid.muted = true; await vid.play();
       const cv = document.createElement('canvas'), g = cv.getContext('2d', { willReadFrequently: true });
@@ -1156,6 +1171,7 @@
 .pty-st{text-align:center;font-size:14px;border-radius:12px;padding:8px 12px;background:rgba(255,255,255,.07);line-height:1.4}
 .pty-err{color:#ffb4a0;border:1px solid rgba(255,120,80,.5)}
 .pty-diag{text-align:center;font-size:12px;color:#8e91a0;margin:0}
+.pty-how{font-size:13px;line-height:1.45;color:#c9cbd6;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px}.pty-how b{color:#fff}.pty-how ol{margin:6px 0;padding-left:20px}.pty-how li{margin:4px 0}
 .pty-qr{display:block;margin:0 auto;width:min(34vh,150px);height:auto;aspect-ratio:1;border-radius:10px;background:#fff;image-rendering:pixelated}
 .pty-qr.big,.pty-ov.near .pty-qr[data-r="qr"]{width:min(72vw,46vh,300px)}
 .pty-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
@@ -1210,7 +1226,7 @@
   <div style="display:flex;flex-direction:column;gap:10px"><div class="pty-or">или войди по коду</div>
   <div class="pty-row"><input class="pty-in code" data-r="in" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" aria-label="Код комнаты" autocomplete="off"><button class="pty-btn" data-r="go">Войти</button></div>
   <div class="pty-st pty-err" data-r="err0" hidden></div>
-  <button class="pty-btn" data-r="nearbtn">📶 Рядом, без интернета<small style="display:block;font-weight:600;font-size:12px;opacity:.75;margin-top:2px">одна сеть Wi-Fi или точка доступа · обмен QR-кодами</small></button>
+  <button class="pty-btn" data-r="nearbtn">📶 Рядом, без интернета<small style="display:block;font-weight:600;font-size:12px;opacity:.75;margin-top:2px">Wi-Fi, точка доступа или Bluetooth · обмен QR-кодами</small></button>
   <button class="pty-btn ghost" data-r="close">Закрыть</button></div>
 </div>
 <div class="pty-box" data-v="home" hidden>
@@ -1222,6 +1238,11 @@
 <div class="pty-box" data-v="near" hidden>
   <p class="pty-h">Рядом, без интернета</p>
   <p class="pty-sub" data-r="nsub"></p>
+  <div class="pty-how" data-r="nhow"><b>Подойдёт любая общая сеть, интернет не нужен:</b><ol>
+    <li><b>Один Wi-Fi</b> — даже роутер без интернета.</li>
+    <li><b>Точка доступа</b>: один телефон включает «Режим модема», остальные подключаются к его Wi-Fi. Мобильный интернет не тратится.</li>
+    <li><b>Bluetooth — совсем без Wi-Fi</b>: на одном телефоне включите «Режим модема» (iPhone) или «Bluetooth-модем» (Android). На остальных: Настройки → Bluetooth → выберите этот телефон и подключитесь к нему (на Android в свойствах устройства включите «Доступ к интернету»). Wi-Fi можно выключить.</li></ol>
+    Потом хозяин нажимает «Я создаю комнату», остальные по очереди сканируют его код и показывают ему свой. VPN выключите.</div>
   <video data-r="vid" playsinline muted style="width:100%;max-height:46vh;border-radius:12px;background:#000;object-fit:cover" hidden></video>
   <canvas class="pty-qr big" data-r="nqr" width="10" height="10" hidden></canvas>
   <div class="pty-st" data-r="nstat" hidden></div>
@@ -1314,7 +1335,8 @@
       const ans = nearGuestPre && near.answerTxt, scanning = !!near.scanning;
       $('nsub').textContent = ans ? 'Покажите этот код хозяину — пусть он нажмёт «Сканировать ответ игрока». После этого телефоны соединятся напрямую.'
         : nearGuestPre ? 'Готовлю ответ…'
-        : 'Все телефоны — в одной сети Wi-Fi, или игроки подключены к точке доступа хозяина. VPN выключите. Интернет не нужен.';
+        : 'Телефоны соединятся напрямую — без серверов и без интернета.';
+      $('nhow').hidden = !!(nearGuestPre || scanning);
       $('vid').hidden = !scanning; $('nstop').hidden = !scanning;
       drawBigQr($('nqr'), ans ? near.answerTxt : ''); if (!ans) $('nqr').hidden = true;
       $('nhost').hidden = nearGuestPre || scanning; $('nscan').hidden = nearGuestPre || scanning;
