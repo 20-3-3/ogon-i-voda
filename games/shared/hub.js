@@ -82,10 +82,24 @@
     return { top: cs.paddingTop, right: cs.paddingRight, bottom: cs.paddingBottom, left: cs.paddingLeft };
   }
   function pushInsets(doc) {
-    try { doc = doc || (ifr && ifr.contentDocument); if (!doc || !doc.documentElement) return; const s = insets(), r = doc.documentElement.style; for (const k in s) r.setProperty('--sa-' + k, s[k]); } catch (e) {}
+    try { doc = doc || (ifr && ifr.contentDocument); if (!doc || !doc.documentElement) return; const s = insets(), r = doc.documentElement.style; s.top = '0px'; for (const k in s) r.setProperty('--sa-' + k, s[k]); } catch (e) {}   // the frame starts below the status bar
   }
+  // iOS home-screen app installed with a translucent status bar: the page is drawn under the status bar, but innerHeight
+  // (and so 100% / inset:0) is short by its height — the menu and the frame are stretched by --vfix down to the screen bottom
+  function viewFix() {
+    let v = 0;
+    try {
+      if (navigator.standalone) {
+        const top = parseFloat(insets().top) || 0, land = innerWidth > innerHeight;
+        const H = land ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
+        if (top > 0 && H - innerHeight >= top - 2) v = Math.round(top);
+      }
+    } catch (e) {}
+    document.documentElement.style.setProperty('--vfix', v + 'px');
+  }
+  viewFix();
   let insT = [];
-  function insetsSoon() { insT.forEach(clearTimeout); insT = [0, 120, 400, 900].map((ms) => setTimeout(() => pushInsets(), ms)); }
+  function insetsSoon() { insT.forEach(clearTimeout); insT = [0, 120, 400, 900].map((ms) => setTimeout(() => { viewFix(); pushInsets(); }, ms)); }
   window.addEventListener('resize', insetsSoon); window.addEventListener('orientationchange', insetsSoon);
   function attach(win) {
     if (!ifr || win !== ifr.contentWindow) return null;

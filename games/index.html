@@ -1,20 +1,24 @@
 <!doctype html>
-<html lang="ru"><head><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="../games/icons/java-game-180.png"><link rel="icon" type="image/png" href="../games/icons/java-game-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Java Game"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<html lang="ru"><head><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="../games/icons/java-game-180.png"><link rel="icon" type="image/png" href="../games/icons/java-game-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Java Game"><meta name="mobile-web-app-capable" content="yes"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Java Game</title><meta name="theme-color" content="#121016">
 <link rel="stylesheet" href="shared/fonts/fonts.css">
 <style>
 :root{--bg:#121016;--fg:#f3eee4;--mut:#a69f93;--line:rgba(255,255,255,.12)}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:Nunito,-apple-system,sans-serif}
-/* the page itself never scrolls (games open over it in a frame); the menu scrolls inside #menu */
-#menu{position:fixed;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}body.playing #menu{visibility:hidden}
-#hubFrame{position:fixed;inset:0;z-index:50;background:#000}
+/* the page itself never scrolls (games open over it in a frame); the menu scrolls inside #menu.
+   Menu and games live below the status bar, as with the usual iOS status bar. --vfix (hub.js): a home-screen app installed with
+   a translucent status bar is drawn under it, yet 100% / inset:0 stay short by its height — an empty strip would stay at the bottom */
+#menu,#hubFrame{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);height:calc(100% + var(--vfix,0px) - env(safe-area-inset-top,0px))}
+#menu{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}body.playing #menu{visibility:hidden}
+#hubFrame{z-index:50;background:#000}
+html .pty-ov{bottom:calc(0px - var(--vfix,0px))}
 #hubFrame iframe{position:absolute;display:block;border:0;margin:0;padding:0;inset:0;width:100%;height:100%;background:transparent}
 #hubBanner{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);transform:translateX(-50%);z-index:9000;display:flex;align-items:center;gap:8px;width:min(520px,calc(100vw - 16px));padding:8px 8px 8px 14px;border-radius:16px;background:rgba(26,24,32,.96);border:1px solid rgba(226,189,98,.5);box-shadow:0 8px 30px rgba(0,0,0,.5);color:var(--fg);font:700 14px/1.35 Nunito,-apple-system,sans-serif}
 #hubBanner .t{flex:1;min-width:0}#hubBanner button{font:inherit;font-weight:800;border-radius:12px;min-height:40px;padding:6px 12px;border:0;cursor:pointer;touch-action:manipulation}
 #hubBanner .go{background:#e2bd62;color:#1b160c}#hubBanner .x{background:transparent;color:var(--mut);font-size:18px;padding:6px 10px}
 .hn-l{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:6px}.hn-l li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.05)}
 .hn-n{flex:1;min-width:0;font-weight:800;font-size:15px}.hn-n small{display:block;font-weight:600;color:var(--mut);font-size:13px}.hn-l .svb.hn-go{flex:none;min-height:40px;padding:6px 12px;font-size:14px}
-main{max-width:560px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+main{max-width:560px;margin:0 auto;padding:24px 16px max(24px,env(safe-area-inset-bottom))}
 h1{font-family:"Press Start 2P",ui-monospace,monospace;font-weight:400;font-size:clamp(17px,6.4vw,30px);line-height:1.5;letter-spacing:.02em;text-transform:uppercase;margin:14px 0 10px;text-align:center;text-shadow:3px 3px 0 #e0472c,6px 6px 0 #2b7fe0;-webkit-font-smoothing:none;font-smooth:never}
 p.sub{text-align:center;color:var(--mut);margin:0 0 20px}
 .card{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:16px;margin-bottom:10px;color:inherit;text-decoration:none;background:rgba(255,255,255,.03)}
