@@ -192,12 +192,23 @@
 
   // ---------- minimal MQTT 3.1.1 client over WebSocket (no library needed) ----------
   function MiniMqtt(url, clientId) {
-    const H2 = {}; let ws = null, buf = new Uint8Array(0), pid = 1, ping = 0, dead = false, retry = 0;
+    // A phone that slept or switched networks often keeps a WebSocket that looks open but carries nothing. Every packet from
+    // the broker is a sign of life, a ping goes out every 5 s, and 15 s of silence (or a failed check()) means the socket is
+    // dead: it is dropped and a new one connects at once instead of waiting for the system to notice.
+    const H2 = {}; let ws = null, buf = new Uint8Array(0), pid = 1, ping = 0, dead = false, retry = 0, wait = 0, cto = 0, probe = 0, rx = 0;
     const c = { connected: false, url,
       on(ev, f) { (H2[ev] = H2[ev] || []).push(f); return c; },
       subscribe(t, o, cb) { c._subs = c._subs || []; if (!c._subs.includes(t)) c._subs.push(t); if (c.connected) sendSub(t); cb && cb(); },
       publish(t, msg) { if (!c.connected) return; const tb = utf(t), pb = utf(msg); send(0x30, cat(len16(tb.length), tb, pb)); },
-      end() { dead = true; clearInterval(ping); try { if (ws && ws.readyState === 1) ws.send(new Uint8Array([0xe0, 0])); ws && ws.close(); } catch (e) {} c.connected = false; },
+      end() { dead = true; clearInterval(ping); clearTimeout(wait); clearTimeout(cto); clearTimeout(probe); try { if (ws && ws.readyState === 1) ws.send(new Uint8Array([0xe0, 0])); ws && ws.close(); } catch (e) {} ws = null; c.connected = false; },
+      // after sleep or a network change: connect now if down, else make sure the socket still answers
+      check() {
+        if (dead) return;
+        if (!ws) { clearTimeout(wait); retry = 0; open(); return; }
+        if (!c.connected || Date.now() - rx < 3000) return;
+        const t = Date.now(); send(0xc0, new Uint8Array(0));
+        clearTimeout(probe); probe = setTimeout(() => { if (c.connected && rx < t) drop('stale'); }, 3500);
+      },
     };
     function emit(ev, ...a) { (H2[ev] || []).forEach(f => { try { f(...a); } catch (e) {} }); }
     function utf(x) { return new TextEncoder().encode(String(x)); }
@@ -206,16 +217,27 @@
     function varlen(n) { const o = []; do { let b = n % 128; n = Math.floor(n / 128); if (n > 0) b |= 128; o.push(b); } while (n > 0); return new Uint8Array(o); }
     function send(h, body) { try { if (ws && ws.readyState === 1) ws.send(cat(new Uint8Array([h]), varlen(body.length), body)); } catch (e) {} }
     function sendSub(t) { const tb = utf(t); pid = (pid % 65000) + 1; send(0x82, cat(len16(pid), len16(tb.length), tb, new Uint8Array([0]))); }
+    function drop(why) {
+      const w = ws; if (!w) return;
+      ws = null; clearTimeout(cto); clearTimeout(probe); clearInterval(ping);
+      try { w.close(); } catch (e) {}
+      const was = c.connected; c.connected = false; buf = new Uint8Array(0);
+      if (was) { emit('close', why || ''); retry = 0; }
+      later();
+    }
     function open() {
-      if (dead) return;
-      try { ws = new WebSocket(url, ['mqtt']); } catch (e) { emit('error', e); return later(); }
-      ws.binaryType = 'arraybuffer';
-      const to = setTimeout(() => { if (!c.connected) { try { ws.close(); } catch (e) {} } }, 8000);
-      ws.onopen = () => {
+      if (dead || ws) return;
+      let w; try { w = ws = new WebSocket(url, ['mqtt']); } catch (e) { ws = null; emit('error', e); return later(); }
+      w.binaryType = 'arraybuffer';
+      cto = setTimeout(() => { if (w === ws && !c.connected) drop(); }, 8000);
+      w.onopen = () => {
+        if (w !== ws) return;
         const id = utf(clientId);
         send(0x10, cat(new Uint8Array([0, 4, 77, 81, 84, 84, 4, 2, 0, 30]), len16(id.length), id));
       };
-      ws.onmessage = (e) => {
+      w.onmessage = (e) => {
+        if (w !== ws) return;
+        rx = Date.now();
         buf = cat(buf, new Uint8Array(e.data));
         for (;;) {
           if (buf.length < 2) return;
@@ -223,13 +245,19 @@
           do { if (i >= buf.length) return; b = buf[i++]; n += (b & 127) * mul; mul *= 128; } while (b & 128);
           if (buf.length < i + n) return;
           const h0 = buf[0], type = h0 >> 4, body = buf.slice(i, i + n); buf = buf.slice(i + n);
-          if (type === 2) { clearTimeout(to); if (body[1] === 0) { c.connected = true; retry = 0; (c._subs || []).forEach(sendSub); clearInterval(ping); ping = setInterval(() => send(0xc0, new Uint8Array(0)), 20000); emit('connect'); } }
+          if (type === 2) {
+            clearTimeout(cto);
+            if (body[1] !== 0) { drop(); return; }
+            c.connected = true; retry = 0; (c._subs || []).forEach(sendSub);
+            clearInterval(ping); ping = setInterval(() => { if (Date.now() - rx > 15000) drop('stale'); else send(0xc0, new Uint8Array(0)); }, 5000);
+            emit('connect');
+          }
           else if (type === 3) { const tl = (body[0] << 8) | body[1], t = new TextDecoder().decode(body.subarray(2, 2 + tl)); let off = 2 + tl; if ((h0 >> 1 & 3) > 0) off += 2; emit('message', t, new TextDecoder().decode(body.subarray(off))); }
         }
       };
-      ws.onclose = ws.onerror = () => { clearTimeout(to); clearInterval(ping); const was = c.connected; c.connected = false; buf = new Uint8Array(0); if (was) emit('close'); later(); };
+      w.onclose = w.onerror = () => { if (w === ws) drop(); };
     }
-    function later() { if (dead) return; retry++; setTimeout(open, Math.min(15000, 1500 * retry)); }
+    function later() { if (dead) return; retry++; clearTimeout(wait); wait = setTimeout(open, retry === 1 ? 700 : Math.min(15000, 1500 * retry)); }
     open();
     return c;
   }

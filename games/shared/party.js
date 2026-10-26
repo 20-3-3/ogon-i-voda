@@ -115,7 +115,7 @@
   let room = { v: 0, mode: '', opts: {}, started: false, cfg: null, match: 0, players: [], evn: 0, ev: [] };
   let seats = [], seatByTok = {};      // host only
   let localSkin = null, myName = '';
-  let hostDead = false, sseq = 0, pseq = 0, hostLast = 0, lastEv = 0, lastMatch = 0, sawLobby = false, hostLostFired = false;
+  let hostEp = '', oldEps = new Set(), hostDead = false, sseq = 0, pseq = 0, hostLast = 0, lastEv = 0, lastMatch = 0, sawLobby = false, hostLostFired = false;
   const diag = { rtc: '—', mq: '—' };
   const H = {};
   function on(k, f) { (H[k] = H[k] || []).push(f); }
@@ -161,12 +161,23 @@
 
   // ---------- minimal MQTT 3.1.1 client over WebSocket (copy of duo.js) ----------
   function MiniMqtt(url, clientId) {
-    const H2 = {}; let ws = null, buf = new Uint8Array(0), pid = 1, ping = 0, dead = false, retry = 0;
+    // A phone that slept or switched networks often keeps a WebSocket that looks open but carries nothing. Every packet from
+    // the broker is a sign of life, a ping goes out every 5 s, and 15 s of silence (or a failed check()) means the socket is
+    // dead: it is dropped and a new one connects at once instead of waiting for the system to notice.
+    const H2 = {}; let ws = null, buf = new Uint8Array(0), pid = 1, ping = 0, dead = false, retry = 0, wait = 0, cto = 0, probe = 0, rx = 0;
     const c = { connected: false, url,
       on(ev, f) { (H2[ev] = H2[ev] || []).push(f); return c; },
       subscribe(t, o, cb) { c._subs = c._subs || []; if (!c._subs.includes(t)) c._subs.push(t); if (c.connected) sendSub(t); cb && cb(); },
       publish(t, msg) { if (!c.connected) return; const tb = utf(t), pb = utf(msg); send(0x30, cat(len16(tb.length), tb, pb)); },
-      end() { dead = true; clearInterval(ping); try { if (ws && ws.readyState === 1) ws.send(new Uint8Array([0xe0, 0])); ws && ws.close(); } catch (e) {} c.connected = false; },
+      end() { dead = true; clearInterval(ping); clearTimeout(wait); clearTimeout(cto); clearTimeout(probe); try { if (ws && ws.readyState === 1) ws.send(new Uint8Array([0xe0, 0])); ws && ws.close(); } catch (e) {} ws = null; c.connected = false; },
+      // after sleep or a network change: connect now if down, else make sure the socket still answers
+      check() {
+        if (dead) return;
+        if (!ws) { clearTimeout(wait); retry = 0; open(); return; }
+        if (!c.connected || Date.now() - rx < 3000) return;
+        const t = Date.now(); send(0xc0, new Uint8Array(0));
+        clearTimeout(probe); probe = setTimeout(() => { if (c.connected && rx < t) drop('stale'); }, 3500);
+      },
     };
     function emit(ev, ...a) { (H2[ev] || []).forEach(f => { try { f(...a); } catch (e) {} }); }
     function utf(x) { return new TextEncoder().encode(String(x)); }
@@ -175,16 +186,27 @@
     function varlen(n) { const o = []; do { let b = n % 128; n = Math.floor(n / 128); if (n > 0) b |= 128; o.push(b); } while (n > 0); return new Uint8Array(o); }
     function send(h, body) { try { if (ws && ws.readyState === 1) ws.send(cat(new Uint8Array([h]), varlen(body.length), body)); } catch (e) {} }
     function sendSub(t) { const tb = utf(t); pid = (pid % 65000) + 1; send(0x82, cat(len16(pid), len16(tb.length), tb, new Uint8Array([0]))); }
+    function drop(why) {
+      const w = ws; if (!w) return;
+      ws = null; clearTimeout(cto); clearTimeout(probe); clearInterval(ping);
+      try { w.close(); } catch (e) {}
+      const was = c.connected; c.connected = false; buf = new Uint8Array(0);
+      if (was) { emit('close', why || ''); retry = 0; }
+      later();
+    }
     function open() {
-      if (dead) return;
-      try { ws = new WebSocket(url, ['mqtt']); } catch (e) { emit('error', e); return later(); }
-      ws.binaryType = 'arraybuffer';
-      const to = setTimeout(() => { if (!c.connected) { try { ws.close(); } catch (e) {} } }, 8000);
-      ws.onopen = () => {
+      if (dead || ws) return;
+      let w; try { w = ws = new WebSocket(url, ['mqtt']); } catch (e) { ws = null; emit('error', e); return later(); }
+      w.binaryType = 'arraybuffer';
+      cto = setTimeout(() => { if (w === ws && !c.connected) drop(); }, 8000);
+      w.onopen = () => {
+        if (w !== ws) return;
         const id = utf(clientId);
         send(0x10, cat(new Uint8Array([0, 4, 77, 81, 84, 84, 4, 2, 0, 30]), len16(id.length), id));
       };
-      ws.onmessage = (e) => {
+      w.onmessage = (e) => {
+        if (w !== ws) return;
+        rx = Date.now();
         buf = cat(buf, new Uint8Array(e.data));
         for (;;) {
           if (buf.length < 2) return;
@@ -192,13 +214,19 @@
           do { if (i >= buf.length) return; b = buf[i++]; n += (b & 127) * mul; mul *= 128; } while (b & 128);
           if (buf.length < i + n) return;
           const h0 = buf[0], type = h0 >> 4, body = buf.slice(i, i + n); buf = buf.slice(i + n);
-          if (type === 2) { clearTimeout(to); if (body[1] === 0) { c.connected = true; retry = 0; (c._subs || []).forEach(sendSub); clearInterval(ping); ping = setInterval(() => send(0xc0, new Uint8Array(0)), 20000); emit('connect'); } }
+          if (type === 2) {
+            clearTimeout(cto);
+            if (body[1] !== 0) { drop(); return; }
+            c.connected = true; retry = 0; (c._subs || []).forEach(sendSub);
+            clearInterval(ping); ping = setInterval(() => { if (Date.now() - rx > 15000) drop('stale'); else send(0xc0, new Uint8Array(0)); }, 5000);
+            emit('connect');
+          }
           else if (type === 3) { const tl = (body[0] << 8) | body[1], t = new TextDecoder().decode(body.subarray(2, 2 + tl)); let off = 2 + tl; if ((h0 >> 1 & 3) > 0) off += 2; emit('message', t, new TextDecoder().decode(body.subarray(off))); }
         }
       };
-      ws.onclose = ws.onerror = () => { if (ws._done) return; ws._done = true; clearTimeout(to); clearInterval(ping); const was = c.connected; c.connected = false; buf = new Uint8Array(0); if (was) { emit('close'); retry = 0; } later(); };
+      w.onclose = w.onerror = () => { if (w === ws) drop(); };
     }
-    function later() { if (dead) return; retry++; setTimeout(open, retry === 1 ? 700 : Math.min(15000, 1500 * retry)); }
+    function later() { if (dead) return; retry++; clearTimeout(wait); wait = setTimeout(open, retry === 1 ? 700 : Math.min(15000, 1500 * retry)); }
     open();
     return c;
   }
@@ -256,10 +284,11 @@
     const id = 'party_' + tok + '_' + rnd(4);
     const cl = (window.mqtt && window.mqtt.connect) ? window.mqtt.connect(url, { clientId: id, keepalive: 20, reconnectPeriod: 3000, connectTimeout: 7000, clean: true }) : MiniMqtt(url, id);
     cl.on('connect', () => { if (ss !== session) return; r.ok = true; subs.forEach(s => cl.subscribe(base() + '/' + s, { qos: 0 }, () => {})); diag.mq = relayStatus(); ui(); onRelayUp(); });
-    cl.on('close', () => { if (r.ok) r.penalty = now() + 30000; r.ok = false; diag.mq = relayStatus(); ui(); });  // probably throttled: publish slower to it for a while
+    cl.on('close', (why) => { if (r.ok && why !== 'stale') r.penalty = now() + 30000; r.ok = false; diag.mq = relayStatus(); ui(); });  // probably throttled: publish slower to it for a while
     cl.on('message', (t, buf) => { if (ss === session) relayIn(String(buf), 'mqtt'); });
     r.send = (s, suffix) => { try { cl.publish(base() + '/' + suffix, s, { qos: 0 }); } catch (e) {} };
     r.stop = () => { try { cl.end(true); } catch (e) {} };
+    r.check = () => { try { if (cl.check) cl.check(); } catch (e) {} };
     return r;
   }
   function ntfyRelay(ss) {
@@ -267,20 +296,25 @@
     const r = { name: 'ntfy', kind: 'ntfy', ok: false, send() {}, stop() {} };
     if (window.mqtt || window.DUO_TEST_BROKERS) return r; // test harness
     const tp = ('party1' + G.game + code + 'x').replace(/[^a-zA-Z0-9_-]/g, '');
-    let ws = null, dead = false, retry = 0;
+    // ntfy sends a keepalive event every 45 s: 70 s of silence means a dead socket (the phone slept, the network changed)
+    let ws = null, dead = false, retry = 0, wait = 0, rx = 0;
     function open() {
-      if (dead || ss !== session) return;
-      try { ws = new WebSocket('wss://' + NTFY + '/' + tp + '/ws'); } catch (e) { return later(); }
-      ws.onopen = () => { r.ok = true; retry = 0; diag.mq = relayStatus(); ui(); onRelayUp(); };
-      ws.onmessage = (e) => { let d; try { d = JSON.parse(e.data); } catch (er) { return; } if (d.event === 'message' && typeof d.message === 'string') relayIn(d.message, 'ntfy'); };
-      ws.onclose = ws.onerror = () => { const was = r.ok; r.ok = false; if (was) { diag.mq = relayStatus(); ui(); } later(); };
+      if (dead || ss !== session || ws) return;
+      let w; try { w = ws = new WebSocket('wss://' + NTFY + '/' + tp + '/ws'); } catch (e) { ws = null; return later(); }
+      w.onopen = () => { if (w !== ws) return; rx = now(); r.ok = true; retry = 0; diag.mq = relayStatus(); ui(); onRelayUp(); };
+      w.onmessage = (e) => { if (w !== ws) return; rx = now(); let d; try { d = JSON.parse(e.data); } catch (er) { return; } if (d.event === 'message' && typeof d.message === 'string') relayIn(d.message, 'ntfy'); };
+      w.onclose = w.onerror = () => { if (w === ws) drop(); };
     }
-    function later() { if (dead) return; retry++; setTimeout(open, Math.min(20000, 2000 * retry)); }
+    function drop() { const w = ws; if (!w) return; ws = null; try { w.close(); } catch (e) {} const was = r.ok; r.ok = false; if (was) { diag.mq = relayStatus(); ui(); } later(); }
+    function later() { if (dead) return; retry++; clearTimeout(wait); wait = setTimeout(open, Math.min(20000, 2000 * retry)); }
+    const wd = setInterval(() => { if (ws && r.ok && now() - rx > 70000) drop(); }, 10000);
     r.send = (s) => { fetch('https://' + NTFY + '/' + tp, { method: 'POST', body: s, mode: 'cors', keepalive: true }).catch(() => {}); };
-    r.stop = () => { dead = true; try { ws && ws.close(); } catch (e) {} };
+    r.check = () => { if (dead) return; if (!ws) { clearTimeout(wait); retry = 0; open(); } else if (r.ok && now() - rx > 50000) drop(); };
+    r.stop = () => { dead = true; clearInterval(wd); clearTimeout(wait); try { ws && ws.close(); } catch (e) {} ws = null; };
     open();
     return r;
   }
+  function checkRelays() { relays.forEach(r => { if (r.check) r.check(); }); }
   function relaysStart(ss) {
     const subs = isHost ? ['h'] : ['all', 'g/' + tok];
     relays = BROKERS.map(u => mqttRelay(u, ss, subs)); relays.push(ntfyRelay(ss));
@@ -404,6 +438,7 @@
       return;
     }
     // guest
+    if (typeof d.e === 'string' && d.e !== hostEp) { if (oldEps.has(d.e)) return; if (hostEp) { oldEps.add(hostEp); hostReset(); } hostEp = d.e; }   // late copies from before the reload: ignored
     hostLast = t0; if (d.t !== 'B') hostTok = d.i;
     const lk = Lk('H'); if (via === 'rtc') lk.tRtc = t0; else lk.tMq = t0;
     if (st === 'lost' && !hostDead && d.t !== 'hostbye') { st = 'joining'; joinSince = t0; sendJoin(); }
@@ -421,6 +456,13 @@
       case 'hostbye': hostDead = true; hostGone('Хозяин вышел из комнаты'); break;
       case 'kicked': giveUp('Хозяин убрал вас из комнаты', true); break;
     }
+  }
+
+  // the host's page was reloaded (a new epoch): its reliable stream, state counters, room versions and the direct link start over
+  function hostReset() {
+    delete OUT.H; delete IN.H; closeLink('H');
+    for (const k in ST) delete ST[k];
+    room.v = 0; lastEv = 0; lastMatch = 0;
   }
 
   // ---------- host: seats, roster ----------
@@ -605,8 +647,17 @@
     if (!wasSilent && show) { buildOverlay(); ov.hidden = false; }
     ui();
   }
+  // the host's room survives a reload of the page (iOS often reloads a home-screen app that was in the background):
+  // same code and token, the guests that keep knocking get their seats again
+  function saveHost() {
+    if (!isHost || !code || !tok || nearby || !seats[0]) return;
+    const v = JSON.stringify({ code, tok, id: seats[0].id, t: now() });
+    ssSet('party.host.' + G.game, v); lsSet('party.host.' + G.game, v);
+  }
+  function clearHost() { ssDel('party.host.' + G.game); lsDel('party.host.' + G.game); }
   function saveAct() {
-    if (isHost || !code || !tok || nearby) return;
+    if (isHost) return saveHost();
+    if (!code || !tok || nearby) return;
     const v = JSON.stringify({ code, tok, t: now() });
     ssSet('party.act.' + G.game, v); lsSet('party.act.' + G.game, v);
   }
@@ -751,6 +802,7 @@
       seats.slice().forEach(S => { if (S.slot && S.online && t0 - S.last > (room.started ? T_GUEST_OFF : T_GUEST_DROP)) goOffline(S); });
       if (t0 - lastHh > 1000) { lastHh = t0; hostHh(); }
       if (t0 - lastRoster > 3000) { lastRoster = t0; bcastRoster(); rtcDiag(); ui(); }
+      if (t0 - lastAct > 10000) { lastAct = t0; saveHost(); }
       weak(seats.filter(S => S.slot && S.online && t0 - S.last > T_WEAK).map(S => S.name));
       return;
     }
@@ -783,6 +835,10 @@
   setInterval(tick, 250);
   setInterval(bundleTick, 16);
   setInterval(() => { if (ov && !ov.hidden) ui(); }, 1000);
+  // back from sleep / another app, or the network changed: check every relay socket at once (they often die silently)
+  function wakeUp() { if (!code) return; checkRelays(); if (!isHost) { if (st === 'joined') { sendHb(); startRtcSoon(); } else if (st === 'joining' || st === 'lost') sendJoin(); } else bcastRoster(); }
+  window.addEventListener('online', wakeUp); window.addEventListener('pageshow', (e) => { if (e.persisted) wakeUp(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && code) checkRelays(); });
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && code) { if (!isHost) { if (st === 'joined') { sendHb(); flushState(true); } else if (st === 'joining' || st === 'lost') sendJoin(); } else bcastRoster(); } });
 
   // ---------- «Рядом, без интернета»: QR handshake, direct WebRTC over the same Wi-Fi / personal hotspot, no servers ----------
@@ -820,7 +876,7 @@
     setTimeout(() => { if (nearby && isHost) nearNewOffer(); }, 300);
   }
   function hostNearby() {
-    stopAll(); nearby = true; isHost = true; code = String(1000 + Math.floor(Math.random() * 9000)); joinSince = now(); tok = rnd(10) + rnd(6); ep = rnd(6); error = ''; silent = false;
+    stopAll(); clearHost(); nearby = true; isHost = true; code = String(1000 + Math.floor(Math.random() * 9000)); joinSince = now(); tok = rnd(10) + rnd(6); ep = rnd(6); error = ''; silent = false;
     st = 'hosting'; room.mode = G.modes.length ? G.modes[0].id : 'default';
     room.opts = clone(typeof G.optsInit === 'function' ? G.optsInit() : (G.optsInit || {})) || {};
     const S = { tok, id: rnd(6), slot: 0, name: uniqName(myName), skin: localSkin, team: 0, online: true, last: now(), ep, ms: 0, reqSkin: '' };
@@ -933,15 +989,15 @@
     seats = []; seatByTok = {}; mine = {}; clearTimeout(flushTimer); flushTimer = 0;
     room = { v: 0, mode: '', opts: {}, started: false, cfg: null, match: 0, players: [], evn: 0, ev: [] };
     me = { slot: -1, id: '', name: myName, skin: localSkin, team: 0 };
-    lastEv = 0; lastMatch = 0; sawLobby = false; hostLostFired = false; hostDead = false; diag.rtc = diag.mq = '—';
+    lastEv = 0; lastMatch = 0; sawLobby = false; hostLostFired = false; hostDead = false; hostEp = ''; oldEps.clear(); diag.rtc = diag.mq = '—';
   }
-  function hostCreate() {
-    stopAll(); isHost = true; code = String(1000 + Math.floor(Math.random() * 9000)); joinSince = now(); tok = rnd(10) + rnd(6); ep = rnd(6); error = ''; silent = false;
+  function hostCreate(o) {
+    stopAll(); isHost = true; code = (o && o.code) || String(1000 + Math.floor(Math.random() * 9000)); joinSince = now(); tok = (o && o.tok) || rnd(10) + rnd(6); ep = rnd(6); error = ''; silent = false;
     st = 'hosting'; room.mode = G.modes.length ? G.modes[0].id : 'default';
     room.opts = clone(typeof G.optsInit === 'function' ? G.optsInit() : (G.optsInit || {})) || {};
-    const S = { tok, id: rnd(6), slot: 0, name: uniqName(myName), skin: localSkin, team: 0, online: true, last: now(), ep, ms: 0, reqSkin: '' };
+    const S = { tok, id: (o && o.id) || rnd(6), slot: 0, name: uniqName(myName), skin: localSkin, team: 0, online: true, last: now(), ep, ms: 0, reqSkin: '' };
     seats = [S]; seatByTok[tok] = S; me = { slot: 0, id: S.id, name: S.name, skin: S.skin, team: 0 };
-    room.v = 1; syncMyRoom();
+    room.v = 1; syncMyRoom(); saveHost();
     relaysStart(session); view = 'room'; drawnQr = ''; ui();
     setTimeout(() => { const ss = session; if (ss === session && st === 'hosting' && !relayUp()) { error = noRelayMsg(); ui(); } }, 8000);
   }
@@ -949,7 +1005,7 @@
   function joinRoom(c, o) {
     c = String(c || '').replace(/\D/g, '').slice(0, 4);
     if (c.length !== 4) { error = 'Код — это 4 цифры'; ui(); return; }
-    stopAll(); isHost = false; code = c; tok = (o && o.tok) || tokenFor(c); ep = rnd(6); error = ''; silent = !!(o && o.silent);
+    stopAll(); clearHost(); isHost = false; code = c; tok = (o && o.tok) || tokenFor(c); ep = rnd(6); error = ''; silent = !!(o && o.silent);
     st = 'joining'; joinSince = now(); lastJoin = now(); lastHb = now();
     me = { slot: -1, id: '', name: myName, skin: localSkin, team: 0 };
     relaysStart(session); view = 'room'; drawnQr = '';
@@ -972,7 +1028,7 @@
     flushRelays(true);
     relays = []; // keep the sockets open a moment so the farewell actually leaves
     setTimeout(() => relaysNow.forEach(r => r.stop()), 400);
-    clearAct(); stopAll(); st = 'idle'; code = ''; isHost = false; error = ''; view = 'main'; silent = false; near.view = 'choose'; near.err = '';
+    clearAct(); clearHost(); stopAll(); st = 'idle'; code = ''; isHost = false; error = ''; view = 'main'; silent = false; near.view = 'choose'; near.err = '';
     if (lobbyRes) { const r = lobbyRes; lobbyRes = null; r(null); }
     ui();
   }
@@ -1341,6 +1397,9 @@
   }
   function resume() {
     if (code) return false;
+    let h = null; try { h = JSON.parse(ssGet('party.host.' + G.game) || lsGet('party.host.' + G.game) || 'null'); } catch (e) {}
+    if (h && h.code && h.tok && now() - h.t < 2 * 3600 * 1000) { hostCreate(h); return true; }
+    clearHost();
     let r = null; try { r = JSON.parse(ssGet('party.act.' + G.game) || lsGet('party.act.' + G.game) || 'null'); } catch (e) {}
     if (!r || !r.code || !r.tok || now() - r.t > 4 * 3600 * 1000) { clearAct(); return false; }
     joinRoom(r.code, { tok: r.tok, silent: true }); return true;
@@ -1409,7 +1468,7 @@
     get me() { return me; }, get players() { return room.players; }, get isHost() { return isHost; },
     get code() { return code; }, get mode() { return room.mode; }, get started() { return room.started; }, get cfg() { return room.cfg; },
     _near() { return { offer: near.offerTxt, answer: near.answerTxt, err: near.err, nearby }; },
-    status() { return { nearby, state: st, code, isHost, started: room.started, slot: me.slot, mode: room.mode, players: room.players.length, hostLost: st === 'lost', diag: { ...diag }, error, relays: relays.map(r => r.name + ':' + (r.ok ? 'ok' : '–')) }; },
+    status() { return { nearby, state: st, code, isHost, started: room.started, slot: me.slot, mode: room.mode, players: room.players.length, hostLost: st === 'lost', hostDead, diag: { ...diag }, error, relays: relays.map(r => r.name + ':' + (r.ok ? 'ok' : '–')) }; },
   };
 
   // ---------- proxy for a game inside the start page: same API, the work is done by hub.js in the page ----------

@@ -422,8 +422,19 @@
   // ---------- keeping everything in step ----------
   let syncT = 0, lastSess = -1;
   function soon() { if (!syncT) syncT = setTimeout(syncAll, 0); }
+  // the screen must not go dark while this phone is in the room: a sleeping phone drops out (the host — for everybody)
+  let wake = null, wakeBusy = false, wakeFail = 0;
+  function keepAwake() {
+    const s = hubSt(), want = s === 'hosting' || s === 'joined' || s === 'joining' || s === 'lost';
+    if (!want) { if (wake) { const w = wake; wake = null; w.release().catch(() => {}); } return; }
+    if (wake || wakeBusy || !navigator.wakeLock || document.visibilityState !== 'visible' || Date.now() - wakeFail < 10000) return;
+    wakeBusy = true;
+    navigator.wakeLock.request('screen').then((w) => {
+      wakeBusy = false; wake = w; w.addEventListener('release', () => { if (wake === w) wake = null; });
+    }).catch(() => { wakeBusy = false; wakeFail = Date.now(); });
+  }
   function syncAll() {
-    clearTimeout(syncT); syncT = 0;
+    clearTimeout(syncT); syncT = 0; keepAwake();
     const ss = Party.sess();
     if (ss !== lastSess) { lastSess = ss; hostPairs = {}; for (const k in presCache) delete presCache[k]; for (const k in presSig) delete presSig[k]; pres.$pr = null; }
     if (Party.code && Party.mine().$v === undefined) republishAll();   // a new room starts with an empty state
@@ -536,7 +547,7 @@
       const st0 = Party.status(), near = st0.nearby;
       const ps = Party.players.slice().sort((a, b) => a.slot - b.slot), meId = Party.me.id;
       const head = near ? '🌐 Комната рядом' : '🌐 Комната ' + esc(Party.code);
-      const line = s === 'joining' ? 'Подключаюсь к комнате…' : s === 'lost' ? 'Связь с хозяином пропала — восстанавливаю…'
+      const line = s === 'joining' ? 'Подключаюсь к комнате…' : s === 'lost' ? (st0.hostDead ? 'Хозяин закрыл комнату. Нажми «Выйти», чтобы создать свою или войти в другую.' : 'Связь с хозяином пропала — восстанавливаю…')
         : ps.length < 2 ? (Party.isHost ? 'Ждём остальных: пусть откроют эту страницу и введут код ' + esc(Party.code) + (near ? '' : ' (или отсканируют QR в окне комнаты)') + '.' : 'Захожу…')
         : 'Вы на связи. Открывайте любую игру и выбирайте в ней игру по сети.';
       let list = '';
